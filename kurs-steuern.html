@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script type="module" src="firebase-init.js"></script>
+<meta charset="UTF-8">
+<meta name="no-components">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Steuern einfach erklärt – FinQuest</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap');
+
+    :root {
+      --p: #00D48A; --s: #1A1A2E; --acc: #FFD166; --hl: #FF6B6B;
+      --su: #16213E; --su2: #0F3460; --tx: #F0F4FF; --mu: #8892B0;
+      --bo: rgba(0,212,138,.2);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--s); color: var(--tx); }
+    h1,h2,h3 { font-family: 'Clash Display','DM Sans',sans-serif; }
+
+    /* NAV */
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(26,26,46,.95);
+      backdrop-filter: blur(12px); border-bottom: 1px solid var(--bo); }
+    .nav-inner { max-width: 1100px; margin: 0 auto; padding: 0 24px;
+      height: 64px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { font-size: 20px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 5px; }
+    .logo-fin { color: var(--tx); } .logo-quest { color: var(--p); }
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+    .xp-nav { font-family: 'JetBrains Mono',monospace; font-size: 13px; color: var(--acc); }
+    .btn { display: inline-flex; align-items: center; padding: 8px 18px; border-radius: 50px;
+      font-family: 'DM Sans',sans-serif; font-weight: 600; font-size: 13px; cursor: pointer;
+      border: none; text-decoration: none; transition: transform .18s, box-shadow .18s; }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-ghost { background: rgba(255,255,255,.06); color: var(--tx); }
+    .btn-primary { background: var(--p); color: #0a0a14; }
+    .btn-primary:hover { box-shadow: 0 6px 20px rgba(0,212,138,.4); }
+    .btn-outline { background: transparent; color: var(--tx); border: 1.5px solid rgba(240,244,255,.25); }
+
+    /* HERO */
+    .hero { background: linear-gradient(135deg, var(--su) 0%, var(--su2) 100%);
+      border-bottom: 1px solid var(--bo); padding: 40px 24px 36px; }
+    .hero-inner { max-width: 800px; margin: 0 auto; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px;
+      color: var(--mu); text-decoration: none; margin-bottom: 20px; transition: color .2s; }
+    .back-link:hover { color: var(--p); }
+    .course-tag { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 50px;
+      font-size: 11px; font-weight: 700; margin-bottom: 12px; }
+    .hero h1 { font-size: clamp(26px, 4vw, 38px); font-weight: 700; margin-bottom: 8px; }
+    .hero p { font-size: 15px; color: var(--mu); margin-bottom: 20px; }
+    .course-meta { display: flex; flex-wrap: wrap; gap: 16px; }
+    .meta-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--mu); }
+
+    /* PROGRESS BAR */
+    .prog-wrap { max-width: 800px; margin: 24px auto; padding: 0 24px; }
+    .prog-header { display: flex; justify-content: space-between; margin-bottom: 8px;
+      font-size: 13px; color: var(--mu); }
+    .prog-track { height: 8px; background: var(--su2); border-radius: 99px; overflow: hidden; }
+    .prog-fill { height: 100%; background: var(--p); border-radius: 99px; transition: width .5s ease; width: 0%; }
+
+    /* COMPLETE BANNER */
+    .complete-banner { display: none; max-width: 800px; margin: 0 auto 16px; padding: 0 24px; }
+    .complete-banner.show { display: block; }
+    .complete-inner { background: rgba(0,212,138,.08); border: 1px solid rgba(0,212,138,.3);
+      border-radius: 18px; padding: 28px; text-align: center; }
+    .complete-inner h2 { margin-bottom: 8px; }
+    .complete-inner p { color: var(--mu); font-size: 14px; margin-bottom: 18px; }
+    .complete-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+    /* LESSON LIST */
+    .lesson-list { max-width: 800px; margin: 0 auto; padding: 12px 24px 80px; }
+    .lesson-item { display: flex; align-items: center; gap: 14px; background: var(--su);
+      border: 1px solid rgba(255,255,255,.07); border-radius: 14px; padding: 16px 18px;
+      margin-bottom: 10px; cursor: pointer; transition: transform .18s, border-color .18s, box-shadow .18s; }
+    .lesson-item:hover { transform: translateY(-2px); border-color: var(--bo); box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+    .lesson-item.active { border-color: var(--p); box-shadow: 0 0 0 2px rgba(0,212,138,.15); }
+    .lesson-item.completed { opacity: .7; }
+    .lesson-item.completed:hover { opacity: 1; }
+    .lesson-icon { font-size: 24px; width: 40px; text-align: center; flex-shrink: 0; }
+    .lesson-content { flex: 1; }
+    .lesson-title { font-weight: 600; font-size: 15px; margin-bottom: 3px; }
+    .lesson-desc { font-size: 13px; color: var(--mu); }
+    .lesson-xp { font-family: 'JetBrains Mono',monospace; font-size: 12px; color: var(--acc);
+      font-weight: 600; white-space: nowrap; }
+    .lesson-status { font-size: 18px; width: 28px; text-align: center; flex-shrink: 0; }
+
+    /* MODAL */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.75);
+      z-index: 999; align-items: center; justify-content: center; padding: 16px; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--su); border: 1px solid var(--bo); border-radius: 20px;
+      width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto;
+      animation: slideUp .25s ease; }
+    @keyframes slideUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+    .modal-header { padding: 24px 24px 16px; border-bottom: 1px solid rgba(255,255,255,.07); }
+    .modal-tag { font-size: 11px; font-weight: 700; color: var(--p); text-transform: uppercase;
+      letter-spacing: .08em; margin-bottom: 8px; }
+    .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .modal-subtitle { font-size: 14px; color: var(--mu); }
+    .modal-body { padding: 20px 24px; }
+    .theory-box { background: var(--su2); border-radius: 12px; padding: 16px 18px;
+      font-size: 14px; line-height: 1.75; color: #c8d0e8; margin-bottom: 20px; }
+    .theory-box strong { color: var(--tx); }
+    .quiz-label { font-size: 11px; font-weight: 700; color: var(--mu); text-transform: uppercase;
+      letter-spacing: .08em; margin-bottom: 10px; }
+    .quiz-question { font-size: 15px; font-weight: 600; margin-bottom: 14px; line-height: 1.45; }
+    .quiz-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+    .quiz-option { display: flex; align-items: center; gap: 10px; background: var(--su2);
+      border: 1.5px solid rgba(255,255,255,.08); border-radius: 10px; padding: 12px 14px;
+      cursor: pointer; text-align: left; font-family: 'DM Sans',sans-serif; font-size: 14px;
+      color: var(--tx); transition: border-color .18s, background .18s; }
+    .quiz-option:hover:not(:disabled) { border-color: var(--p); background: rgba(0,212,138,.06); }
+    .quiz-option.correct { border-color: var(--p); background: rgba(0,212,138,.12); }
+    .quiz-option.wrong { border-color: var(--hl); background: rgba(255,107,107,.1); }
+    .quiz-option:disabled { cursor: default; }
+    .option-letter { font-weight: 700; font-size: 12px; width: 24px; height: 24px;
+      border-radius: 50%; background: rgba(255,255,255,.08); display: flex;
+      align-items: center; justify-content: center; flex-shrink: 0; }
+    .feedback-box { display: none; border-radius: 10px; padding: 12px 14px; font-size: 14px;
+      line-height: 1.6; margin-top: 4px; }
+    .feedback-box.correct { background: rgba(0,212,138,.1); border: 1px solid rgba(0,212,138,.3); }
+    .feedback-box.wrong { background: rgba(255,107,107,.08); border: 1px solid rgba(255,107,107,.25); }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid rgba(255,255,255,.07);
+      display: flex; align-items: center; justify-content: space-between; }
+    .xp-badge { font-family: 'JetBrains Mono',monospace; font-size: 13px; font-weight: 700;
+      color: var(--acc); background: rgba(255,209,102,.1); border: 1px solid rgba(255,209,102,.25);
+      border-radius: 50px; padding: 6px 14px; }
+    #btn-continue { display: none; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 28px; right: 24px; background: var(--su);
+      border: 1px solid var(--bo); border-radius: 14px; padding: 12px 20px;
+      display: flex; align-items: center; gap: 10px; font-family: 'JetBrains Mono',monospace;
+      font-size: 15px; font-weight: 700; color: var(--p); z-index: 9999;
+      transform: translateY(80px); opacity: 0; transition: transform .4s ease, opacity .4s ease;
+      pointer-events: none; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+
+    /* ── GAMIFICATION EXTRAS ── */
+    .lesson-item { position: relative; overflow: hidden; }
+    .lesson-item::after { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(0,212,138,.06),transparent); transition:left .5s; }
+    .lesson-item:hover::after { left:100%; }
+    .lesson-item.completed .lesson-icon { filter: drop-shadow(0 0 6px rgba(0,212,138,.6)); }
+
+    /* Streak badge */
+    .streak-banner { background:linear-gradient(135deg,rgba(255,107,107,.12),rgba(255,107,107,.04)); border:1px solid rgba(255,107,107,.25); border-radius:16px; padding:14px 20px; margin:0 auto 20px; max-width:800px; display:flex; align-items:center; gap:12px; }
+    .streak-fire { font-size:28px; }
+    .streak-text { font-size:13px; color:var(--mu); }
+    .streak-text strong { color:var(--tx); font-size:15px; display:block; }
+
+    /* XP explosion on correct answer */
+    @keyframes xpPop { 0%{transform:scale(0) translateY(0);opacity:1} 80%{transform:scale(1.2) translateY(-30px);opacity:1} 100%{transform:scale(1) translateY(-50px);opacity:0} }
+    .xp-pop { position:fixed; font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; color:#00D48A; pointer-events:none; z-index:9999; animation:xpPop .8s ease forwards; }
+
+    /* Progress milestone badge */
+    .milestone-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(255,209,102,.1); border:1px solid rgba(255,209,102,.3); border-radius:50px; padding:4px 12px; font-size:11px; font-weight:700; color:var(--acc); margin:0 0 12px; }
+
+    /* Course section dividers */
+    .section-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:var(--mu); padding:8px 20px; background:rgba(255,255,255,.02); border-top:1px solid rgba(255,255,255,.04); border-bottom:1px solid rgba(255,255,255,.04); margin:4px 0; }
+
+    /* Quiz option animations */
+    .quiz-option { transition:transform .15s, background .2s, border-color .2s; }
+    .quiz-option:hover:not(:disabled) { transform:translateX(4px); }
+    .quiz-option.correct-anim { animation: correctPulse .4s ease; }
+    @keyframes correctPulse { 0%{transform:scale(1)} 50%{transform:scale(1.03)} 100%{transform:scale(1)} }
+
+    /* Lesson counter chip */
+    .lesson-counter-chip { display:inline-flex; align-items:center; gap:5px; background:rgba(0,212,138,.08); border:1px solid var(--bo); border-radius:50px; padding:3px 10px; font-size:11px; font-weight:600; color:var(--p); margin-bottom:16px; }
+
+
+    /* ══════════════════════════════════════════════════
+       STORY BOX
+    ══════════════════════════════════════════════════ */
+    .story-box {
+      max-width: 800px; margin: 0 auto 8px; padding: 0 24px;
+    }
+    .story-inner {
+      background: linear-gradient(135deg, rgba(255,255,255,.04) 0%, rgba(255,255,255,.01) 100%);
+      border: 1px solid rgba(255,255,255,.1);
+      border-radius: 20px;
+      padding: 20px 22px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+    .story-inner::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, var(--story-color-a, rgba(0,212,138,.06)), transparent 60%);
+      pointer-events: none;
+    }
+    .story-avatar {
+      font-size: 48px;
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.06);
+      border: 2px solid rgba(255,255,255,.12);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      animation: avatarFloat 3s ease-in-out infinite;
+    }
+    @keyframes avatarFloat {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-5px); }
+    }
+    .story-text {
+      flex: 1;
+    }
+    .story-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .12em; color: var(--mu); margin-bottom: 5px;
+    }
+    .story-body {
+      font-size: 14px; line-height: 1.65; color: #c8d0e8;
+    }
+    .story-body strong { color: var(--tx); }
+
+
+    /* ══════════════════════════════════════════════════
+       MARIO MAP  –  reichhaltige interaktive Level-Karte
+    ══════════════════════════════════════════════════ */
+    .mario-map-wrap {
+      max-width: 560px; margin: 0 auto; padding: 0 16px 80px;
+    }
+    .mario-map {
+      position: relative; width: 100%;
+      border-radius: 20px; overflow: hidden;
+      border: 2px solid rgba(255,255,255,.1);
+      box-shadow: 0 32px 80px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.06);
+    }
+    .mario-map::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(255,255,255,.03) 0%, transparent 55%);
+      pointer-events: none; z-index: 1;
+    }
+    .map-svg {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%; z-index: 0;
+    }
+    /* ── NODES ── */
+    .mnode {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      width: 66px; height: 66px;
+      border-radius: 50%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      cursor: pointer; z-index: 10;
+      transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .2s;
+      border: 3px solid rgba(255,255,255,.15);
+      background: rgba(10,14,28,.82);
+      backdrop-filter: blur(6px);
+    }
+    .mnode:hover { transform: translate(-50%,-50%) scale(1.18) !important; z-index: 20; }
+
+    .mnode.state-done {
+      background: var(--nc, #00D48A);
+      border-color: rgba(255,255,255,.45);
+      box-shadow: 0 0 0 5px rgba(var(--nr,0,212,138),.2),
+                  0 0 28px rgba(var(--nr,0,212,138),.55),
+                  0 6px 18px rgba(0,0,0,.5);
+    }
+    .mnode.state-done .mnode-num { color: rgba(0,0,0,.55); }
+
+    .mnode.state-active {
+      background: rgba(8,12,26,.95);
+      border: 3px solid var(--nc, #00D48A);
+      animation: mPulse 1.7s ease-in-out infinite;
+    }
+    @keyframes mPulse {
+      0%   { box-shadow: 0 0 0 0   rgba(var(--nr,0,212,138),.8), 0 6px 20px rgba(0,0,0,.5); }
+      65%  { box-shadow: 0 0 0 18px rgba(var(--nr,0,212,138),0), 0 6px 20px rgba(0,0,0,.5); }
+      100% { box-shadow: 0 0 0 0   rgba(var(--nr,0,212,138),0), 0 6px 20px rgba(0,0,0,.5); }
+    }
+    .mnode.state-active::before {
+      content: "▼";
+      position: absolute; top: -22px; left: 50%;
+      transform: translateX(-50%);
+      font-size: 13px; color: var(--nc, #00D48A);
+      animation: arrowBounce .9s ease-in-out infinite;
+      text-shadow: 0 0 8px rgba(var(--nr,0,212,138),.8);
+    }
+    @keyframes arrowBounce {
+      0%,100% { top: -22px; opacity: 1; }
+      50%      { top: -30px; opacity: .8; }
+    }
+    .mnode.state-locked {
+      background: rgba(6,8,18,.7);
+      border-color: rgba(255,255,255,.06);
+      cursor: not-allowed; opacity: .42;
+    }
+    .mnode.state-locked:hover { transform: translate(-50%,-50%) scale(1) !important; }
+
+    .mnode-icon { font-size: 22px; line-height: 1; pointer-events: none; }
+    .mnode-num  { font-family: "JetBrains Mono",monospace; font-size: 9px; font-weight: 700;
+                  color: rgba(255,255,255,.5); margin-top: 1px; pointer-events: none; }
+
+    .mnode-check {
+      position: absolute; top: -5px; right: -5px;
+      width: 21px; height: 21px; border-radius: 50%;
+      background: white; color: var(--nc, #00D48A);
+      font-size: 12px; font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+      border: 2.5px solid var(--nc, #00D48A);
+      box-shadow: 0 3px 10px rgba(0,0,0,.4); pointer-events: none;
+    }
+
+    /* Tooltip */
+    .mnode[data-tip]:hover::after {
+      content: attr(data-tip);
+      position: absolute; bottom: calc(100% + 12px); left: 50%;
+      transform: translateX(-50%);
+      background: rgba(6,10,24,.97); border: 1px solid rgba(255,255,255,.12);
+      border-radius: 10px; padding: 7px 11px; font-size: 11px; line-height: 1.5;
+      white-space: normal; max-width: 155px; text-align: center;
+      color: var(--tx); pointer-events: none; z-index: 30;
+      box-shadow: 0 8px 24px rgba(0,0,0,.5);
+    }
+    .mnode[data-tip]:hover::before {
+      content: ""; position: absolute; bottom: calc(100% + 7px); left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent; border-top-color: rgba(255,255,255,.12);
+      pointer-events: none; z-index: 30;
+    }
+    @media(max-width:600px){
+      .mario-map-wrap{ padding:0 10px 60px; }
+      .mnode{ width:56px; height:56px; }
+      .mnode-icon{ font-size:18px; }
+    }
+
+        /* ══════════════════════════════════════════════════
+       LOOT BOX / SCHATZTRUHEN
+    ══════════════════════════════════════════════════ */
+    .loot-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.85);
+      z-index: 1100;
+      align-items: center; justify-content: center;
+      flex-direction: column;
+      backdrop-filter: blur(8px);
+    }
+    .loot-overlay.open { display: flex; }
+
+    .loot-title {
+      font-family: 'Clash Display','DM Sans',sans-serif;
+      font-size: clamp(22px,4vw,34px);
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .loot-sub {
+      font-size: 15px;
+      color: var(--mu);
+      margin-bottom: 36px;
+      text-align: center;
+    }
+
+    .loot-chests {
+      display: flex;
+      gap: 28px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 32px;
+    }
+
+    .chest {
+      display: flex; flex-direction: column; align-items: center;
+      cursor: pointer;
+      transition: transform .2s;
+    }
+    .chest:hover .chest-body { transform: rotate(-4deg) scale(1.06); }
+    .chest.chosen  { pointer-events: none; }
+    .chest.unchosen { opacity: .5; pointer-events: none; }
+
+    .chest-body {
+      width: 100px; height: 90px;
+      background: linear-gradient(135deg, #2a1800, #4a2e00);
+      border: 3px solid #8B5E00;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 50px;
+      transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+      position: relative;
+      box-shadow: 0 8px 28px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,220,80,.15);
+    }
+    .chest-body::before {
+      content: '';
+      position: absolute; top: 40%; left: 0; right: 0;
+      height: 3px;
+      background: #8B5E00;
+    }
+    .chest-body::after {
+      content: '';
+      position: absolute; top: 34%; left: 50%; transform: translateX(-50%);
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #FFD166 40%, #8B5E00 100%);
+      border: 2px solid #4a2e00;
+    }
+
+    /* Chest open animation */
+    @keyframes chestOpen {
+      0%   { transform: rotate(0deg) scale(1); }
+      20%  { transform: rotate(-8deg) scale(1.08); }
+      40%  { transform: rotate(8deg)  scale(1.12); }
+      60%  { transform: rotate(-4deg) scale(1.15); }
+      80%  { transform: rotate(2deg)  scale(1.1); }
+      100% { transform: rotate(0deg) scale(1); }
+    }
+    .chest.opening .chest-body { animation: chestOpen .5s ease; }
+    .chest.open-winner .chest-body { background: linear-gradient(135deg,#1a3300,#2e5500); border-color: var(--p); box-shadow: 0 0 32px rgba(0,212,138,.6), 0 8px 28px rgba(0,0,0,.5); }
+    .chest.open-looser .chest-body { background: #1a1a2e; border-color: rgba(255,255,255,.1); }
+
+    .chest-label {
+      margin-top: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--mu);
+      text-align: center;
+    }
+    .chest-label.win-label { color: var(--acc); font-size: 14px; }
+    .chest-label.miss-label { color: rgba(255,255,255,.35); }
+
+    /* XP burst */
+    @keyframes xpBurst { 0%{transform:scale(0) translateY(0);opacity:1} 80%{transform:scale(1.3) translateY(-40px);opacity:1} 100%{transform:scale(1) translateY(-70px);opacity:0} }
+    .xp-burst {
+      position: fixed;
+      font-family: 'JetBrains Mono',monospace;
+      font-size: 28px; font-weight: 700;
+      color: var(--acc);
+      pointer-events: none;
+      z-index: 9999;
+      animation: xpBurst 1.2s ease forwards;
+      text-shadow: 0 0 20px rgba(255,209,102,.8);
+    }
+
+    /* Confetti */
+    .confetti-piece {
+      position: fixed; top: -20px;
+      width: 10px; height: 10px;
+      border-radius: 2px;
+      pointer-events: none;
+      z-index: 2000;
+      animation: confettiFall linear forwards;
+    }
+    @keyframes confettiFall {
+      0%   { transform: translateY(-20px) rotate(0deg);   opacity: 1; }
+      100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+
+    .loot-result {
+      text-align: center;
+      animation: fadeInUp .5s ease;
+    }
+    @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    .loot-result h2 { font-size: clamp(20px,4vw,30px); font-weight: 700; margin-bottom: 6px; }
+    .loot-result p  { color: var(--mu); font-size: 14px; margin-bottom: 20px; }
+
+    .loot-close-btn {
+      background: var(--p); color: #0a0a14;
+      border: none; border-radius: 50px;
+      padding: 13px 32px; font-size: 15px; font-weight: 700;
+      cursor: pointer; font-family: 'DM Sans',sans-serif;
+      transition: transform .18s, box-shadow .18s;
+    }
+    .loot-close-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,212,138,.4); }
+
+    @media(max-width:600px) {
+      .map-row:nth-child(odd)  { padding-left: 20px; }
+      .map-row:nth-child(even) { padding-right: 20px; }
+      .map-node { width: 60px; height: 60px; }
+      .node-icon { font-size: 18px; }
+      .loot-chests { gap: 16px; }
+      .chest-body { width: 80px; height: 72px; font-size: 38px; }
+      .story-avatar { width: 56px; height: 56px; font-size: 36px; }
+    }
+
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="finquest.html" class="logo">
+      <span>🚀</span><span class="logo-fin">Fin</span><span class="logo-quest">Quest</span>
+    </a>
+    <div class="nav-right" id="navRight">
+      <a href="login.html" class="btn btn-outline">Einloggen</a>
+      <a href="register.html" class="btn btn-primary">Kostenlos starten</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <a href="dashboard.html" class="back-link">← Zurück zum Dashboard</a>
+    <div class="course-tag" style="background:rgba(0,212,138,.1);color:#FFD166;border:1px solid rgba(0,212,138,.25);">🧾 Mittelstufe</div>
+    <h1>🧾 Steuern einfach erklärt</h1>
+    <p>Mehr Geld behalten – legal und einfach</p>
+    <div class="course-meta">
+      <div class="meta-item">📚 20 Lektionen</div>
+      <div class="meta-item">⚡ 1000 XP möglich</div>
+      <div class="meta-item">⏱️ ca. 19 Minuten</div>
+    </div>
+  </div>
+</section>
+
+<div class="prog-wrap">
+  <div class="prog-header">
+    <span id="progLabel">0 von 19 Lektionen</span>
+    <span id="progXP">0 / 950 XP</span>
+  </div>
+  <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+</div>
+
+<div class="story-box">
+  <div class="story-inner" style="--story-color-a: rgba(167,139,250,.08);">
+    <div class="story-avatar">🧾</div>
+    <div class="story-text">
+      <div class="story-label">📖 Deine Geschichte</div>
+      <div class="story-body">Das ist <strong>Leila</strong>. Leila hat zum ersten Mal eine Steuererklärung abgegeben – und bekommt 780€ zurück. Ihr Freund hat die gleiche Situation, aber nichts abgegeben. Lerne mit Leila, wie du legale Steuervorteile nicht verschenkst!</div>
+    </div>
+  </div>
+</div>
+<div class="complete-banner" id="completeBanner">
+  <div class="complete-inner">
+    <div style="font-size:48px;margin-bottom:10px;">🏆</div>
+    <h2>Kurs abgeschlossen!</h2>
+    <p>Alle 20 Lektionen von <strong>Steuern einfach erklärt</strong> abgeschlossen – 1000 XP verdient!</p>
+    <div class="complete-btns">
+      <a href="dashboard.html" class="btn btn-primary">Zum Dashboard →</a>
+      <button class="btn btn-ghost" onclick="resetCourse()">🔄 Wiederholen</button>
+    </div>
+  </div>
+</div>
+
+<div class="mario-map-wrap" id="levelMap">
+  <div class="mario-map" style="height:2410px;">
+    <svg class="map-svg" viewBox="0 0 520 2410" preserveAspectRatio="xMidYMin meet" xmlns="http://www.w3.org/2000/svg">
+      
+  <defs>
+    <linearGradient id="taxsky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0d0820"/>
+      <stop offset="60%" stop-color="#100c28"/>
+      <stop offset="100%" stop-color="#0a0818"/>
+    </linearGradient>
+    <linearGradient id="marbleG" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1430"/>
+      <stop offset="100%" stop-color="#0e0c20"/>
+    </linearGradient>
+  </defs>
+  <rect width="520" height="2360" fill="url(#taxsky)"/>
+
+  <!-- Marmor-Boden Muster -->
+  <line x1="0" y1="680" x2="520" y2="680" stroke="#1e1840" stroke-width="2"/>
+  <line x1="0" y1="1400" x2="520" y2="1400" stroke="#1e1840" stroke-width="2"/>
+  <line x1="0" y1="2100" x2="520" y2="2100" stroke="#1e1840" stroke-width="2"/>
+
+  <!-- Finanzamt-Gebäude (klassisch, pompös) -->
+  <rect x="150" y="250" width="220" height="280" fill="url(#marbleG)" rx="2"/>
+  <!-- Giebel -->
+  <polygon points="140,250 260,170 380,250" fill="#14103a"/>
+  <polygon points="150,250 260,176 370,250" fill="#100e30"/>
+  <!-- Säulen -->
+  <rect x="158" y="250" width="12" height="280" fill="#1a1640" rx="1"/>
+  <rect x="178" y="250" width="12" height="280" fill="#1a1640" rx="1"/>
+  <rect x="198" y="250" width="12" height="280" fill="#1a1640" rx="1"/>
+  <rect x="218" y="250" width="12" height="280" fill="#1a1640" rx="1"/>
+  <rect x="238" y="250" width="12" height="280" fill="#1a1640" rx="1"/>
+  <rect x="258" y="250" width="12" height="280" fill="#1a1640" rx="1"/>
+  <rect x="278" y="250" width="12" height="280" fill="#1a1640" rx="1"/>
+  <rect x="298" y="250" width="12" height="280" fill="#1a1640" rx="1"/>
+  <rect x="318" y="250" width="12" height="280" fill="#1a1640" rx="1"/>
+  <rect x="338" y="250" width="12" height="280" fill="#1a1640" rx="1"/>
+  <!-- Fenster Finanzamt -->
+  <rect x="168" y="290" width="18" height="24" fill="#a78bfa20" rx="2"/><rect x="198" y="290" width="18" height="24" fill="#a78bfa25" rx="2"/>
+  <rect x="228" y="290" width="18" height="24" fill="#a78bfa20" rx="2"/><rect x="258" y="290" width="18" height="24" fill="#a78bfa30" rx="2"/>
+  <rect x="288" y="290" width="18" height="24" fill="#a78bfa20" rx="2"/><rect x="318" y="290" width="18" height="24" fill="#a78bfa25" rx="2"/>
+  <rect x="348" y="290" width="18" height="24" fill="#a78bfa20" rx="2"/>
+  <rect x="168" y="330" width="18" height="24" fill="#a78bfa15" rx="2"/><rect x="198" y="330" width="18" height="24" fill="#a78bfa25" rx="2"/>
+  <rect x="228" y="330" width="18" height="24" fill="#a78bfa20" rx="2"/><rect x="258" y="330" width="18" height="24" fill="#a78bfa20" rx="2"/>
+  <rect x="288" y="330" width="18" height="24" fill="#a78bfa25" rx="2"/><rect x="318" y="330" width="18" height="24" fill="#a78bfa15" rx="2"/>
+  <!-- Eingang-Portal -->
+  <rect x="235" y="460" width="50" height="70" fill="#080614" rx="2"/>
+  <rect x="238" y="463" width="44" height="60" fill="url(#taxsky)" opacity=".3"/>
+  <!-- Schild -->
+  <rect x="185" y="220" width="150" height="22" fill="#14103a" rx="3"/>
+  <text x="260" y="234" text-anchor="middle" fill="#A78BFA" font-size="8" font-weight="700">🏛️ FINANZAMT</text>
+  <!-- Adler / Wappen -->
+  <text x="260" y="210" text-anchor="middle" font-size="18">🦅</text>
+
+  <!-- Aktenordner Stapel links -->
+  <rect x="15" y="700" width="30" height="40" fill="#4a2a8a" rx="2"/>
+  <rect x="12" y="696" width="30" height="40" fill="#5a3a9a" rx="2"/>
+  <rect x="9" y="692" width="30" height="40" fill="#6a4aaa" rx="2"/>
+  <text x="25" y="715" text-anchor="middle" fill="white" font-size="6" font-weight="700">ELSTER</text>
+  <text x="24" y="725" text-anchor="middle" fill="white" font-size="6">2024</text>
+
+  <!-- Paragraphen-Zeichen -->
+  <text x="60" y="850" text-anchor="middle" font-size="40" fill="#A78BFA" opacity=".2">§</text>
+  <text x="450" y="750" text-anchor="middle" font-size="36" fill="#A78BFA" opacity=".15">§</text>
+  <text x="30" y="1200" text-anchor="middle" font-size="32" fill="#A78BFA" opacity=".15">§</text>
+  <text x="480" y="1400" text-anchor="middle" font-size="38" fill="#A78BFA" opacity=".15">§</text>
+
+  <!-- Steuererklärung-Formular -->
+  <rect x="365" y="850" width="140" height="110" fill="#0e0c20" rx="4" stroke="#a78bfa20" stroke-width="1"/>
+  <text x="435" y="868" text-anchor="middle" fill="#A78BFA" font-size="7" font-weight="700">📋 STEUERERKLÄRUNG</text>
+  <text x="435" y="882" text-anchor="middle" fill="#8892B0" font-size="6">Anlage N: ✓</text>
+  <text x="435" y="894" text-anchor="middle" fill="#8892B0" font-size="6">Anlage KAP: ✓</text>
+  <text x="435" y="906" text-anchor="middle" fill="#8892B0" font-size="6">Anlage V: ○</text>
+  <rect x="375" y="916" width="120" height="4" fill="#a78bfa10"/>
+  <text x="435" y="940" text-anchor="middle" fill="#00D48A" font-size="8" font-weight="700">Erstattung: +480€ 🎉</text>
+
+  <!-- Münzen-Haufen -->
+  <ellipse cx="100" cy="1440" rx="30" ry="10" fill="#9a7000" opacity=".6"/>
+  <ellipse cx="100" cy="1436" rx="28" ry="9" fill="#c8a000" opacity=".5"/>
+  <ellipse cx="100" cy="1432" rx="26" ry="8" fill="#c8a000" opacity=".5"/>
+  <ellipse cx="100" cy="1428" rx="24" ry="7" fill="#FFD166" opacity=".4"/>
+  <text x="100" y="1460" text-anchor="middle" fill="#FFD166" font-size="7">Sparerpauschbetrag</text>
+
+  <!-- Computerterminal ELSTER -->
+  <rect x="20" y="1600" width="120" height="90" fill="#0a0818" rx="4" stroke="#a78bfa20" stroke-width="1"/>
+  <rect x="28" y="1608" width="104" height="64" fill="#060412" rx="2"/>
+  <text x="80" y="1624" text-anchor="middle" fill="#A78BFA" font-size="7" font-weight="700">ELSTER Online</text>
+  <text x="80" y="1640" text-anchor="middle" fill="#00D48A" font-size="6">Einreichung erfolgreich</text>
+  <text x="80" y="1654" text-anchor="middle" fill="#8892B0" font-size="5">Bearbeitungsnr: 2024-0815</text>
+  <text x="80" y="1666" text-anchor="middle" fill="#FFD166" font-size="7">+780€ ↩</text>
+  <rect x="48" y="1682" width="64" height="8" fill="#1a1430" rx="1"/>
+
+  <!-- Ziel: Tempel der Steuerfreiheit -->
+  <rect x="160" y="2080" width="200" height="160" fill="#0c0a20" rx="4" stroke="#A78BFA" stroke-width="2"/>
+  <polygon points="155,2080 260,2010 365,2080" fill="#140e30"/>
+  <text x="260" y="2055" text-anchor="middle" font-size="22">🧾</text>
+  <rect x="170" y="2080" width="12" height="160" fill="#141030" rx="1"/>
+  <rect x="190" y="2080" width="12" height="160" fill="#141030" rx="1"/>
+  <rect x="326" y="2080" width="12" height="160" fill="#141030" rx="1"/>
+  <rect x="346" y="2080" width="12" height="160" fill="#141030" rx="1"/>
+  <text x="260" y="2160" text-anchor="middle" fill="#A78BFA" font-size="9" font-weight="700">STEUER-MEISTER</text>
+  <text x="260" y="2176" text-anchor="middle" fill="#8892B0" font-size="7">Du zahlst nur was nötig ist</text>
+  
+      
+  <!-- === ZUSÄTZLICHE DEKO – gleichmäßig verteilt === -->
+
+  <!-- §-Zeichen + Akten verteilt -->
+  <text x="10"  y="120" font-size="14" fill="#a78bfa" opacity=".2">§</text>
+  <text x="502" y="160" font-size="14" fill="#a78bfa" opacity=".15">§</text>
+  <text x="8"   y="700" font-size="12" fill="#a78bfa" opacity=".18">§</text>
+  <text x="505" y="1000" font-size="14" fill="#a78bfa" opacity=".15">§</text>
+  <text x="12"  y="1400" font-size="12" fill="#a78bfa" opacity=".18">§</text>
+  <text x="504" y="1800" font-size="14" fill="#a78bfa" opacity=".15">§</text>
+  <text x="10"  y="2000" font-size="12" fill="#a78bfa" opacity=".18">§</text>
+
+  <!-- Zone y≈100 – Eulen-Schriftrolle (Recht) oben links -->
+  <rect x="10" y="80" width="110" height="65" fill="#0e0c20" rx="4" stroke="#a78bfa20" stroke-width="1"/>
+  <text x="65" y="104" text-anchor="middle" fill="#A78BFA" font-size="8" font-weight="700" opacity=".6">§ STEUERRECHT</text>
+  <text x="65" y="118" text-anchor="middle" fill="#8892B0" font-size="7" opacity=".5">AO · EStG · UStG</text>
+  <text x="65" y="132" text-anchor="middle" fill="#8892B0" font-size="7" opacity=".45">KStG · GewStG</text>
+  <rect x="16" y="140" width="98" height="2" fill="#a78bfa15"/>
+
+  <!-- Zone y≈640 – Münzstapel rechts -->
+  <circle cx="480" cy="672" r="18" fill="#1a1430" stroke="#a78bfa25" stroke-width="1.5"/>
+  <circle cx="480" cy="664" r="18" fill="#161030" stroke="#a78bfa25" stroke-width="1.5"/>
+  <circle cx="480" cy="656" r="18" fill="#120e28" stroke="#a78bfa25" stroke-width="1.5"/>
+  <text x="480" y="660" text-anchor="middle" fill="#A78BFA" font-size="9" font-weight="700" opacity=".5">26%</text>
+  <text x="480" y="690" text-anchor="middle" fill="#8892B0" font-size="7" opacity=".45">Abgeltung</text>
+
+  <!-- Zone y≈1050 – Paragraphen-Labyrinth links -->
+  <rect x="10" y="1040" width="120" height="80" fill="#0e0c20" rx="4" stroke="#a78bfa18" stroke-width="1"/>
+  <text x="70" y="1058" text-anchor="middle" fill="#A78BFA" font-size="8" font-weight="700" opacity=".6">FORMULAR 2024</text>
+  <rect x="18" y="1066" width="104" height="4" fill="#a78bfa15" rx="1"/>
+  <rect x="18" y="1076" width="80" height="3" fill="#a78bfa10" rx="1"/>
+  <rect x="18" y="1083" width="92" height="3" fill="#a78bfa10" rx="1"/>
+  <rect x="18" y="1090" width="70" height="3" fill="#a78bfa10" rx="1"/>
+  <rect x="18" y="1097" width="86" height="3" fill="#a78bfa10" rx="1"/>
+  <text x="100" y="1113" fill="#00D48A" font-size="9" font-weight="700" opacity=".55">✓</text>
+
+  <!-- Zone y≈1350 – Waage der Gerechtigkeit rechts -->
+  <circle cx="475" cy="1350" r="32" fill="#0e0c20" stroke="#a78bfa25" stroke-width="1.5"/>
+  <circle cx="475" cy="1350" r="26" fill="none" stroke="#1a1640" stroke-width="1"/>
+  <text x="475" y="1355" text-anchor="middle" font-size="18" opacity=".6">⚖️</text>
+  <text x="475" y="1390" text-anchor="middle" fill="#8892B0" font-size="7" opacity=".5">FAIRNESS</text>
+
+  <!-- Zone y≈1800 – Steuererklärung abgehakt -->
+  <rect x="10" y="1790" width="110" height="75" fill="#0e0c20" rx="4" stroke="#00d48a20" stroke-width="1.5"/>
+  <text x="65" y="1808" text-anchor="middle" fill="#00D48A" font-size="8" font-weight="700" opacity=".65">✅ STEUERERKLÄRUNG</text>
+  <rect x="18" y="1814" width="94" height="3" fill="#00d48a20" rx="1"/>
+  <text x="65" y="1828" text-anchor="middle" fill="#8892B0" font-size="7" opacity=".55">Erstattung: +1.240 €</text>
+  <text x="65" y="1842" text-anchor="middle" fill="#8892B0" font-size="7" opacity=".5">Frist: 31. Juli 2025</text>
+  <rect x="18" y="1856" width="94" height="2" fill="#00d48a15" rx="1"/>
+
+  <!-- Zone y≈2000 – Adler-Stempel / Wappen -->
+  <circle cx="480" cy="2010" r="26" fill="#0e0c20" stroke="#a78bfa25" stroke-width="1.5" opacity=".8"/>
+  <circle cx="480" cy="2010" r="20" fill="none" stroke="#1a1640" stroke-width="1" opacity=".7"/>
+  <text x="480" y="2015" text-anchor="middle" font-size="18" opacity=".5">🦅</text>
+  <text x="480" y="2044" text-anchor="middle" fill="#8892B0" font-size="7" opacity=".45">FINANZAMT</text>
+
+  <!-- Path glow -->
+      <path d="M 80 60 Q 125 60 170 170 Q 220 170 270 280 Q 320 280 370 390 Q 405 390 440 500 Q 440 500 440 610 Q 405 610 370 720 Q 320 720 270 830 Q 220 830 170 940 Q 125 940 80 1050 Q 80 1050 80 1160 Q 125 1160 170 1270 Q 220 1270 270 1380 Q 320 1380 370 1490 Q 405 1490 440 1600 Q 440 1600 440 1710 Q 405 1710 370 1820 Q 320 1820 270 1930 Q 220 1930 170 2040 Q 125 2040 80 2150" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Path dashes -->
+      <path d="M 80 60 Q 125 60 170 170 Q 220 170 270 280 Q 320 280 370 390 Q 405 390 440 500 Q 440 500 440 610 Q 405 610 370 720 Q 320 720 270 830 Q 220 830 170 940 Q 125 940 80 1050 Q 80 1050 80 1160 Q 125 1160 170 1270 Q 220 1270 270 1380 Q 320 1380 370 1490 Q 405 1490 440 1600 Q 440 1600 440 1710 Q 405 1710 370 1820 Q 320 1820 270 1930 Q 220 1930 170 2040 Q 125 2040 80 2150" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="14 10"/>
+      <!-- Done overlay -->
+      <path id="pathDone" d="M 80 60 Q 125 60 170 170 Q 220 170 270 280 Q 320 280 370 390 Q 405 390 440 500 Q 440 500 440 610 Q 405 610 370 720 Q 320 720 270 830 Q 220 830 170 940 Q 125 940 80 1050 Q 80 1050 80 1160 Q 125 1160 170 1270 Q 220 1270 270 1380 Q 320 1380 370 1490 Q 405 1490 440 1600 Q 440 1600 440 1710 Q 405 1710 370 1820 Q 320 1820 270 1930 Q 220 1930 170 2040 Q 125 2040 80 2150" fill="none" stroke="#A78BFA" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3392" stroke-dashoffset="3392" opacity=".75"/>
+      <rect x="368" y="554" width="144" height="20" rx="10" fill="rgba(0,0,0,.55)" stroke="#FFD166" stroke-width="1.2" opacity=".85"/>
+<text x="440" y="569" text-anchor="middle" fill="#FFD166" font-size="9.5" font-weight="700" letter-spacing="0.5">⚡ Aufbau</text><rect x="8" y="1104" width="144" height="20" rx="10" fill="rgba(0,0,0,.55)" stroke="#FF6B6B" stroke-width="1.2" opacity=".85"/>
+<text x="80" y="1119" text-anchor="middle" fill="#FF6B6B" font-size="9.5" font-weight="700" letter-spacing="0.5">🚀 Fortgeschritten</text><rect x="368" y="1654" width="144" height="20" rx="10" fill="rgba(0,0,0,.55)" stroke="#A78BFA" stroke-width="1.2" opacity=".85"/>
+<text x="440" y="1669" text-anchor="middle" fill="#A78BFA" font-size="9.5" font-weight="700" letter-spacing="0.5">🏆 Meisterlevel</text>
+    </svg>
+    <div class="mnode" id="li0" onclick="openLesson(0)" style="left:80px;top:60px;--nc:#A78BFA;--nr:167,139,250;" data-tip="Lekt. 1: Warum Steuern verstehen lohnt"><span class="mnode-icon">🧾</span><span class="mnode-num">1</span></div>
+<div class="mnode" id="li1" onclick="openLesson(1)" style="left:170px;top:170px;--nc:#A78BFA;--nr:167,139,250;" data-tip="Lekt. 2: Werbungskosten absetzen"><span class="mnode-icon">💼</span><span class="mnode-num">2</span></div>
+<div class="mnode" id="li2" onclick="openLesson(2)" style="left:270px;top:280px;--nc:#A78BFA;--nr:167,139,250;" data-tip="Lekt. 3: Sonderausgaben & außergewöhnliche Belastungen"><span class="mnode-icon">🏥</span><span class="mnode-num">3</span></div>
+<div class="mnode" id="li3" onclick="openLesson(3)" style="left:370px;top:390px;--nc:#A78BFA;--nr:167,139,250;" data-tip="Lekt. 4: Kapitalerträge & Abgeltungssteuer"><span class="mnode-icon">📈</span><span class="mnode-num">4</span></div>
+<div class="mnode" id="li4" onclick="openLesson(4)" style="left:440px;top:500px;--nc:#A78BFA;--nr:167,139,250;" data-tip="Lekt. 5: Steuervorteile für Immobilien"><span class="mnode-icon">🏠</span><span class="mnode-num">5</span></div>
+<div class="mnode" id="li5" onclick="openLesson(5)" style="left:440px;top:610px;--nc:#A78BFA;--nr:167,139,250;" data-tip="Lekt. 6: Altersvorsorge & Steuern"><span class="mnode-icon">👴</span><span class="mnode-num">6</span></div>
+<div class="mnode" id="li6" onclick="openLesson(6)" style="left:370px;top:720px;--nc:#A78BFA;--nr:167,139,250;" data-tip="Lekt. 7: Steuererklärung mit ELSTER"><span class="mnode-icon">💻</span><span class="mnode-num">7</span></div>
+<div class="mnode" id="li7" onclick="openLesson(7)" style="left:270px;top:830px;--nc:#A78BFA;--nr:167,139,250;" data-tip="Lekt. 8: 5 meistübersehene Steuerposten"><span class="mnode-icon">🎯</span><span class="mnode-num">8</span></div>
+<div class="mnode" id="li8" onclick="openLesson(8)" style="left:170px;top:940px;--nc:#A78BFA;--nr:167,139,250;" data-tip="Lekt. 9: Steueroptimierung langfristig"><span class="mnode-icon">🏆</span><span class="mnode-num">9</span></div>
+<div class="mnode" id="li9" onclick="openLesson(9)" style="left:80px;top:1050px;--nc:#A78BFA;--nr:167,139,250;" data-tip="Lekt. 10: Steuererklärung Schritt für Schritt"><span class="mnode-icon">📋</span><span class="mnode-num">10</span></div>
+<div class="mnode" id="li10" onclick="openLesson(10)" style="left:80px;top:1160px;--nc:#A78BFA;--nr:167,139,250;" data-tip="Lekt. 11: Steuervorteile für Eigenheimbesitzer"><span class="mnode-icon">🏠</span><span class="mnode-num">11</span></div>
+<div class="mnode" id="li11" onclick="openLesson(11)" style="left:170px;top:1270px;--nc:#A78BFA;--nr:167,139,250;" data-tip="Lekt. 12: Steuerklassen in Deutschland"><span class="mnode-icon">👥</span><span class="mnode-num">12</span></div>
+<div class="mnode" id="li12" onclick="openLesson(12)" style="left:270px;top:1380px;--nc:#A78BFA;--nr:167,139,250;" data-tip="Lekt. 13: Nebenberuflich selbstständig – was musst du beachten?"><span class="mnode-icon">💼</span><span class="mnode-num">13</span></div>
+<div class="mnode" id="li13" onclick="openLesson(13)" style="left:370px;top:1490px;--nc:#A78BFA;--nr:167,139,250;" data-tip="Lekt. 14: Vorabpauschale bei ETFs – was ist das?"><span class="mnode-icon">📈</span><span class="mnode-num">14</span></div>
+<div class="mnode" id="li14" onclick="openLesson(14)" style="left:440px;top:1600px;--nc:#A78BFA;--nr:167,139,250;" data-tip="Lekt. 15: Steuern auf ausländische Einkünfte"><span class="mnode-icon">🌍</span><span class="mnode-num">15</span></div>
+<div class="mnode" id="li15" onclick="openLesson(15)" style="left:440px;top:1710px;--nc:#A78BFA;--nr:167,139,250;" data-tip="Lekt. 16: Steuern sparen – 7 legale Tricks"><span class="mnode-icon">🎯</span><span class="mnode-num">16</span></div>
+<div class="mnode" id="li16" onclick="openLesson(16)" style="left:370px;top:1820px;--nc:#A78BFA;--nr:167,139,250;" data-tip="Lekt. 17: Steuer-Champion – was du jetzt weißt"><span class="mnode-icon">🏆</span><span class="mnode-num">17</span></div>
+<div class="mnode" id="li17" onclick="openLesson(17)" style="left:270px;top:1930px;--nc:#A78BFA;--nr:167,139,250;" data-tip="Lekt. 18: Verlustverrechnung bei ETFs"><span class="mnode-icon">🧩</span><span class="mnode-num">18</span></div>
+<div class="mnode" id="li18" onclick="openLesson(18)" style="left:170px;top:2040px;--nc:#A78BFA;--nr:167,139,250;" data-tip="Lekt. 19: Steuern und Rebalancing"><span class="mnode-icon">🔄</span><span class="mnode-num">19</span></div>
+<div class="mnode" id="li19" onclick="openLesson(19)" style="left:80px;top:2150px;--nc:#A78BFA;--nr:167,139,250;" data-tip="Lekt. 20: Steuern in der Zukunft – was könnte sich ändern?"><span class="mnode-icon">🔮</span><span class="mnode-num">20</span></div>
+
+  </div>
+</div>
+
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-tag" id="mTag"></div>
+      <div class="modal-title" id="mTitle"></div>
+      <div class="modal-subtitle" id="mSub"></div>
+    </div>
+    <div class="modal-body">
+      <div class="theory-box" id="mTheory"></div>
+      <div class="quiz-label">Wissenscheck 🧠</div>
+      <div class="quiz-question" id="mQuestion"></div>
+      <div class="quiz-options" id="mOptions"></div>
+      <div class="feedback-box" id="mFeedback"></div>
+    </div>
+    <div class="modal-footer">
+      <div class="xp-badge" id="mXP">⚡ +50 XP</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="closeModal()">✕ Schließen</button>
+        <button class="btn btn-primary" id="btn-continue" onclick="nextLesson()">Weiter →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span>⚡</span><span id="toastMsg"></span></div>
+
+<script src="components.js"></script>
+<script src="auth.js"></script>
+<script>
+// ── Data ──────────────────────────────────────────────────────
+const COURSE_ID  = 'kurs-steuern';
+const XP_EACH    = 50;
+
+const LESSONS = [
+
+  {
+    icon:`🧾`, title:`Warum Steuern verstehen lohnt`, subtitle:`Das Finanzamt erklärt dir nicht wie du Geld sparen kannst.`,
+    theory:`Deutsche bekommen im Schnitt ~1.100€ Steuererstattung – wer aber nicht alle Möglichkeiten kennt, zahlt zu viel.
+
+Nur ~55% der Deutschen machen eine Steuererklärung – dabei bekommen ~90% Geld zurück. Lohnt sich fast immer!`,
+    question:`Wie viele Deutsche geben freiwillig eine Steuererklärung ab?`,
+    options:[`Über 90%`, `Etwa 55%`, `Etwa 30%`, `Fast alle sind verpflichtet`],
+    correct:1,
+    explanation:`Korrekt! Nur ~55% geben ab – dabei bekommen ~90% Geld zurück. Lohnt sich fast immer.`
+  },
+  {
+    icon:`💼`, title:`Werbungskosten absetzen`, subtitle:`Alles was du für die Arbeit ausgibst.`,
+    theory:`**Werbungskosten** senken dein zu versteuerndes Einkommen:
+- Arbeitsmittel: Laptop, Bürostuhl (unter 952€ sofort absetzbar)
+- Homeoffice-Pauschale: 6€/Tag, max. 1.260€/Jahr
+- Fortbildungen: Kurse, Bücher, Seminare
+- Fahrtkosten: 0,30€/km Entfernungspauschale
+
+Pauschale: 1.230€ automatisch – nur darüber lohnt sich Einzelnachweis.`,
+    question:`Wie hoch ist die Homeoffice-Pauschale pro Tag?`,
+    options:[`3€`, `6€`, `10€`, `15€`],
+    correct:1,
+    explanation:`Richtig! 6€ pro Tag, max. 1.260€/Jahr – ohne Einzelbelege.`
+  },
+  {
+    icon:`🏥`, title:`Sonderausgaben & außergewöhnliche Belastungen`, subtitle:`Versicherungen, Spenden und mehr.`,
+    theory:`**Sonderausgaben**:
+- Kranken- und Pflegeversicherungsbeiträge
+- Riester-/Rürup-Beiträge
+- Spenden (bis 20% des Einkommens)
+- Kirchensteuer
+
+**Außergewöhnliche Belastungen**:
+- Krankheitskosten über die zumutbare Eigenbelastung
+- Pflegekosten für Angehörige`,
+    question:`Was gehört zu den Sonderausgaben?`,
+    options:[`Urlaubskosten`, `Krankenversicherungsbeiträge`, `Lebensmittelkosten`, `Miete`],
+    correct:1,
+    explanation:`Korrekt! Kranken- und Pflegeversicherungsbeiträge sind der wichtigste Sonderausgaben-Posten.`
+  },
+  {
+    icon:`📈`, title:`Kapitalerträge & Abgeltungssteuer`, subtitle:`Das Finanzamt mitverdienen lassen – oder nicht.`,
+    theory:`Auf Kapitalerträge fällt die **Abgeltungssteuer**: 25% + Soli = 26,375%.
+
+**Sparerpauschbetrag**: 1.000€/Person (2.000€ Ehepaare) steuerfrei.
+
+**Freistellungsauftrag**: Bei der Bank einrichten! Sonst zieht die Bank automatisch Steuer ab – auch unter 1.000€.
+
+Verluste aus Kapitalanlagen können mit Gewinnen verrechnet werden.`,
+    question:`Was muss man bei der Bank einrichten für steuerfreie Erträge bis 1.000€?`,
+    options:[`Tagesgeldkonto`, `Freistellungsauftrag`, `Steuererklärung`, `Sparplan`],
+    correct:1,
+    explanation:`Genau! Ohne Freistellungsauftrag zieht die Bank automatisch Steuern ab.`
+  },
+  {
+    icon:`🏠`, title:`Steuervorteile für Immobilien`, subtitle:`Vermieter haben viele Hebel.`,
+    theory:`Bei Vermietung absetzbar:
+- **Zinsen** auf den Immobilienkredit
+- **AfA**: 2% des Gebäudewerts p.a.
+- Reparaturen und Renovierungen
+- Verwaltungskosten
+
+Auch für alle: **Handwerkerleistungen** im Haushalt:
+20% der Lohnkosten direkt von der Steuerschuld (max. 1.200€ p.a.).`,
+    question:`Was bedeutet AfA bei Immobilien?`,
+    options:[`Allgemeine Finanzierungsabgabe`, `Absetzung für Abnutzung`, `Automatische Freistellungsanfrage`, `Ausländische Finanzanlage`],
+    correct:1,
+    explanation:`Richtig! AfA = Absetzung für Abnutzung. 2% des Gebäudewerts p.a. steuerlich absetzbar.`
+  },
+  {
+    icon:`👴`, title:`Altersvorsorge & Steuern`, subtitle:`Der Staat fördert Vorsorge.`,
+    theory:`**Riester-Rente**: Staatliche Zulagen (175€/Jahr Grundzulage, 300€ je Kind) + bis 2.100€ als Sonderausgaben absetzbar.
+
+**Rürup-Rente**: Ideal für Selbstständige. Bis 27.566€/Jahr absetzbar.
+
+**Betriebliche Altersvorsorge (bAV)**: Bis 3.624€/Jahr steuerfrei einzahlen.`,
+    question:`Für wen ist die Rürup-Rente besonders geeignet?`,
+    options:[`Nur Beamte`, `Vor allem Selbstständige`, `Nur Arbeitnehmer mit Kindern`, `Alle unter 30`],
+    correct:1,
+    explanation:`Korrekt! Selbstständige haben keine gesetzliche Rente – die Rürup-Rente ist ihr wichtigstes Steuersparmodell.`
+  },
+  {
+    icon:`💻`, title:`Steuererklärung mit ELSTER`, subtitle:`Kostenlos, sicher, einfacher als du denkst.`,
+    theory:`**ELSTER** ist das kostenlose Portal des Finanzamts.
+
+Was du brauchst:
+- Lohnsteuerbescheinigung
+- Belege für Werbungskosten
+- Steuer-ID
+
+**Abgabefrist**: 31. Juli des Folgejahres.
+Durchschnittszeit für Arbeitnehmer: 2–3 Stunden.`,
+    question:`Bis wann muss die Steuererklärung ohne Steuerberater abgegeben werden?`,
+    options:[`31. März`, `30. Juni`, `31. Juli`, `31. Dezember`],
+    correct:2,
+    explanation:`Richtig! Ohne Steuerberater: 31. Juli des Folgejahres. Zu spät = Verspätungszuschlag.`
+  },
+  {
+    icon:`🎯`, title:`5 meistübersehene Steuerposten`, subtitle:`Geld das die meisten liegenlassen.`,
+    theory:`1. **Steuerberaterkosten** selbst absetzen
+2. **Berufskleidung** die nicht privat tragbar ist
+3. **Umzugskosten** bei beruflich bedingtem Umzug
+4. **Doppelte Haushaltsführung** bei Arbeit in anderer Stadt
+5. **Verlustvorträge** aus Vorjahren geltend machen
+
+Nicht jeder Posten lohnt sich – Pauschalen manchmal höher als tatsächliche Kosten.`,
+    question:`Was ist ein Verlustvortrag?`,
+    options:[`Eine Investitionsform`, `Nicht verrechnete Verluste aus Vorjahren`, `Kredit vom Finanzamt`, `Differenz Brutto/Netto`],
+    correct:1,
+    explanation:`Korrekt! Verluste die nicht im selben Jahr verrechnet wurden, mindern zukünftige Steuern.`
+  },
+  {
+    icon:`🏆`, title:`Steueroptimierung langfristig`, subtitle:`Wer früh plant, zahlt weniger.`,
+    theory:`**Langfristige Strategien**:
+- **Steuerstundung**: ETFs wachsen lassen, erst bei Verkauf Steuern zahlen
+- **Günstigerprüfung**: Wenn persönlicher Steuersatz < 25% → weniger Steuern auf Kapitalerträge
+- **Tax-Loss-Harvesting**: Verlustpositionen verkaufen um Gewinne zu verrechnen
+- **Ehegattensplitting**: Heirat kann bei unterschiedlichen Einkommen stark sparen
+
+Steueroptimierung ist legal – Steuerhinterziehung nicht.`,
+    question:`Was ist Steuerstundung bei ETFs?`,
+    options:[`Steuern nie zahlen`, `Steuern erst bei Verkauf zahlen – Kapital wächst länger`, `Steuern übertragen`, `Steuerberater beauftragen`],
+    correct:1,
+    explanation:`Richtig! ETFs wachsen unversteuert – erst beim Verkauf fällt Steuer an. Das steigert den Zinseszinseffekt.`
+  },
+  {
+    icon:`📋`, title:`Steuererklärung Schritt für Schritt`, subtitle:`Was du wo einträgst – einfach erklärt.`,
+    theory:`**Steuererklärung** – die wichtigsten Anlagen:
+
+📌 **Anlage N**: Arbeitnehmereinkünfte, Werbungskosten
+📌 **Anlage KAP**: Kapitalerträge, ETF-Gewinne
+📌 **Anlage V**: Mieteinnahmen
+📌 **Anlage Vorsorgeaufwand**: Renten-, Krankenversicherungsbeiträge
+📌 **Anlage Sonderausgaben**: Spenden, Kirchensteuer
+
+**Tools**: ELSTER (kostenlos), Wundertax, Taxfix (~35€)`,
+    question:`Wo gibt man Kapitalerträge aus ETF-Verkäufen in der Steuererklärung an?`,
+    options:[`Anlage N`,`Anlage KAP`,`Anlage V`,`Anlage Sonderausgaben`],
+    correct:1,
+    explanation:`Kapitalerträge (Dividenden, Kursgewinne aus ETFs) gehören in die Anlage KAP.`
+  },
+  {
+    icon:`🏠`, title:`Steuervorteile für Eigenheimbesitzer`, subtitle:`Wie Immobilienbesitzer legal Steuern sparen.`,
+    theory:`Als **Eigenheimbesitzer** kannst du absetzen:
+
+✅ **Handwerkerleistungen**: 20% von bis zu 6.000€ = max. 1.200€ Steuerersparnis
+✅ **Haushaltnahe Dienstleistungen**: Putzkraft, Gärtner
+✅ **Hausverkauf nach 10 Jahren**: Steuerfrei!
+✅ Bei **Vermietung**: Abschreibung (AfA) 2% p.a. auf den Gebäudewert
+
+⚠️ Eigennutzung und Vermietung haben komplett unterschiedliche Regeln.`,
+    question:`Nach wie vielen Jahren ist der Verkauf einer selbstgenutzten Immobilie steuerfrei?`,
+    options:[`Nach 2 Jahren`,`Nach 5 Jahren`,`Sofort nach dem Kauf`,`Immobilienkäufe sind immer steuerpflichtig`],
+    correct:2,
+    explanation:`Selbst genutzte Immobilien können jederzeit steuerfrei verkauft werden – vermiete Immobilien erst nach 10 Jahren.`
+  },
+  {
+    icon:`👥`, title:`Steuerklassen in Deutschland`, subtitle:`1, 2, 3, 4, 5, 6 – was bedeutet was?`,
+    theory:`**Steuerklassen** bestimmen die monatliche Lohnsteuer:
+
+1️⃣ **Klasse 1**: Alleinstehende
+2️⃣ **Klasse 2**: Alleinerziehende
+3️⃣ **Klasse 3**: Verheiratete, höherer Verdienst
+4️⃣ **Klasse 4**: Verheiratete, ähnliches Einkommen
+5️⃣ **Klasse 5**: Verheiratete, geringerer Verdienst
+6️⃣ **Klasse 6**: Zweiter Job (höchste Besteuerung)
+
+Klasse 3/5 senkt monatliche Abzüge – bei Steuererklärung wird der echte Betrag ermittelt.`,
+    question:`Welche Steuerklasse ist für Alleinstehende ohne Kinder?`,
+    options:[`Steuerklasse 2`,`Steuerklasse 3`,`Steuerklasse 1`,`Steuerklasse 4`],
+    correct:2,
+    explanation:`Steuerklasse 1 gilt für Alleinstehende, Geschiedene oder Verwitwete ohne Kinder.`
+  },
+  {
+    icon:`💼`, title:`Nebenberuflich selbstständig – was musst du beachten?`, subtitle:`Steuern beim Side-Hustle.`,
+    theory:`Nebenberuflich selbstständig? Das musst du wissen:
+
+📌 **Kleinunternehmerregelung**: Bis 22.000€ Jahresumsatz keine Mehrwertsteuer
+📌 **Einnahmen-Überschuss-Rechnung** (EÜR): Einfache Buchführung
+📌 **Anlage S** in der Steuererklärung
+📌 Alle Betriebsausgaben absetzbar (Laptop, Software, Fortbildung)
+📌 **Gewerbesteuer** ab 24.500€ Gewinn
+
+Wichtig: Finanzamt informieren – keine Anmeldepflicht bis 410€ Jahresgewinn.`,
+    question:`Was erlaubt die Kleinunternehmerregelung?`,
+    options:[`Keine Einkommensteuer zu zahlen`,`Unter 22.000€ Jahresumsatz keine Mehrwertsteuer ausweisen`,`Alle Steuern zu umgehen`,`Kein Gewerbe anmelden zu müssen`],
+    correct:1,
+    explanation:`Kleinunternehmer (bis 22.000€ Umsatz) müssen keine Umsatzsteuer ausweisen – vereinfacht die Buchhaltung enorm.`
+  },
+  {
+    icon:`📈`, title:`Vorabpauschale bei ETFs – was ist das?`, subtitle:`Die Steuer die du kaum bemerkst.`,
+    theory:`Seit 2018 gibt es die **Vorabpauschale** für thesaurierende ETFs:
+
+Das Finanzamt besteuert einen fiktiven Mindestgewinn – auch wenn du nichts verkauft hast.
+
+Berechnung: Sehr komplex (Basiszins × 0,7 × Fondswert am Jahresanfang)
+
+In der Praxis: **Meist sehr klein** und wird von der Depotbank automatisch verrechnet.
+
+✅ Der Sparerpauschbetrag (1.000€) wird zuerst aufgebraucht.`,
+    question:`Was ist die Vorabpauschale?`,
+    options:[`Eine Depotgebühr`,`Eine jährliche Steuer auf fiktive Mindestgewinne thesaurierender ETFs`,`Ein ETF-Kauf`,`Eine Steuerrückzahlung`],
+    correct:1,
+    explanation:`Vorabpauschale = Mindestbesteuerung für thesaurierende ETFs – verhindert dass Steuern ewig aufgeschoben werden.`
+  },
+  {
+    icon:`🌍`, title:`Steuern auf ausländische Einkünfte`, subtitle:`Was gilt wenn du im Ausland arbeitest oder investierst?`,
+    theory:`**Doppelbesteuerungsabkommen (DBA)**:
+Deutschland hat mit ~100 Ländern Abkommen um doppelte Besteuerung zu vermeiden.
+
+Wenn du in Deutschland wohnst und US-ETFs hältst:
+→ US-Quellensteuer von 15% auf Dividenden
+→ Wird in DE angerechnet (nicht doppelt besteuert)
+
+Wenn du im Ausland arbeitest:
+→ Kommt auf DBA mit dem Land an
+→ Steuerberater empfohlen`,
+    question:`Was regeln Doppelbesteuerungsabkommen?`,
+    options:[`Den Steuersatz in Deutschland`,`Dass Einkommen nicht zweimal versteuert wird wenn man international tätig ist`,`Die Höhe der Abgeltungsteuer`,`Den Freistellungsauftrag`],
+    correct:1,
+    explanation:`DBA verhindern dass du in zwei Ländern gleichzeitig Steuern auf dasselbe Einkommen zahlen musst.`
+  },
+  {
+    icon:`🎯`, title:`Steuern sparen – 7 legale Tricks`, subtitle:`Was jeder wissen sollte.`,
+    theory:`**7 legale Steuer-Spartipps:**
+
+1. **Freistellungsauftrag** einrichten (1.000€)
+2. **Verlustverrechnung**: ETF-Verluste gegen Gewinne verrechnen
+3. **Werbungskosten** absetzen (Arbeitsmittel, Fahrtkosten)
+4. **Homeoffice-Pauschale**: 6€/Tag bis 1.260€/Jahr
+5. **Rürup/Riester**: Steuervorteil in der Einzahlungsphase
+6. **Kirchensteuer-Erstattung** optimieren
+7. **Verlustvortrag**: Verluste ins nächste Jahr vortragen`,
+    question:`Was ist die Homeoffice-Pauschale?`,
+    options:[`Ein Rabatt für Büroausstattung`,`6€ pro Homeoffice-Tag, max. 1.260€/Jahr steuerlich absetzbar`,`Eine staatliche Förderung für Heimarbeiter`,`Ein Steuererlass für Selbstständige`],
+    correct:1,
+    explanation:`6€ pro Tag im Homeoffice (max. 210 Tage = 1.260€/Jahr) können steuerlich abgesetzt werden – kein Einzelnachweis nötig.`
+  },
+  {
+    icon:`🏆`, title:`Steuer-Champion – was du jetzt weißt`, subtitle:`Dein Wissens-Upgrade ist komplett.`,
+    theory:`Du weißt jetzt:
+
+✅ Welche Ausgaben du absetzen kannst
+✅ Wie Kapitalertragsteuer und Vorabpauschale funktionieren
+✅ Steuerklassen und ihre Bedeutung
+✅ Steuervorteile für Eigenheimbesitzer
+✅ Was Nebenberufliche beachten müssen
+✅ Doppelbesteuerungsabkommen
+✅ 7 legale Spartipps
+
+**Steuern zahlen ist Pflicht. Mehr als nötig zahlen ist eine Wahl.**`,
+    question:`Was ist die beste Einstellung zu Steuern?`,
+    options:[`So wenig wie möglich daran denken`,`Alle legalen Möglichkeiten nutzen um die Steuerlast zu reduzieren`,`Immer einen Steuerberater beauftragen`,`Steuern sind unvermeidbar und unveränderbar`],
+    correct:1,
+    explanation:`Steuern intelligent zu planen ist legal, sinnvoll und spart echtes Geld. Das Finanzamt erklärt dir das nicht.`
+  },
+  {
+    icon:`🧩`, title:`Verlustverrechnung bei ETFs`, subtitle:`Verluste machen – und davon profitieren.`,
+    theory:`**Verlustverrechnung** bei Kapitalerträgen:
+
+📉 ETF A: -500€ Verlust
+📈 ETF B: +1.000€ Gewinn
+→ Steuer nur auf **500€** statt 1.000€
+
+Wichtig:
+- Verluste werden automatisch im Depot gegengerechnet
+- Zwischen Banken: Verlustbescheinigung beantragen (bis 15.12.!)
+- Aktien-Verluste nur gegen Aktien-Gewinne verrechenbar
+- ETF-Verluste gegen ETF/Dividenden-Gewinne`,
+    question:`Bis wann muss man eine Verlustbescheinigung bei der Bank beantragen?`,
+    options:[`31. März des Folgejahres`,`15. Dezember des laufenden Jahres`,`Jederzeit im Jahr`,`Nur bei der Steuererklärung`],
+    correct:1,
+    explanation:`Verlustbescheinigung: Antrag bis 15. Dezember! Danach übernimmt die Bank den Verlust ins nächste Jahr – bankübergreifend geht es dann nicht mehr.`
+  },
+  {
+    icon:`🔄`, title:`Steuern und Rebalancing`, subtitle:`Wie man steuereffizient umschichtet.`,
+    theory:`Beim **Rebalancing** (Portfolio anpassen) entstehen Steuern:
+
+❌ **Schlechte Methode**: Alles verkaufen und neu kaufen → Abgeltungsteuer
+
+✅ **Bessere Methode**: Nur neue Sparbeiträge in untergewichtete ETFs
+✅ Verkäufe innerhalb Sparerpauschbetrag (1.000€) steuerfrei
+✅ **Verluste** gleichzeitig realisieren und verrechnen
+
+Merke: Je weniger man umschichtet, desto weniger Steuern – thesaurierende ETFs halten ist steuereffizienter als ständiges Handeln.`,
+    question:`Wie rebalanciert man am steuereffizientesten?`,
+    options:[`Jedes Jahr alles verkaufen und neu kaufen`,`Neue Sparraten gezielt in untergewichtete Positionen investieren`,`Nur Gold kaufen`,`Den Sparplan stoppen`],
+    correct:1,
+    explanation:`Neue Sparraten gezielt einsetzen vermeidet Verkäufe und damit Steuern. Erst wenn nötig werden Positionen verkauft.`
+  }
+,
+  {
+    icon:`🔮`, title:`Steuern in der Zukunft – was könnte sich ändern?`, subtitle:`Was du im Blick behalten solltest.`,
+    theory:`**Steuerliche Risiken und Trends:**
+
+⚠️ **Abgeltungsteuer könnte steigen**: Politisch immer wieder diskutiert (auf 30–35%)
+⚠️ **Vorabpauschale**: Komplexer werdend bei mehr ETF-Anlegern
+⚠️ **Erbschaftsteuer**: Bei großen Vermögen relevant
+⚠️ **Vermögenssteuer**: In einigen Ländern wieder eingeführt – in DE aktuell kein Thema
+
+**Strategie**: Breite Aufstellung, keine übermäßige Optimierung auf aktuelles Steuerrecht. Steuergesetze ändern sich.`,
+    question:`Was sollte man bei steuerlicher Finanzplanung immer im Hinterkopf haben?`,
+    options:[`Steuern bleiben immer gleich`,`Steuergesetze können sich ändern – breite Aufstellung reduziert das Risiko`,`Optimiere immer maximal auf aktuelle Regeln`,`Steuern sind unveränderlich`],
+    correct:1,
+    explanation:`Steuergesetze ändern sich. Wer sein Portfolio nur auf aktuelles Steuerrecht optimiert, kann bei Gesetzesänderungen überrascht werden.`
+  }
+];
+
+// ── State ─────────────────────────────────────────────────────
+let current = -1;
+let answered = false;
+
+// ── Auth guard ────────────────────────────────────────────────
+(function() {
+  var user = FQ.getCurrentUser();
+  if (!user) { window.location.href = 'login.html'; return; }
+  var _xpEl = document.getElementById('xpNav');
+  if (_xpEl) _xpEl.textContent = '⚡ ' + (user.totalXP || 0) + ' XP';
+  if (typeof fqUpdateNavbar === 'function') fqUpdateNavbar();
+  FQ.init && FQ.init();
+})();
+
+// ── Progress helpers ──────────────────────────────────────────
+function getCompleted() {
+  const user = FQ.getCurrentUser();
+  if (!user) return [];
+  return (user.progress && user.progress[COURSE_ID]) || [];
+}
+
+function markComplete(idx) {
+  const user = FQ.getCurrentUser();
+  if (!user) return;
+  const completed = getCompleted();
+  if (completed.includes(idx)) return; // already saved
+  const newArr = [...completed, idx];
+  FQ.saveProgress(COURSE_ID, newArr, XP_EACH);
+  // refresh XP in nav
+  const fresh = FQ.getCurrentUser();
+  (function(){var _e=document.getElementById('xpNav');if(_e)_e.textContent='⚡ '+(fresh.totalXP || 0) + ' XP';})();
+}
+
+
+
+// ── Render Level Map ──────────────────────────────────────────
+function renderMap() {
+  const completed = getCompleted();
+  const count = completed.length;
+  const total = LESSONS.length;
+  document.getElementById('progLabel').textContent = count + ' von ' + total + ' Lektionen';
+  document.getElementById('progXP').textContent = (count * XP_EACH) + ' / ' + (total * XP_EACH) + ' XP';
+  document.getElementById('progFill').style.width = (count / total * 100) + '%';
+  for (let i = 0; i < total; i++) {
+    const node = document.getElementById('li' + i);
+    if (!node) continue;
+    node.querySelectorAll('.mnode-check').forEach(e => e.remove());
+    node.classList.remove('state-done','state-active','state-locked');
+    if (completed.includes(i)) {
+      node.className = 'mnode state-done';
+      const ck = document.createElement('div'); ck.className = 'mnode-check'; ck.textContent = '✓';
+      node.appendChild(ck);
+    } else if (i === count) {
+      node.className = 'mnode state-active';
+      setTimeout(() => node.scrollIntoView({ behavior:'smooth', block:'center' }), 350);
+    } else {
+      node.className = 'mnode state-locked';
+    }
+  }
+  const pd = document.getElementById('pathDone');
+  if (pd) {
+    const done = Math.round(3392 * count / total);
+    pd.style.transition = 'stroke-dashoffset 1s ease';
+    pd.setAttribute('stroke-dasharray', 3392);
+    pd.setAttribute('stroke-dashoffset', 3392 - done);
+  }
+  if (count === total) {
+    document.getElementById('completeBanner').classList.add('show');
+    showLoot();
+  }
+}
+
+
+// ── Open lesson modal ─────────────────────────────────────────
+function openLesson(idx) {
+  const completed = getCompleted();
+  // Allow opening if already completed OR is the next unlocked lesson
+  if (idx > 0 && !completed.includes(idx) && !completed.includes(idx - 1) && completed.length < idx) {
+    showToast('🔒 Schließe zuerst die vorherige Lektion ab!', '#FF6B6B');
+    return;
+  }
+  current = idx;
+  answered = false;
+
+  const l = LESSONS[idx];
+  document.getElementById('mTag').textContent = 'Lektion ' + (idx + 1) + ' / ' + LESSONS.length;
+  document.getElementById('mTitle').textContent = l.title;
+  document.getElementById('mSub').textContent = l.subtitle;
+  document.getElementById('mTheory').innerHTML =
+    l.theory.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+  document.getElementById('mQuestion').textContent = l.question;
+  document.getElementById('mXP').textContent = '⚡ +' + XP_EACH + ' XP';
+
+  const opts = document.getElementById('mOptions');
+  opts.innerHTML = '';
+  ['A','B','C','D'].forEach(function(letter, i) {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option';
+    btn.innerHTML = '<span class="option-letter">' + letter + '</span>' + l.options[i];
+    btn.dataset.idx = i;
+    btn.addEventListener('click', function() { checkAnswer(parseInt(this.dataset.idx), this); });
+    opts.appendChild(btn);
+  });
+
+  const fb = document.getElementById('mFeedback');
+  fb.style.display = 'none';
+  fb.className = 'feedback-box';
+  document.getElementById('btn-continue').style.display = 'none';
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+// ── Check answer ──────────────────────────────────────────────
+function checkAnswer(chosen, btn) {
+  if (answered) return;
+  answered = true;
+
+  const l = LESSONS[current];
+  document.querySelectorAll('.quiz-option').forEach(function(b) { b.disabled = true; });
+  document.querySelectorAll('.quiz-option')[l.correct].classList.add('correct');
+
+  const fb = document.getElementById('mFeedback');
+  if (chosen === l.correct) {
+    btn.classList.add('correct');
+    fb.className = 'feedback-box correct';
+    fb.innerHTML = '✅ ' + l.explanation;
+    markComplete(current);
+    showToast('+' + XP_EACH + ' XP verdient! ⚡', '#00D48A');
+    renderMap();
+  } else {
+    btn.classList.add('wrong');
+    fb.className = 'feedback-box wrong';
+    fb.innerHTML = '❌ Falsch. 💡 ' + l.explanation;
+  }
+  fb.style.display = 'block';
+  document.getElementById('btn-continue').style.display = 'inline-flex';
+}
+
+// ── Next / close ──────────────────────────────────────────────
+function nextLesson() {
+  closeModal();
+  if (current + 1 < LESSONS.length) {
+    setTimeout(function() { openLesson(current + 1); }, 280);
+  }
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+// outsideClick handled via addEventListener below
+function outsideClick(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+// ── Reset ─────────────────────────────────────────────────────
+function resetCourse() {
+  const currentCompleted = getCompleted().length;
+  if (currentCompleted > 0) {
+    FQ.saveProgress(COURSE_ID, [], -(currentCompleted * XP_EACH));
+  }
+  document.getElementById('completeBanner').classList.remove('show');
+  const fresh = FQ.getCurrentUser();
+  if (fresh) (function(){var _e=document.getElementById('xpNav');if(_e)_e.textContent='⚡ '+(fresh.totalXP || 0) + ' XP';})();
+  renderMap();
+}
+
+// ── Toast ─────────────────────────────────────────────────────
+function showToast(msg, color) {
+  const t = document.getElementById('toast');
+  const m = document.getElementById('toastMsg');
+  m.textContent = msg;
+  t.style.color = color || '#00D48A';
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 3000);
+}
+
+// ── Init ──────────────────────────────────────────────────────
+renderMap();
+
+// Overlay: close when clicking the dark backdrop (NOT the modal card)
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+
+// ── XP Pop Animation ─────────────────────────────────────────
+function showXpPop(x, y) {
+  const el = document.createElement('div');
+  el.className = 'xp-pop';
+  el.textContent = '+50 XP ⚡';
+  el.style.left = x + 'px';
+  el.style.top  = y + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 900);
+}
+
+// ── Milestone check ───────────────────────────────────────────
+function checkMilestone(count, total) {
+  const milestones = [
+    { at: Math.floor(total*0.25), msg: '25% geschafft! 🔥' },
+    { at: Math.floor(total*0.5),  msg: 'Halbzeit! Du bist auf dem richtigen Weg! ⚡' },
+    { at: Math.floor(total*0.75), msg: '75%! Fast am Ziel! 🚀' },
+  ];
+  const hit = milestones.find(m => m.at === count);
+  if (hit) showToast('🎯 ' + hit.msg, '#FFD166');
+}
+
+// ── Override checkAnswer to add gamification ──────────────────
+const _origCheckAnswer = window.checkAnswer;
+
+// ── LOOT BOX LOGIC ───────────────────────────────────────────
+let _lootDone = false;
+let _chestValues = [];
+
+function showLoot() {
+  if (_lootDone) return;
+  _lootDone = true;
+  // Generate 3 random values, guarantee one is the "winner" range
+  const prizes = [
+    Math.floor(Math.random() * 151) + 50,   // 50–200
+    Math.floor(Math.random() * 201) + 100,  // 100–300
+    Math.floor(Math.random() * 301) + 200,  // 200–500
+  ];
+  // Shuffle
+  _chestValues = prizes.sort(() => Math.random() - 0.5);
+  document.getElementById('lootOverlay').classList.add('open');
+}
+
+function openChest(idx) {
+  if (document.getElementById('chest'+idx).classList.contains('chosen')) return;
+
+  const winXP = _chestValues[idx];
+
+  // Animate chosen chest
+  const chosen = document.getElementById('chest'+idx);
+  chosen.classList.add('chest','opening');
+  setTimeout(() => {
+    chosen.classList.remove('opening');
+    chosen.classList.add('open-winner','chosen');
+    chosen.querySelector('.chest-body').textContent = '🎁';
+    document.getElementById('cl'+idx).textContent = '+' + winXP + ' XP!';
+    document.getElementById('cl'+idx).className = 'chest-label win-label';
+  }, 520);
+
+  // Reveal other chests after short delay
+  setTimeout(() => {
+    [0,1,2].forEach(i => {
+      if (i === idx) return;
+      const c = document.getElementById('chest'+i);
+      c.classList.add('open-looser','unchosen');
+      c.querySelector('.chest-body').textContent = '💨';
+      document.getElementById('cl'+i).textContent = _chestValues[i] + ' XP';
+      document.getElementById('cl'+i).className = 'chest-label miss-label';
+    });
+    // Award XP
+    awardBonusXP(winXP);
+    // Confetti
+    launchConfetti();
+    // XP burst
+    for (let b = 0; b < 5; b++) {
+      setTimeout(() => {
+        const el = document.createElement('div');
+        el.className = 'xp-burst';
+        el.textContent = '+' + winXP + ' XP ⚡';
+        el.style.left = (20 + Math.random() * 60) + 'vw';
+        el.style.top  = (30 + Math.random() * 30) + 'vh';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1300);
+      }, b * 180);
+    }
+    // Show result
+    document.getElementById('lootResultTitle').textContent = '🎉 Glückwunsch! +' + winXP + ' Bonus-XP!';
+    document.getElementById('lootResultSub').textContent = 'Du hast die Truhe mit dem größten Schatz gewählt. Die anderen hätten ' + _chestValues.filter((_,i)=>i!==idx).join(' und ') + ' XP gebracht.';
+    setTimeout(() => { document.getElementById('lootResult').style.display = 'block'; }, 800);
+  }, 700);
+}
+
+function awardBonusXP(amount) {
+  try {
+    if (typeof FQ !== 'undefined' && FQ.addXP) {
+      FQ.addXP(amount);
+    } else {
+      // Fallback: direct localStorage write
+      const email = localStorage.getItem('fq_current_user');
+      if (email) {
+        const users = JSON.parse(localStorage.getItem('fq_users') || '{}');
+        if (users[email]) {
+          users[email].totalXP = (users[email].totalXP || 0) + amount;
+          localStorage.setItem('fq_users', JSON.stringify(users));
+        }
+      }
+    }
+    // Update nav XP display
+    const xpEl = document.getElementById('xpNav');
+    if (xpEl) {
+      const user = typeof FQ !== 'undefined' ? FQ.getCurrentUser() : null;
+      if (user) xpEl.textContent = '⚡ ' + (user.totalXP || 0) + ' XP';
+    }
+  } catch(e) { console.warn('awardBonusXP error:', e); }
+}
+
+function launchConfetti() {
+  const colors = ['#00D48A','#FFD166','#FF6B6B','#A78BFA','#38BDF8','#ffffff'];
+  for (let i = 0; i < 80; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.left     = Math.random() * 100 + 'vw';
+      el.style.background = colors[Math.floor(Math.random() * colors.length)];
+      el.style.width    = (6 + Math.random() * 8) + 'px';
+      el.style.height   = (6 + Math.random() * 12) + 'px';
+      el.style.borderRadius = Math.random() > .5 ? '50%' : '2px';
+      const dur = 1.5 + Math.random() * 2;
+      el.style.animationDuration = dur + 's';
+      el.style.animationDelay   = (Math.random() * .5) + 's';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), (dur + 0.6) * 1000);
+    }, i * 20);
+  }
+}
+
+function closeLoot() {
+  document.getElementById('lootOverlay').classList.remove('open');
+  window.location.href = 'dashboard.html';
+}
+
+</script>
+
+<!-- LOOT BOX OVERLAY -->
+<div class="loot-overlay" id="lootOverlay">
+  <div class="loot-title">🏆 Kurs abgeschlossen!</div>
+  <div class="loot-sub">Wähle eine Schatztruhe – dein Bonusbelohnung wartet!</div>
+  <div class="loot-chests" id="lootChests">
+    <div class="chest" id="chest0" onclick="openChest(0)">
+      <div class="chest-body">🪙</div>
+      <div class="chest-label" id="cl0">Wähle mich!</div>
+    </div>
+    <div class="chest" id="chest1" onclick="openChest(1)">
+      <div class="chest-body">🪙</div>
+      <div class="chest-label" id="cl1">Wähle mich!</div>
+    </div>
+    <div class="chest" id="chest2" onclick="openChest(2)">
+      <div class="chest-body">🪙</div>
+      <div class="chest-label" id="cl2">Wähle mich!</div>
+    </div>
+  </div>
+  <div class="loot-result" id="lootResult" style="display:none">
+    <h2 id="lootResultTitle"></h2>
+    <p id="lootResultSub"></p>
+    <button class="loot-close-btn" onclick="closeLoot()">Weiter zum Dashboard →</button>
+  </div>
+</div>
+
+</body>
+</html>
