@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mein Dashboard – FinQuest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    @import url('https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap');
+    :root {
+      --p:#00D48A;--s:#1A1A2E;--acc:#FFD166;--hl:#FF6B6B;
+      --surf:#16213E;--surf2:#0F3460;--txt:#F0F4FF;--muted:#8892B0;
+      --border:rgba(0,212,138,0.2);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'DM Sans',sans-serif;background:var(--s);color:var(--txt);overflow-x:hidden;min-height:100vh}
+    h1,h2,h3,h4,.logo{font-family:'Clash Display','DM Sans',sans-serif}
+
+    /* ── NAVBAR ── */
+    .navbar{position:sticky;top:0;z-index:200;background:rgba(26,26,46,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+    .navbar-inner{max-width:1180px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px}
+    .logo{font-size:22px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:6px}
+    .logo-fin{color:var(--txt)}.logo-quest{color:var(--p)}
+    #nav-actions{display:flex;gap:10px;align-items:center}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:50px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;cursor:pointer;border:none;transition:transform 0.2s,box-shadow 0.2s;text-decoration:none;line-height:1}
+    .btn:hover{transform:translateY(-2px)}
+    .btn-primary{background:var(--p);color:#0a0a14}
+    .btn-primary:hover{box-shadow:0 8px 24px rgba(0,212,138,0.4)}
+    .btn-ghost{background:transparent;color:var(--txt);border:1.5px solid rgba(240,244,255,0.25)}
+    .btn-outline{background:transparent;color:var(--txt);border:1.5px solid rgba(240,244,255,0.3)}
+    .btn-shop{background:linear-gradient(135deg,rgba(255,209,102,0.15),rgba(255,209,102,0.05));border:1.5px solid rgba(255,209,102,0.4);color:var(--acc);border-radius:50px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:5px}
+    .btn-shop:hover{background:rgba(255,209,102,0.2);transform:translateY(-2px);box-shadow:0 6px 20px rgba(255,209,102,0.2)}
+
+    /* ── LAYOUT ── */
+    .page{max-width:1100px;margin:0 auto;padding:40px 24px 80px}
+
+    /* ── PROFILE HEADER ── */
+    .profile-header{background:var(--surf);border:1px solid var(--border);border-radius:24px;padding:32px;margin-bottom:28px;display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:center;position:relative;overflow:hidden}
+    .profile-header::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 90% 50%,rgba(0,212,138,0.07),transparent 60%);pointer-events:none}
+    
+    /* Avatar (clickable) */
+    .avatar-wrap{position:relative;flex-shrink:0;cursor:pointer}
+    .avatar-big{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--p),#00a06a);display:flex;align-items:center;justify-content:center;font-size:36px;border:3px solid var(--border);transition:transform 0.2s,box-shadow 0.2s;user-select:none}
+    .avatar-wrap:hover .avatar-big{transform:scale(1.06)}
+    .avatar-edit-hint{position:absolute;bottom:-4px;right:-4px;width:24px;height:24px;background:var(--p);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;border:2px solid var(--s);transition:transform 0.2s}
+    .avatar-wrap:hover .avatar-edit-hint{transform:scale(1.15)}
+
+    .profile-info h1{font-size:24px;font-weight:700;margin-bottom:4px}
+    .profile-email{font-size:14px;color:var(--muted);margin-bottom:10px}
+    .profile-badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+    .pbadge{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:50px;padding:4px 12px;font-size:12px;color:var(--muted)}
+    .pbadge.gold{border-color:rgba(255,209,102,0.3);color:var(--acc);background:rgba(255,209,102,0.06)}
+    .pbadge.green{border-color:var(--border);color:var(--p);background:rgba(0,212,138,0.06)}
+    .pbadge.special{border-color:rgba(136,207,255,0.4);color:#88CFFF;background:rgba(136,207,255,0.06);display:none}
+
+    .profile-stats{display:flex;gap:12px}
+    .pstat{text-align:center;padding:12px 18px;background:var(--surf2);border-radius:14px;border:1px solid rgba(255,255,255,0.05);cursor:default}
+    .pstat-val{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--p)}
+    .pstat-key{font-size:11px;color:var(--muted);margin-top:2px}
+    /* XP stat gets special color */
+    .pstat.xp-stat .pstat-val{color:var(--acc)}
+
+    /* ── XP BAR ── */
+    .xp-section{margin-bottom:28px}
+    .xp-bar-wrap{background:var(--surf);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:8px}
+    .xp-top{display:flex;justify-content:space-between;align-items:center}
+    .xp-label-txt{font-size:13px;color:var(--muted)}
+    .xp-val{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--p);font-weight:700}
+    .xp-track{height:10px;background:var(--surf2);border-radius:5px;overflow:hidden}
+    .xp-fill{height:100%;background:linear-gradient(90deg,var(--p),#00ffaa);border-radius:5px;transition:width 1.2s cubic-bezier(0.22,1,0.36,1)}
+    .level-label{font-size:12px;color:var(--muted);text-align:right}
+    .xp-bottom{display:flex;justify-content:space-between;align-items:center}
+    .xp-coins{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--acc);font-weight:600;font-family:'JetBrains Mono',monospace}
+
+    /* ── TABS ── */
+    .tab-nav{display:flex;gap:4px;background:var(--surf);border:1px solid rgba(255,255,255,0.06);border-radius:16px;padding:6px;margin-bottom:24px}
+    .tab-btn{flex:1;padding:10px 16px;border:none;background:transparent;color:var(--muted);font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;border-radius:12px;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px}
+    .tab-btn.active{background:var(--surf2);color:var(--txt);box-shadow:0 2px 8px rgba(0,0,0,0.3)}
+    .tab-btn:hover:not(.active){color:var(--txt);background:rgba(255,255,255,0.04)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+
+    /* ── DASH GRID ── */
+    .dash-grid{display:grid;grid-template-columns:2fr 1fr;gap:24px}
+    .section-title{font-size:18px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+    .course-row{display:flex;flex-direction:column;gap:12px}
+    .dc-card{background:var(--surf);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:18px 20px;display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--txt);transition:transform 0.2s,box-shadow 0.2s,border-color 0.2s;cursor:pointer}
+    .dc-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,0,0,0.25);border-color:var(--border)}
+    .dc-card.started{border-color:rgba(0,212,138,0.25)}
+    .dc-icon{font-size:28px;flex-shrink:0}
+    .dc-info{flex:1}
+    .dc-title{font-size:14px;font-weight:600;margin-bottom:4px}
+    .dc-sub{font-size:12px;color:var(--muted)}
+    .dc-prog-wrap{width:80px}
+    .dc-pct{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--p);text-align:right;margin-bottom:3px}
+    .dc-bar{height:4px;background:var(--surf2);border-radius:2px;overflow:hidden}
+    .dc-bar-fill{height:100%;background:var(--p);border-radius:2px;transition:width 0.6s}
+
+    /* ── SIDEBAR ── */
+    .sidebar{display:flex;flex-direction:column;gap:20px}
+    .widget{background:var(--surf);border:1px solid rgba(255,255,255,0.06);border-radius:20px;padding:22px}
+    .widget-title{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+    .streak-big{text-align:center;padding:12px 0}
+    .streak-num{font-family:'JetBrains Mono',monospace;font-size:52px;font-weight:700;color:var(--hl);line-height:1}
+    .streak-label{font-size:12px;color:var(--muted);margin-top:4px}
+    .streak-days{display:flex;justify-content:center;gap:6px;margin-top:14px}
+    .sday{width:28px;height:28px;border-radius:50%;background:var(--surf2);border:1.5px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--muted);font-weight:600}
+    .sday.done{background:rgba(255,107,107,0.15);border-color:rgba(255,107,107,0.4);color:var(--hl)}
+
+    /* Daily Challenge */
+    .challenge-card{background:linear-gradient(135deg,rgba(0,212,138,0.08),rgba(0,212,138,0.02));border:1px solid var(--border);border-radius:14px;padding:14px;margin-top:4px;cursor:pointer;transition:all 0.2s}
+    .challenge-card:hover{background:rgba(0,212,138,0.12);transform:translateY(-2px)}
+    .challenge-card.done-ch{background:rgba(0,212,138,0.15);border-color:rgba(0,212,138,0.5);cursor:default}
+    .ch-title{font-size:13px;font-weight:600;margin-bottom:4px}
+    .ch-desc{font-size:11px;color:var(--muted);margin-bottom:10px}
+    .ch-reward{font-size:11px;color:var(--acc);font-weight:700;display:flex;align-items:center;gap:4px}
+    .ch-start-btn{width:100%;padding:8px;background:var(--p);color:#0a0a14;border:none;border-radius:8px;font-weight:700;font-size:12px;cursor:pointer;transition:opacity 0.2s;margin-top:8px}
+    .ch-start-btn:hover{opacity:0.85}
+    .ch-done-label{text-align:center;font-size:12px;color:var(--p);font-weight:600;padding-top:4px}
+
+    /* ── ACHIEVEMENTS TAB ── */
+    .ach-grid-big{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+    .ach-card{background:var(--surf);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:16px 12px;text-align:center;transition:transform 0.2s,border-color 0.2s}
+    .ach-card:hover:not(.locked){transform:translateY(-3px);border-color:var(--border)}
+    .ach-card.locked{opacity:0.3;filter:grayscale(1)}
+    .ach-card.unlocked{border-color:rgba(0,212,138,0.3);background:rgba(0,212,138,0.04)}
+    .ach-emoji-big{font-size:36px;display:block;margin-bottom:8px}
+    .ach-name-big{font-size:12px;font-weight:600;margin-bottom:4px}
+    .ach-xp{font-size:11px;color:var(--p);font-weight:700}
+
+    /* ── SHOP TAB ── */
+    .shop-header{background:var(--surf);border:1px solid rgba(255,209,102,0.2);border-radius:20px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+    .shop-balance{display:flex;align-items:center;gap:10px}
+    .shop-bal-label{font-size:13px;color:var(--muted)}
+    .shop-bal-val{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;color:var(--acc)}
+    .shop-bal-unit{font-size:13px;color:var(--acc);font-weight:600;margin-left:4px}
+    .shop-desc{font-size:12px;color:var(--muted);max-width:280px}
+
+    .shop-cats{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap}
+    .shop-cat{padding:7px 16px;border-radius:50px;border:1.5px solid rgba(255,255,255,0.1);background:transparent;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif}
+    .shop-cat.active{background:rgba(0,212,138,0.1);border-color:var(--border);color:var(--p)}
+    .shop-cat:hover:not(.active){color:var(--txt);border-color:rgba(255,255,255,0.2)}
+
+    .shop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px}
+    .shop-item{background:var(--surf);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:18px;text-align:center;transition:transform 0.2s,border-color 0.2s;position:relative;overflow:hidden}
+    .shop-item:hover{transform:translateY(-4px);border-color:rgba(255,255,255,0.15)}
+    .shop-item.owned{border-color:rgba(0,212,138,0.3);background:rgba(0,212,138,0.04)}
+    .shop-item.equipped{border-color:var(--p);background:rgba(0,212,138,0.08)}
+    .shop-item.cant-afford{opacity:0.55}
+    .shop-owned-badge{position:absolute;top:8px;right:8px;background:var(--p);color:#0a0a14;font-size:9px;font-weight:700;padding:2px 7px;border-radius:50px}
+    .shop-equipped-badge{position:absolute;top:8px;right:8px;background:var(--acc);color:#0a0a14;font-size:9px;font-weight:700;padding:2px 7px;border-radius:50px}
+    .shop-preview{font-size:40px;height:64px;display:flex;align-items:center;justify-content:center;margin-bottom:12px}
+    .shop-preview.avatar-prev{width:60px;height:60px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:30px;background:linear-gradient(135deg,var(--p),#00a06a)}
+    .shop-preview.frame-prev{width:60px;height:60px;border-radius:50%;margin:0 auto 12px;background:linear-gradient(135deg,var(--p),#00a06a);display:flex;align-items:center;justify-content:center;font-size:24px}
+    .shop-preview.bg-prev{width:60px;height:60px;border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:22px}
+    .shop-item-name{font-size:14px;font-weight:700;margin-bottom:4px}
+    .shop-item-desc{font-size:11px;color:var(--muted);margin-bottom:12px}
+    .shop-item-cost{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--acc);font-weight:700;display:flex;align-items:center;justify-content:center;gap:4px;margin-bottom:10px}
+    .shop-buy-btn{width:100%;padding:8px 0;border-radius:8px;border:none;font-weight:700;font-size:12px;cursor:pointer;transition:all 0.2s;font-family:'DM Sans',sans-serif}
+    .shop-buy-btn.buy{background:var(--p);color:#0a0a14}
+    .shop-buy-btn.buy:hover{box-shadow:0 4px 12px rgba(0,212,138,0.4)}
+    .shop-buy-btn.equip{background:rgba(255,209,102,0.15);color:var(--acc);border:1.5px solid rgba(255,209,102,0.4)}
+    .shop-buy-btn.equip:hover{background:rgba(255,209,102,0.25)}
+    .shop-buy-btn.equipped-btn{background:transparent;color:var(--muted);border:1.5px solid rgba(255,255,255,0.1);cursor:default}
+    .shop-buy-btn.no-xp{background:rgba(255,255,255,0.05);color:var(--muted);cursor:not-allowed}
+
+    /* ── AVATAR MODAL ── */
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px);opacity:0;pointer-events:none;transition:opacity 0.25s}
+    .modal-overlay.open{opacity:1;pointer-events:all}
+    .modal{background:var(--surf);border:1px solid rgba(255,255,255,0.1);border-radius:24px;width:100%;max-width:480px;padding:28px;transform:translateY(20px);transition:transform 0.25s;max-height:90vh;overflow-y:auto}
+    .modal-overlay.open .modal{transform:translateY(0)}
+    .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+    .modal-title{font-size:20px;font-weight:700}
+    .modal-close{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,0.07);border:none;color:var(--txt);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s}
+    .modal-close:hover{background:rgba(255,255,255,0.14)}
+
+    .modal-section{margin-bottom:20px}
+    .modal-section-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:12px}
+
+    /* Avatar Preview in modal */
+    .av-modal-preview{display:flex;justify-content:center;margin-bottom:24px}
+    .av-modal-preview-inner{width:90px;height:90px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:42px;border:3px solid var(--border);transition:all 0.3s;background:linear-gradient(135deg,var(--p),#00a06a)}
+
+    /* Emoji picker */
+    .emoji-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+    .em-btn{width:100%;aspect-ratio:1;border-radius:10px;background:var(--surf2);border:2px solid transparent;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.15s}
+    .em-btn:hover{background:rgba(255,255,255,0.08);transform:scale(1.1)}
+    .em-btn.selected{border-color:var(--p);background:rgba(0,212,138,0.12)}
+    .em-btn.locked-em{opacity:0.3;cursor:not-allowed;position:relative}
+    .em-btn.locked-em::after{content:'🔒';font-size:10px;position:absolute;bottom:2px;right:2px}
+
+    /* Frame picker */
+    .frame-grid{display:flex;gap:10px;flex-wrap:wrap}
+    .fr-btn{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--p),#00a06a);display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;transition:all 0.2s;border:3px solid transparent;position:relative}
+    .fr-btn.selected{outline:2px solid var(--p);outline-offset:3px}
+    .fr-btn.locked-fr{opacity:0.3;cursor:not-allowed}
+    .fr-btn .fr-lock{position:absolute;bottom:-2px;right:-2px;font-size:10px}
+
+    /* ── PREMIUM BANNER ── */
+    .premium-banner{background:linear-gradient(135deg,rgba(255,209,102,0.1),rgba(255,209,102,0.04));border:1px solid rgba(255,209,102,0.3);border-radius:20px;padding:24px;margin-bottom:28px;display:flex;align-items:center;gap:20px}
+    .premium-banner.hidden{display:none}
+    .prem-text h3{font-size:16px;font-weight:700;margin-bottom:4px}
+    .prem-text p{font-size:13px;color:var(--muted)}
+    .btn-premium{background:linear-gradient(135deg,var(--acc),#ffb700);color:#0a0a14;padding:11px 22px;border-radius:50px;font-weight:700;font-size:13px;text-decoration:none;white-space:nowrap;display:inline-flex;border:none;cursor:pointer;transition:transform 0.2s}
+    .btn-premium:hover{transform:translateY(-2px)}
+
+    /* ── TOAST ── */
+    .toast{position:fixed;bottom:28px;right:28px;z-index:999;background:var(--surf);border:1px solid var(--border);border-radius:14px;padding:14px 20px;display:flex;align-items:center;gap:10px;box-shadow:0 12px 32px rgba(0,0,0,0.4);transform:translateY(80px);opacity:0;transition:all 0.35s cubic-bezier(0.22,1,0.36,1);pointer-events:none;max-width:320px}
+    .toast.show{transform:translateY(0);opacity:1}
+    .toast-icon{font-size:22px;flex-shrink:0}
+    .toast-msg{font-size:13px;font-weight:600;line-height:1.4}
+    .toast-sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+    /* ── SIDEBAR MINI ACHIEVEMENTS ── */
+    .ach-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+    .ach-item{background:var(--surf2);border-radius:12px;padding:10px;text-align:center;border:1px solid rgba(255,255,255,0.04)}
+    .ach-item.locked{opacity:0.25;filter:grayscale(1)}
+    .ach-emoji{font-size:22px;display:block;margin-bottom:4px}
+    .ach-name{font-size:9px;color:var(--muted);line-height:1.3}
+
+    /* ── LIVE LEADERBOARD ── */
+    .lb-widget{display:flex;flex-direction:column;gap:0}
+    .lb-row{display:grid;grid-template-columns:28px 28px 1fr auto;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.04);transition:background .15s}
+    .lb-row:last-child{border-bottom:none}
+    .lb-row.lb-me{background:rgba(0,212,138,0.06);border-radius:10px;padding:9px 8px;margin:0 -8px}
+    .lb-rank{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--muted);text-align:center}
+    .lb-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--p),#00a06a);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+    .lb-info{min-width:0}
+    .lb-name{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .lb-lvl{font-size:10px;color:var(--muted)}
+    .lb-xp{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--p);font-weight:700;white-space:nowrap}
+    .lb-empty{text-align:center;padding:20px 0;color:var(--muted);font-size:12px}
+    .lb-refresh{font-size:10px;color:var(--muted);text-align:right;margin-top:6px;display:flex;align-items:center;justify-content:flex-end;gap:5px}
+    .lb-dot{width:6px;height:6px;border-radius:50%;background:var(--p);animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+    @keyframes lb-bump{0%{background:rgba(0,212,138,0.2)}100%{background:transparent}}
+    .lb-row.bumped{animation:lb-bump 1.4s ease forwards}
+
+    /* ── ANIMATIONS ── */
+    @keyframes pop{0%{transform:scale(0.8)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+    @keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+    .animate-pop{animation:pop 0.4s ease forwards}
+
+    /* ── RESPONSIVE ── */
+    @media(max-width:768px){
+      .dash-grid{grid-template-columns:1fr}
+      .profile-header{grid-template-columns:auto 1fr;grid-template-rows:auto auto}
+      .profile-stats{grid-column:1/-1;justify-content:flex-start;flex-wrap:wrap}
+      .pstat{padding:10px 14px}
+      .shop-header{flex-direction:column;align-items:flex-start;gap:10px}
+      .tab-btn span.tab-label{display:none}
+    }
+  </style>
+</head>
+<body>
+
+<!-- AVATAR MODAL -->
+<div class="modal-overlay" id="avatar-modal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title">✏️ Avatar anpassen</div>
+      <button class="modal-close" onclick="closeAvatarModal()">✕</button>
+    </div>
+
+    <!-- Live preview -->
+    <div class="av-modal-preview">
+      <div class="av-modal-preview-inner" id="av-preview">😊</div>
+    </div>
+
+    <!-- Emoji auswählen -->
+    <div class="modal-section">
+      <div class="modal-section-title">Emoji wählen</div>
+      <div class="emoji-grid" id="emoji-grid"></div>
+    </div>
+
+    <!-- Rahmen auswählen -->
+    <div class="modal-section">
+      <div class="modal-section-title">Rahmen wählen</div>
+      <div class="frame-grid" id="frame-grid-modal"></div>
+    </div>
+
+    <!-- Hintergrund auswählen -->
+    <div class="modal-section">
+      <div class="modal-section-title">Hintergrundfarbe</div>
+      <div class="frame-grid" id="bg-grid-modal"></div>
+    </div>
+
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px" onclick="saveAvatar()">💾 Speichern</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-icon" id="toast-icon">✅</div>
+  <div>
+    <div class="toast-msg" id="toast-msg"></div>
+    <div class="toast-sub" id="toast-sub"></div>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<!-- MAIN PAGE (logged in) -->
+<div class="page" id="page-content" style="display:none">
+
+  <!-- PREMIUM BANNER -->
+  <div class="premium-banner" id="premium-banner">
+    <div style="font-size:36px">⭐</div>
+    <div class="prem-text">
+      <h3>Werde FinQuest Premium</h3>
+      <p>Lerne ohne Werbung, schalte exklusive Kurse frei und erhalte doppelte FinCoins.</p>
+    </div>
+    <a href="premium.html" class="btn-premium">Premium testen →</a>
+  </div>
+
+  <!-- PROFIL HEADER -->
+  <div class="profile-header">
+    <div class="avatar-wrap" onclick="openAvatarModal()" title="Avatar anpassen">
+      <div class="avatar-big" id="avatar">😊</div>
+      <div class="avatar-edit-hint">✏️</div>
+    </div>
+    <div class="profile-info">
+      <h1 id="user-name">Lade...</h1>
+      <div class="profile-email" id="user-email"></div>
+      <div class="profile-badges">
+        <span class="pbadge green" id="badge-level">⚡ Level 1</span>
+        <span class="pbadge gold" id="badge-streak">🔥 1 Tage Streak</span>
+        <span class="pbadge" id="badge-member">📅 Seit heute</span>
+        <span class="pbadge special" id="badge-title"></span>
+      </div>
+    </div>
+    <div class="profile-stats">
+      <div class="pstat xp-stat"><div class="pstat-val" id="stat-xp">0</div><div class="pstat-key">Gesamt XP</div></div>
+      <div class="pstat"><div class="pstat-val" id="stat-xp-free" style="color:var(--acc)">0</div><div class="pstat-key">XP verfügbar</div></div>
+      <div class="pstat"><div class="pstat-val" id="stat-fincoins" style="color:#bb8aff">0</div><div class="pstat-key">💜 FinCoins</div></div>
+      <div class="pstat"><div class="pstat-val" id="stat-courses">0</div><div class="pstat-key">Kurse aktiv</div></div>
+      <div class="pstat"><div class="pstat-val" id="stat-lessons">0</div><div class="pstat-key">Lektionen ✅</div></div>
+    </div>
+  </div>
+
+  <!-- XP BAR -->
+  <div class="xp-section">
+    <div class="xp-bar-wrap">
+      <div class="xp-top">
+        <span class="xp-label-txt" id="xp-level-label">Level 1 – Finanz-Einsteiger</span>
+        <span class="xp-val" id="xp-bar-val">0 / 500 XP</span>
+      </div>
+      <div class="xp-track"><div class="xp-fill" id="xp-bar-fill" style="width:0%"></div></div>
+      <div class="xp-bottom">
+        <div class="xp-coins">🪙 <span id="xp-free-display">0</span> XP verfügbar für Shop</div>
+        <div class="level-label" id="xp-next-label">Noch 500 XP bis Level 2</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB NAVIGATION -->
+  <div class="tab-nav">
+    <button class="tab-btn active" id="tab-kurse" onclick="switchTab('kurse')">📚 <span class="tab-label">Meine Kurse</span></button>
+    <button class="tab-btn" id="tab-shop" onclick="switchTab('shop')">🛍️ <span class="tab-label">XP-Shop</span></button>
+    <button class="tab-btn" id="tab-achievements" onclick="switchTab('achievements')">🏅 <span class="tab-label">Erfolge</span></button>
+    <button class="tab-btn" id="tab-challenges" onclick="window.location.href='challenges.html'" style="position:relative;">
+      🎯 <span class="tab-label">Challenges</span>
+      <span id="challenges-badge" style="display:none;position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:#FFD166;animation:pulse 2s infinite;display:block;"></span>
+    </button>
+    <button class="tab-btn" id="tab-livequiz" onclick="window.location.href='multiplayer.html'" style="position:relative;">
+      🎮 <span class="tab-label">Live-Quiz</span>
+      <span style="position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--hl,#FF6B6B);animation:pulse 2s infinite;display:block;"></span>
+    </button>
+  </div>
+
+  <!-- TAB: KURSE -->
+  <div class="tab-panel active" id="panel-kurse">
+    <div class="dash-grid">
+      <div>
+        <div class="section-title">📚 Meine Kurse</div>
+        <div class="course-row" id="course-row"></div>
+      </div>
+      <div class="sidebar">
+        <!-- Streak -->
+        <div class="widget">
+          <div class="widget-title">🔥 Lern-Streak</div>
+          <div class="streak-big">
+            <div class="streak-num" id="streak-num">1</div>
+            <div class="streak-label">Tage in Folge</div>
+          </div>
+          <div class="streak-days" id="streak-days"></div>
+        </div>
+        <!-- Daily Challenge -->
+        <div class="widget">
+          <div class="widget-title">⚡ Tages-Challenge</div>
+          <div id="daily-challenge-area"></div>
+        </div>
+        <!-- Mini Achievements -->
+        <div class="widget">
+          <div class="widget-title" style="justify-content:space-between">
+            <span>🏅 Achievements</span>
+            <button onclick="switchTab('achievements')" style="background:none;border:none;color:var(--p);font-size:12px;cursor:pointer;font-weight:600">Alle →</button>
+          </div>
+          <div class="ach-grid" id="ach-grid"></div>
+        </div>
+      </div>
+        <!-- Live Rangliste -->
+        <div class="widget">
+          <div class="widget-title" style="justify-content:space-between">
+            <span>🏆 Rangliste</span>
+            <a href="challenges.html" style="background:none;border:none;color:var(--p);font-size:12px;cursor:pointer;font-weight:600;text-decoration:none">Challenges →</a>
+          </div>
+          <div class="lb-widget" id="lb-widget"></div>
+          <div class="lb-refresh"><span class="lb-dot"></span><span id="lb-last-update">Live</span></div>
+        </div>
+        <!-- Live-Quiz Banner -->
+        <div class="widget" style="background:linear-gradient(135deg,rgba(0,212,138,0.07),rgba(15,52,96,0.6));border-color:var(--border);position:relative;overflow:hidden;cursor:pointer;" onclick="window.location.href='multiplayer.html'">
+          <div style="position:absolute;top:-20px;right:-10px;font-size:80px;opacity:0.07;pointer-events:none;line-height:1;">🎮</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+            <span style="background:var(--hl);color:#fff;font-size:10px;font-weight:700;padding:2px 8px;border-radius:50px;letter-spacing:.04em;text-transform:uppercase;">Neu</span>
+            <span style="font-size:13px;font-weight:700;">Live-Quiz</span>
+          </div>
+          <p style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:14px;">Starte ein Multiplayer-Quiz und teste dein Finanzwissen gegen echte Spieler – live und in Echtzeit.</p>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;gap:6px;">
+              <span style="background:rgba(0,212,138,0.1);border:1px solid var(--border);border-radius:50px;padding:3px 10px;font-size:11px;color:var(--p);font-weight:600;">⚡ Zeitbasiert</span>
+              <span style="background:rgba(255,209,102,0.08);border:1px solid rgba(255,209,102,0.2);border-radius:50px;padding:3px 10px;font-size:11px;color:var(--acc);font-weight:600;">🏆 Leaderboard</span>
+            </div>
+            <span style="font-size:18px;">→</span>
+          </div>
+        </div>
+    </div>
+  </div>
+
+  <!-- TAB: SHOP -->
+  <div class="tab-panel" id="panel-shop">
+    <div class="shop-header">
+      <div class="shop-balance">
+        <div>
+          <div class="shop-bal-label">Dein XP-Guthaben</div>
+          <div style="display:flex;align-items:baseline;gap:4px">
+            <div class="shop-bal-val" id="shop-xp-display">0</div>
+            <div class="shop-bal-unit">XP</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="shop-bal-label" style="font-size:12px;color:var(--muted)">Deine FinCoins</div>
+        <div style="display:flex;align-items:baseline;gap:4px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:700;color:#bb8aff" id="shop-coins-display">0</div>
+          <div style="font-size:13px;color:#bb8aff;font-weight:600">💜</div>
+        </div>
+      </div>
+      <div class="shop-desc">Verdiene XP &amp; FinCoins durch Kurse und Challenges! 🎨</div>
+    </div>
+
+    <div class="shop-cats">
+      <button class="shop-cat active" onclick="filterShop('all')">✨ Alle</button>
+      <button class="shop-cat" onclick="filterShop('frame')">🖼️ Rahmen</button>
+      <button class="shop-cat" onclick="filterShop('bg')">🎨 Hintergründe</button>
+      <button class="shop-cat" onclick="filterShop('title')">🏷️ Titel</button>
+      <button class="shop-cat" onclick="filterShop('avatar')">🐾 Avatare</button>
+    </div>
+
+    <div class="shop-grid" id="shop-grid"></div>
+  </div>
+
+  <!-- TAB: ACHIEVEMENTS -->
+  <div class="tab-panel" id="panel-achievements">
+    <div class="section-title">🏅 Alle Erfolge</div>
+    <div class="ach-grid-big" id="ach-grid-big"></div>
+  </div>
+
+</div>
+
+<!-- NICHT EINGELOGGT -->
+<div class="page" id="page-login" style="display:none;text-align:center;padding-top:80px">
+  <div style="font-size:64px;margin-bottom:20px">🔒</div>
+  <h2 style="font-size:28px;margin-bottom:12px">Bitte einloggen</h2>
+  <p style="color:var(--muted);margin-bottom:28px">Du musst eingeloggt sein, um dein Dashboard zu sehen.</p>
+  <button onclick="FQ.openAuth('login')" class="btn btn-primary" style="font-size:16px;padding:16px 32px">Jetzt einloggen →</button>
+</div>
+
+<!-- FIREBASE FETCH LOGIC -->
+<script>
+  // Wenn Firebase bereit ist: Nutzerdaten aus Firestore holen und Dashboard neu rendern
+  window.addEventListener('firebaseLoaded', async () => {
+    // Leaderboard laden
+    if (typeof renderLeaderboard === 'function') renderLeaderboard();
+
+    // Aktuellen User aus Firestore nachladen (frische Daten überschreiben localStorage)
+    try {
+      const email = localStorage.getItem('fq_current_user');
+      if (email && window.FirebaseAuth && window.FirebaseAuth.auth) {
+        const fbUser = window.FirebaseAuth.auth.currentUser;
+        if (fbUser && window.fetchUserFromFirestore) {
+          const fsData = await window.fetchUserFromFirestore(fbUser.uid);
+          if (fsData) {
+            const users = JSON.parse(localStorage.getItem('fq_users') || '{}');
+            if (users[email]) {
+              // Firestore-Daten sind die Source of Truth – lokal überschreiben
+              users[email].totalXP        = fsData.xp            || users[email].totalXP || 0;
+              users[email].finCoins       = fsData.finCoins      || users[email].finCoins || 0;
+              users[email].progress       = fsData.progress      || users[email].progress || {};
+              users[email].streak         = fsData.streak        || users[email].streak || 0;
+              users[email].learnHistory   = fsData.learnHistory  || users[email].learnHistory || [];
+              users[email].cosmetics      = fsData.cosmetics     || users[email].cosmetics || { avatar:'😊', frame:null, bg:null, title:null, owned:[] };
+              users[email].claimedRewards = fsData.claimedRewards || users[email].claimedRewards || {};
+              users[email].spentXP        = fsData.spentXP       || users[email].spentXP || 0;
+              localStorage.setItem('fq_users', JSON.stringify(users));
+              // Kosmetika-Cache aktualisieren
+              if (users[email].cosmetics) {
+                localStorage.setItem('fq_cosmetics', JSON.stringify(users[email].cosmetics));
+              }
+              // Dashboard neu rendern mit frischen Daten
+              if (typeof render === 'function') render();
+            }
+          }
+        }
+      }
+    } catch(e) { console.warn('Firestore User-Sync Fehler:', e); }
+  });
+
+  // Live-Quiz Button in der Navbar ergänzen, sobald DOM fertig
+  document.addEventListener('DOMContentLoaded', () => {
+    function injectQuizNavBtn() {
+      const navActions = document.getElementById('nav-actions');
+      if (!navActions) return;
+      if (document.getElementById('nav-quiz-btn')) return; // already injected
+      const btn = document.createElement('a');
+      btn.id = 'nav-quiz-btn';
+      btn.href = 'multiplayer.html';
+      btn.style.cssText = 'display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:50px;background:rgba(255,107,107,0.1);border:1.5px solid rgba(255,107,107,0.35);color:#FF6B6B;font-family:"DM Sans",sans-serif;font-size:13px;font-weight:700;text-decoration:none;transition:all .2s;white-space:nowrap;';
+      btn.innerHTML = '🎮 Live-Quiz';
+      btn.onmouseenter = () => { btn.style.background='rgba(255,107,107,0.2)'; btn.style.transform='translateY(-1px)'; };
+      btn.onmouseleave = () => { btn.style.background='rgba(255,107,107,0.1)'; btn.style.transform=''; };
+      navActions.prepend(btn);
+    }
+    // Try immediately, then retry after components.js may have loaded the navbar
+    injectQuizNavBtn();
+    setTimeout(injectQuizNavBtn, 800);
+    setTimeout(injectQuizNavBtn, 2000);
+  });
+</script>
+
+
+
+<script type="module" src="firebase-init.js"></script>
+<script src="components.js"></script>
+<script src="auth.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════════════════════ */
+const COURSES = [
+  { key:'kurs-geld101',    icon:'🐣', title:'Geld 101',               file:'kurs-geld101.html',    total:20  },
+  { key:'kurs-schulden',   icon:'💳', title:'Schulden & Kredit',      file:'kurs-schulden.html',   total:20 },
+  { key:'kurs-investieren',icon:'📈', title:'Investieren für Anfänger',file:'kurs-investieren.html',total:20 },
+  { key:'kurs-immobilien', icon:'🏠', title:'Immobilien verstehen',   file:'kurs-immobilien.html', total:20  },
+  { key:'kurs-steuern',    icon:'🧾', title:'Steuern einfach erklärt',file:'kurs-steuern.html',    total:20  },
+  { key:'kurs-fire',       icon:'🔥', title:'FIRE-Bewegung',          file:'kurs-fire.html',       total:20 },
+  { key:'kurs-rente',      icon:'🏖️', title:'Rente & Altersvorsorge', file:'kurs-rente.html',      total:20  },
+  { key:'kurs-zinseszins', icon:'📈', title:'Zinseszins',             file:'kurs-zinseszins.html', total:20  },
+  { key:'kurs-etf',        icon:'🌍', title:'ETFs verstehen & nutzen',file:'kurs-etf.html',        total:20  }
+];
+
+const LEVELS = [
+  {name:'Finanz-Einsteiger',xp:0},
+  {name:'Geldlehrling',xp:500},
+  {name:'Budget-Ninja',xp:1200},
+  {name:'Investitions-Profi',xp:2500},
+  {name:'Steuer-Meister',xp:4000},
+  {name:'FIRE-Champion',xp:6000}
+];
+
+const ACHIEVEMENTS = [
+  {emoji:'🐣', name:'Erste Lektion',  xp:'+50 XP',  condition: u => Object.values(u.progress||{}).some(a=>a.length>=1)},
+  {emoji:'🔥', name:'3-Tage Streak', xp:'+100 XP', condition: u => (u.streak||0) >= 3},
+  {emoji:'📚', name:'10 Lektionen',  xp:'+150 XP', condition: u => Object.values(u.progress||{}).reduce((s,a)=>s+a.length,0) >= 10},
+  {emoji:'⚡', name:'500 XP',        xp:'Milestone',condition: u => (u.totalXP||0) >= 500},
+  {emoji:'🏆', name:'Kurs komplett', xp:'+200 XP', condition: u => COURSES.some(c=>(u.progress||{})[c.key]?.length>=c.total)},
+  {emoji:'🌍', name:'3 Kurse aktiv', xp:'+100 XP', condition: u => Object.keys(u.progress||{}).filter(k=>u.progress[k].length>0).length >= 3},
+  {emoji:'💎', name:'2000 XP',       xp:'Milestone',condition: u => (u.totalXP||0) >= 2000},
+  {emoji:'🚀', name:'Alle Kurse',    xp:'+500 XP', condition: u => COURSES.every(c=>(u.progress||{})[c.key]?.length>=c.total)},
+  {emoji:'⭐', name:'Level 3',       xp:'Milestone',condition: u => (u.totalXP||0) >= 1200},
+  {emoji:'💰', name:'Erster Kauf',   xp:'Shop',    condition: u => (getSpentXP()>0)},
+  {emoji:'🎨', name:'Avatar gesetzt',xp:'Style',   condition: u => (getCosm().avatar !== '😊')},
+  {emoji:'🥇', name:'Top Streak 7',  xp:'+300 XP', condition: u => (u.streak||0) >= 7},
+];
+
+/* Shop items */
+const SHOP_ITEMS = [
+  /* ── RAHMEN ── */
+  { id:'frame-gold',    cat:'frame',  name:'Gold Rahmen',    desc:'Glänzender Goldrahmen', icon:'🏅', cost:500,
+    frameCss:'border:3px solid #FFD166 !important;box-shadow:0 0 14px rgba(255,209,102,0.55)' },
+  { id:'frame-emerald', cat:'frame',  name:'Smaragd Rahmen', desc:'Strahlendes Grün',      icon:'💚', cost:800,
+    frameCss:'border:3px solid #00D48A !important;box-shadow:0 0 16px rgba(0,212,138,0.65)' },
+  { id:'frame-fire',    cat:'frame',  name:'Feuer Rahmen',   desc:'Heiß wie die Sonne',    icon:'🔥', cost:1200,
+    frameCss:'border:3px solid #FF6B6B !important;box-shadow:0 0 18px rgba(255,107,107,0.7)' },
+  { id:'frame-diamond', cat:'frame',  name:'Diamant Rahmen', desc:'Edel & unaufhaltsam',   icon:'💎', cost:2500,
+    frameCss:'border:3px solid #88CFFF !important;box-shadow:0 0 22px rgba(136,207,255,0.8)' },
+  { id:'frame-galaxy',  cat:'frame',  name:'Galaxy Rahmen',  desc:'Kosmische Energie',     icon:'🌌', cost:3500,
+    frameCss:'border:3px solid #b48eff !important;box-shadow:0 0 24px rgba(180,142,255,0.8),0 0 48px rgba(180,142,255,0.3)' },
+
+  /* ── HINTERGRÜNDE ── */
+  { id:'bg-ocean',    cat:'bg', name:'Ozean',       desc:'Tiefes Meeresblau',    icon:'🌊', cost:300,  gradient:'linear-gradient(135deg,#0077B6,#00B4D8)' },
+  { id:'bg-fire2',    cat:'bg', name:'Feuer',        desc:'Brennende Leidenschaft',icon:'🔥',cost:450,  gradient:'linear-gradient(135deg,#FF4E00,#EC9F05)' },
+  { id:'bg-galaxy2',  cat:'bg', name:'Galaxy',       desc:'Zwischen den Sternen', icon:'🌌', cost:900,  gradient:'linear-gradient(135deg,#7B2FBE,#E040FB)' },
+  { id:'bg-midnight', cat:'bg', name:'Mitternacht',  desc:'Dunkle Eleganz',       icon:'🌙', cost:600,  gradient:'linear-gradient(135deg,#1B1464,#2980B9)' },
+  { id:'bg-forest',   cat:'bg', name:'Wald',         desc:'Natürliche Ruhe',      icon:'🌿', cost:350,  gradient:'linear-gradient(135deg,#134E5E,#71B280)' },
+  { id:'bg-sunset',   cat:'bg', name:'Sonnenuntergang',desc:'Warme Abendröte',    icon:'🌅', cost:500,  gradient:'linear-gradient(135deg,#f953c6,#b91d73)' },
+
+  /* ── TITEL ── */
+  { id:'title-ninja',   cat:'title', name:'Budget-Ninja',    desc:'Meister des Sparens',      icon:'🥷', cost:500,  badge:'🥷 Budget-Ninja' },
+  { id:'title-legend',  cat:'title', name:'Spar-Legende',    desc:'Legendärer Sparer',        icon:'💰', cost:750,  badge:'💰 Spar-Legende' },
+  { id:'title-guru',    cat:'title', name:'Finanz-Guru',     desc:'Weiser der Finanzen',      icon:'🧙', cost:1000, badge:'🧙 Finanz-Guru' },
+  { id:'title-rocket',  cat:'title', name:'Rocket Investor', desc:'Investiert wie eine Rakete',icon:'🚀',cost:1500, badge:'🚀 Rocket Investor' },
+  { id:'title-diamond', cat:'title', name:'Diamant-Investor',desc:'Der Elite-Status',         icon:'💎', cost:3000, badge:'💎 Diamant-Investor' },
+
+  /* ── SPEZIAL-AVATARE ── */
+  { id:'av-robot',   cat:'avatar', name:'Roboter',   desc:'Auf dem Mond der Finanzen', icon:'🤖', cost:400,  emoji:'🤖' },
+  { id:'av-ninja2',  cat:'avatar', name:'Ninja',     desc:'Lautlos & effizient',       icon:'🥷', cost:500,  emoji:'🥷' },
+  { id:'av-wizard',  cat:'avatar', name:'Zauberer',  desc:'Magie der Geldanlage',      icon:'🧙', cost:600,  emoji:'🧙' },
+  { id:'av-unicorn', cat:'avatar', name:'Einhorn',   desc:'Magisch selten',            icon:'🦄', cost:800,  emoji:'🦄' },
+  { id:'av-dragon',  cat:'avatar', name:'Drache',    desc:'Mächtiger Vermögenshüter',  icon:'🐲', cost:1200, emoji:'🐲' },
+  { id:'av-alien',   cat:'avatar', name:'Alien',     desc:'Aus einer anderen Galaxie', icon:'👽', cost:1500, emoji:'👽' },
+];
+
+/* Free emojis (always available) */
+const FREE_EMOJIS = ['😊','😎','🤓','🦊','🐻','🦁','🐯','🐼','🐸','🌟','💪','🧠','🎯','⚡','🏆'];
+
+/* Daily Challenges pool */
+const CHALLENGES = [
+  { id:'ch1', title:'Schnell-Lektion', desc:'Schließe eine beliebige Lektion ab', reward:'+75 XP', link:null },
+  { id:'ch2', title:'Quiz-Meister',    desc:'Beantworte 3 Fragen richtig in Folge', reward:'+50 XP', link:null },
+  { id:'ch3', title:'Neuer Kurs',      desc:'Starte einen noch nicht begonnenen Kurs', reward:'+100 XP', link:null },
+  { id:'ch4', title:'Lern-Sprint',     desc:'Schließe 2 Lektionen heute ab', reward:'+120 XP', link:null },
+];
+
+/* ═══════════════════════════════════════════════════════════
+   COSMETICS HELPERS
+═══════════════════════════════════════════════════════════ */
+// Alle Ops über FQ.* → automatisch Firestore-Sync
+function getCosm()          { return FQ.getCosmetics(); }
+function saveCosm(c)        { FQ.saveCosmetics(c); }
+function getSpentXP()       { return FQ.getSpentXP(); }
+function addSpentXP(n)      { FQ.addSpentXP(n); }
+function getFreeXP(totalXP) { return Math.max(0, totalXP - FQ.getSpentXP()); }
+
+/* Apply cosmetics to avatar element */
+function applyCosmetics(el) {
+  if (!el) return;
+  const cosm = getCosm();
+  el.textContent = cosm.avatar || '😊';
+
+  // Background
+  const bgItem = cosm.bg ? SHOP_ITEMS.find(i=>i.id===cosm.bg) : null;
+  el.style.background = bgItem ? bgItem.gradient : 'linear-gradient(135deg,var(--p),#00a06a)';
+
+  // Frame
+  const frItem = cosm.frame ? SHOP_ITEMS.find(i=>i.id===cosm.frame) : null;
+  el.style.cssText = el.style.cssText.replace(/border:[^;]+;?/g,'').replace(/box-shadow:[^;]+;?/g,'');
+  if (frItem) el.style.cssText += ';' + frItem.frameCss;
+  else el.style.border = '3px solid var(--border)';
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TABS
+═══════════════════════════════════════════════════════════ */
+function switchTab(tab) {
+  ['kurse','shop','achievements'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t===tab);
+    document.getElementById('panel-'+t).classList.toggle('active', t===tab);
+  });
+  if (tab==='shop') renderShop();
+  if (tab==='achievements') renderAchievementsBig();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════════ */
+let toastTimer;
+function showToast(icon, msg, sub='') {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-icon').textContent = icon;
+  document.getElementById('toast-msg').textContent = msg;
+  document.getElementById('toast-sub').textContent = sub;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove('show'), 3500);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   AVATAR MODAL
+═══════════════════════════════════════════════════════════ */
+let tempCosm = null;
+
+function openAvatarModal() {
+  tempCosm = {...getCosm(), owned:[...(getCosm().owned||[])]};
+  const user = FQ.getCurrentUser();
+  const freeXP = getFreeXP(user ? user.totalXP || 0 : 0);
+
+  // Unlock shop avatars if owned
+  const ownedIds = tempCosm.owned || [];
+  const shopEmojis = SHOP_ITEMS.filter(i=>i.cat==='avatar').map(i=>i.emoji);
+
+  // Build emoji grid
+  const eg = document.getElementById('emoji-grid');
+  eg.innerHTML = '';
+  const allEmojis = [...FREE_EMOJIS];
+  SHOP_ITEMS.filter(i=>i.cat==='avatar').forEach(i=>{
+    if(!allEmojis.includes(i.emoji)) allEmojis.push(i.emoji);
+  });
+  allEmojis.forEach(em => {
+    const shopItem = SHOP_ITEMS.find(i=>i.cat==='avatar' && i.emoji===em);
+    const isLocked = shopItem && !ownedIds.includes(shopItem.id);
+    const b = document.createElement('button');
+    b.className = 'em-btn' + (isLocked?' locked-em':'') + (em===tempCosm.avatar?' selected':'');
+    b.textContent = em;
+    b.title = isLocked ? `Im Shop kaufen (${shopItem.cost} XP)` : em;
+    if (!isLocked) b.onclick = () => { tempCosm.avatar = em; updateModalPreview(); eg.querySelectorAll('.em-btn').forEach(x=>x.classList.remove('selected')); b.classList.add('selected'); };
+    eg.appendChild(b);
+  });
+
+  // Frame grid
+  const fg = document.getElementById('frame-grid-modal');
+  fg.innerHTML = '';
+  // "Kein Rahmen" option
+  const noFrame = document.createElement('div');
+  noFrame.className = 'fr-btn' + (!tempCosm.frame?' selected':'');
+  noFrame.title = 'Kein Rahmen';
+  noFrame.style.cssText = 'background:var(--surf2);border:2px dashed rgba(255,255,255,0.2)';
+  noFrame.innerHTML = '<span style="font-size:12px;color:var(--muted)">∅</span>';
+  noFrame.onclick = () => { tempCosm.frame = null; updateModalPreview(); fg.querySelectorAll('.fr-btn').forEach(x=>x.classList.remove('selected')); noFrame.classList.add('selected'); };
+  fg.appendChild(noFrame);
+  SHOP_ITEMS.filter(i=>i.cat==='frame').forEach(item => {
+    const owned = ownedIds.includes(item.id);
+    const btn = document.createElement('div');
+    btn.className = 'fr-btn' + (!owned?' locked-fr':'') + (tempCosm.frame===item.id?' selected':'');
+    btn.title = owned ? item.name : `Nicht freigeschaltet (${item.cost} XP)`;
+    btn.innerHTML = `<span>${item.icon}</span>${!owned?'<span class="fr-lock">🔒</span>':''}`;
+    if (owned) {
+      btn.style.cssText = item.frameCss.replace(/!important/g,'');
+      btn.onclick = () => { tempCosm.frame = item.id; updateModalPreview(); fg.querySelectorAll('.fr-btn').forEach(x=>x.classList.remove('selected')); btn.classList.add('selected'); };
+    }
+    fg.appendChild(btn);
+  });
+
+  // BG grid
+  const bg = document.getElementById('bg-grid-modal');
+  bg.innerHTML = '';
+  const noBg = document.createElement('div');
+  noBg.className = 'fr-btn' + (!tempCosm.bg?' selected':'');
+  noBg.title = 'Standard';
+  noBg.style.cssText = 'background:linear-gradient(135deg,var(--p),#00a06a)';
+  noBg.innerHTML = '<span style="font-size:12px">✓</span>';
+  noBg.onclick = () => { tempCosm.bg = null; updateModalPreview(); bg.querySelectorAll('.fr-btn').forEach(x=>x.classList.remove('selected')); noBg.classList.add('selected'); };
+  bg.appendChild(noBg);
+  SHOP_ITEMS.filter(i=>i.cat==='bg').forEach(item => {
+    const owned = ownedIds.includes(item.id);
+    const btn = document.createElement('div');
+    btn.className = 'fr-btn' + (!owned?' locked-fr':'') + (tempCosm.bg===item.id?' selected':'');
+    btn.title = owned ? item.name : `Nicht freigeschaltet (${item.cost} XP)`;
+    btn.style.background = item.gradient;
+    btn.innerHTML = `<span>${item.icon}</span>${!owned?'<span class="fr-lock">🔒</span>':''}`;
+    if (owned) btn.onclick = () => { tempCosm.bg = item.id; updateModalPreview(); bg.querySelectorAll('.fr-btn').forEach(x=>x.classList.remove('selected')); btn.classList.add('selected'); };
+    bg.appendChild(btn);
+  });
+
+  updateModalPreview();
+  document.getElementById('avatar-modal').classList.add('open');
+}
+
+function updateModalPreview() {
+  const prev = document.getElementById('av-preview');
+  prev.textContent = tempCosm.avatar || '😊';
+  const bgItem = tempCosm.bg ? SHOP_ITEMS.find(i=>i.id===tempCosm.bg) : null;
+  prev.style.background = bgItem ? bgItem.gradient : 'linear-gradient(135deg,var(--p),#00a06a)';
+  const frItem = tempCosm.frame ? SHOP_ITEMS.find(i=>i.id===tempCosm.frame) : null;
+  if (frItem) {
+    prev.style.border = '';
+    prev.style.cssText += ';' + frItem.frameCss.replace(/!important/g,'');
+  } else {
+    prev.style.border = '3px solid var(--border)';
+    prev.style.boxShadow = '';
+  }
+  prev.classList.add('animate-pop');
+  setTimeout(()=>prev.classList.remove('animate-pop'), 400);
+}
+
+function saveAvatar() {
+  saveCosm(tempCosm);
+  closeAvatarModal();
+  applyCosmetics(document.getElementById('avatar'));
+  showToast('✅', 'Avatar gespeichert!', 'Dein neues Aussehen ist aktiv.');
+}
+
+function closeAvatarModal() { document.getElementById('avatar-modal').classList.remove('open'); }
+document.getElementById('avatar-modal').addEventListener('click', e => { if(e.target===e.currentTarget) closeAvatarModal(); });
+
+/* ═══════════════════════════════════════════════════════════
+   SHOP
+═══════════════════════════════════════════════════════════ */
+let shopFilter = 'all';
+
+function filterShop(cat) {
+  shopFilter = cat;
+  document.querySelectorAll('.shop-cat').forEach(b=>b.classList.remove('active'));
+  event.target.classList.add('active');
+  renderShop();
+}
+
+function renderShop() {
+  const user = FQ.getCurrentUser();
+  if (!user) return;
+  const totalXP = user.totalXP || 0;
+  const freeXP = getFreeXP(totalXP);
+  const cosm = getCosm();
+  const owned = cosm.owned || [];
+
+  document.getElementById('shop-xp-display').textContent = freeXP.toLocaleString('de');
+  const shopCoinsEl = document.getElementById('shop-coins-display');
+  if (shopCoinsEl) shopCoinsEl.textContent = (user.finCoins || 0).toLocaleString('de');
+
+  const items = shopFilter==='all' ? SHOP_ITEMS : SHOP_ITEMS.filter(i=>i.cat===shopFilter);
+  const grid = document.getElementById('shop-grid');
+  grid.innerHTML = '';
+
+  items.forEach(item => {
+    const isOwned = owned.includes(item.id);
+    const canAfford = freeXP >= item.cost;
+    const isEquipped = (item.cat==='frame' && cosm.frame===item.id) ||
+                       (item.cat==='bg' && cosm.bg===item.id) ||
+                       (item.cat==='title' && cosm.title===item.id) ||
+                       (item.cat==='avatar' && cosm.avatar===item.emoji);
+
+    const card = document.createElement('div');
+    card.className = `shop-item${isOwned?' owned':''}${isEquipped?' equipped':''}${!isOwned&&!canAfford?' cant-afford':''}`;
+
+    // Badge
+    let badgeHtml = '';
+    if (isEquipped) badgeHtml = '<div class="shop-equipped-badge">AN</div>';
+    else if (isOwned) badgeHtml = '<div class="shop-owned-badge">✓</div>';
+
+    // Preview
+    let previewHtml = '';
+    if (item.cat==='frame') {
+      previewHtml = `<div class="shop-preview frame-prev" style="${item.frameCss.replace(/!important/g,'')}"><span>😊</span></div>`;
+    } else if (item.cat==='bg') {
+      previewHtml = `<div class="shop-preview bg-prev" style="background:${item.gradient}"><span>😊</span></div>`;
+    } else if (item.cat==='title') {
+      previewHtml = `<div class="shop-preview"><span style="font-size:28px">${item.icon}</span></div>`;
+    } else {
+      previewHtml = `<div class="shop-preview"><span style="font-size:40px">${item.emoji}</span></div>`;
+    }
+
+    // Button
+    let btnHtml = '';
+    if (isEquipped) {
+      btnHtml = `<button class="shop-buy-btn equipped-btn">Ausgerüstet ✓</button>`;
+    } else if (isOwned) {
+      btnHtml = `<button class="shop-buy-btn equip" onclick="equipItem('${item.id}')">Anlegen →</button>`;
+    } else if (canAfford) {
+      btnHtml = `<button class="shop-buy-btn buy" onclick="buyItem('${item.id}')">Kaufen ✨</button>`;
+    } else {
+      btnHtml = `<button class="shop-buy-btn no-xp" disabled>Zu wenig XP</button>`;
+    }
+
+    card.innerHTML = `
+      ${badgeHtml}
+      ${previewHtml}
+      <div class="shop-item-name">${item.name}</div>
+      <div class="shop-item-desc">${item.desc}</div>
+      <div class="shop-item-cost">🪙 ${item.cost.toLocaleString('de')} XP</div>
+      ${btnHtml}`;
+    grid.appendChild(card);
+  });
+}
+
+function buyItem(id) {
+  const user = FQ.getCurrentUser();
+  if (!user) return;
+  const item = SHOP_ITEMS.find(i=>i.id===id);
+  if (!item) return;
+  const freeXP = getFreeXP(user.totalXP || 0);
+  if (freeXP < item.cost) { showToast('❌','Nicht genug XP','Verdiene mehr XP durch Lektionen!'); return; }
+
+  const cosm = getCosm();
+  if (!cosm.owned) cosm.owned = [];
+  cosm.owned.push(id);
+  saveCosm(cosm);
+  addSpentXP(item.cost);
+
+  // Auto-equip
+  equipItem(id, true);
+
+  showToast('🎉', item.name + ' gekauft!', `${item.cost} XP ausgegeben.`);
+  renderShop();
+
+  // Update stats
+  const freeXPNew = getFreeXP(user.totalXP || 0);
+  document.getElementById('stat-xp-free').textContent = freeXPNew.toLocaleString('de');
+  document.getElementById('xp-free-display').textContent = freeXPNew.toLocaleString('de');
+  document.getElementById('shop-xp-display').textContent = freeXPNew.toLocaleString('de');
+}
+
+function equipItem(id, silent=false) {
+  const item = SHOP_ITEMS.find(i=>i.id===id);
+  if (!item) return;
+  const cosm = getCosm();
+
+  if (item.cat==='frame')  cosm.frame = id;
+  else if (item.cat==='bg') cosm.bg = id;
+  else if (item.cat==='title') { cosm.title = id; updateTitle(); }
+  else if (item.cat==='avatar') cosm.avatar = item.emoji;
+
+  saveCosm(cosm);
+  applyCosmetics(document.getElementById('avatar'));
+  if (!silent) showToast('✨', item.name + ' angelegt!', '');
+  renderShop();
+}
+
+function updateTitle() {
+  const cosm = getCosm();
+  const badge = document.getElementById('badge-title');
+  if (cosm.title) {
+    const item = SHOP_ITEMS.find(i=>i.id===cosm.title);
+    if (item) { badge.textContent = item.badge; badge.style.display='inline-flex'; }
+  } else {
+    badge.style.display='none';
+  }
+  
+  // Try to sync to firestore so leaderboards instantly show the name
+  if (typeof window.syncUserToFirestore === 'function') {
+     window.syncUserToFirestore();
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ACHIEVEMENTS (big tab)
+═══════════════════════════════════════════════════════════ */
+function renderAchievementsBig() {
+  const user = FQ.getCurrentUser();
+  if (!user) return;
+  const ag = document.getElementById('ach-grid-big');
+  ag.innerHTML = '';
+  ACHIEVEMENTS.forEach(a => {
+    const unlocked = a.condition(user);
+    const div = document.createElement('div');
+    div.className = `ach-card${unlocked?' unlocked':' locked'}`;
+    div.innerHTML = `<span class="ach-emoji-big">${a.emoji}</span>
+      <div class="ach-name-big">${a.name}</div>
+      <div class="ach-xp">${a.xp}</div>
+      ${!unlocked?'<div style="font-size:10px;color:var(--muted);margin-top:4px">🔒 Noch gesperrt</div>':''}`;
+    ag.appendChild(div);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   DAILY CHALLENGE
+═══════════════════════════════════════════════════════════ */
+function renderDailyChallenge() {
+  const today = new Date().toISOString().slice(0,10);
+  const challengeId = 'daily_dashboard_' + today;
+  const ch = CHALLENGES[new Date().getDate() % CHALLENGES.length];
+
+  // Prüfe ob heute gelernt wurde (via learnHistory in Firestore-gesynctem User)
+  const freshUser = FQ.getCurrentUser();
+  const learnHistory = freshUser ? (freshUser.learnHistory || []) : [];
+  const learnedToday = learnHistory.includes(today);
+  const isClaimed = FQ.isChallengeRewardClaimed(challengeId);
+
+  const area = document.getElementById('daily-challenge-area');
+  if (isClaimed) {
+    area.innerHTML = `<div class="challenge-card done-ch">
+      <div class="ch-title">${ch.title} ✅</div>
+      <div class="ch-desc">${ch.desc}</div>
+      <div class="ch-done-label">🎉 Belohnung heute bereits abgeholt!</div>
+    </div>`;
+  } else if (learnedToday) {
+    const xpAmt = parseInt(ch.reward) || 75;
+    area.innerHTML = `<div class="challenge-card" style="border-color:rgba(0,212,138,0.5);background:rgba(0,212,138,0.08)">
+      <div class="ch-title">${ch.title} ✅</div>
+      <div class="ch-desc">${ch.desc}</div>
+      <div class="ch-reward">🪙 Belohnung: ${ch.reward}</div>
+      <button class="ch-start-btn" style="background:var(--p)" onclick="claimDailyChallenge('${challengeId}',${xpAmt})">🎁 Belohnung abholen!</button>
+    </div>`;
+  } else {
+    area.innerHTML = `<div class="challenge-card">
+      <div class="ch-title">${ch.title}</div>
+      <div class="ch-desc">${ch.desc}</div>
+      <div class="ch-reward">🪙 Belohnung: ${ch.reward}</div>
+      <button class="ch-start-btn" onclick="window.location.href='finquest.html#courses'">Challenge starten →</button>
+    </div>`;
+  }
+}
+
+function claimDailyChallenge(challengeId, xpAmt) {
+  const ok = FQ.claimChallengeReward(challengeId);  // speichert in Firestore
+  if (!ok) { showToast('ℹ️','Bereits abgeholt!',''); return; }
+  FQ.addXP(xpAmt);                                   // XP → Firestore
+  showToast('⚡', 'Tages-Challenge abgeschlossen!', '+' + xpAmt + ' XP verdient!');
+  renderDailyChallenge();
+  render();
+}
+
+// Streak-Berechnung erfolgt in auth.js via FQ._calcStreak()
+
+/* ═══════════════════════════════════════════════════════════
+   LEVEL HELPERS
+═══════════════════════════════════════════════════════════ */
+function getLevel(xp) {
+  let lv = 0;
+  for(let i=0;i<LEVELS.length;i++) { if(xp >= LEVELS[i].xp) lv=i; }
+  return lv;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MAIN RENDER
+═══════════════════════════════════════════════════════════ */
+function render() {
+  const user = FQ.getCurrentUser();
+  if (!user) {
+    document.getElementById('page-content').style.display = 'none';
+    document.getElementById('page-login').style.display = 'block';
+    return;
+  }
+  document.getElementById('page-content').style.display = 'block';
+  document.getElementById('page-login').style.display = 'none';
+
+  // Sync progress from localStorage
+  COURSES.forEach(c => {
+    const local = JSON.parse(localStorage.getItem('fq_' + c.key.replace('kurs-','') + '_completed') || '[]');
+    if (local.length > (user.progress[c.key]||[]).length) FQ.saveProgress(c.key, local, 50);
+  });
+
+  const freshUser = FQ.getCurrentUser();
+  const xp = freshUser.totalXP || 0;
+  const freeXP = getFreeXP(xp);
+  const lv = getLevel(xp);
+  const nextLv = LEVELS[lv+1];
+  const lvXp = LEVELS[lv].xp;
+  const pct = nextLv ? Math.min(100, (xp - lvXp) / (nextLv.xp - lvXp) * 100) : 100;
+
+  // Avatar
+  const avatarEl = document.getElementById('avatar');
+  applyCosmetics(avatarEl);
+
+  // Name & email
+  document.getElementById('user-name').textContent = freshUser.name;
+  document.getElementById('user-email').textContent = freshUser.email;
+  document.getElementById('badge-level').textContent = '⚡ Level ' + (lv+1);
+  document.getElementById('badge-streak').textContent = '🔥 ' + (freshUser.streak||1) + ' Tage Streak';
+  const days = Math.floor((Date.now() - freshUser.createdAt) / 86400000);
+  document.getElementById('badge-member').textContent = '📅 Seit ' + (days === 0 ? 'heute' : days + ' Tagen');
+
+  // Custom title badge
+  updateTitle();
+
+  // Stats
+  document.getElementById('stat-xp').textContent = xp.toLocaleString('de');
+  document.getElementById('stat-xp-free').textContent = freeXP.toLocaleString('de');
+  const activeCourses = COURSES.filter(c=>(freshUser.progress[c.key]||[]).length>0).length;
+  const totalLessons = COURSES.reduce((s,c)=>s+(freshUser.progress[c.key]||[]).length,0);
+  document.getElementById('stat-courses').textContent = activeCourses;
+  document.getElementById('stat-lessons').textContent = totalLessons;
+  document.getElementById('stat-fincoins').textContent = (freshUser.finCoins || 0).toLocaleString('de');
+
+  // XP bar
+  document.getElementById('xp-level-label').textContent = 'Level ' + (lv+1) + ' – ' + LEVELS[lv].name;
+  document.getElementById('xp-bar-val').textContent = xp.toLocaleString('de') + ' / ' + (nextLv ? nextLv.xp.toLocaleString('de') : xp.toLocaleString('de')) + ' XP';
+  setTimeout(()=>{document.getElementById('xp-bar-fill').style.width = pct + '%';}, 100);
+  document.getElementById('xp-next-label').textContent = nextLv ? 'Noch ' + (nextLv.xp - xp).toLocaleString('de') + ' XP bis Level ' + (lv+2) : '🏆 Max Level erreicht!';
+  document.getElementById('xp-free-display').textContent = freeXP.toLocaleString('de');
+
+  // Courses
+  const cr = document.getElementById('course-row');
+  cr.innerHTML = '';
+  COURSES.forEach(c => {
+    const prog = freshUser.progress[c.key] || [];
+    const pct2 = Math.round(prog.length / c.total * 100);
+    const card = document.createElement('a');
+    card.className = 'dc-card' + (prog.length > 0 ? ' started' : '');
+    card.href = c.file;
+    card.innerHTML = `
+      <div class="dc-icon">${c.icon}</div>
+      <div class="dc-info">
+        <div class="dc-title">${c.title}</div>
+        <div class="dc-sub">${prog.length} / ${c.total} Lektionen${prog.length === c.total ? ' ✅ Abgeschlossen' : prog.length > 0 ? ' – In Bearbeitung' : ' – Noch nicht gestartet'}</div>
+      </div>
+      <div class="dc-prog-wrap">
+        <div class="dc-pct">${pct2}%</div>
+        <div class="dc-bar"><div class="dc-bar-fill" style="width:${pct2}%"></div></div>
+      </div>`;
+    cr.appendChild(card);
+  });
+
+  // Streak – zeigt die letzten 7 Tage basierend auf echten Lerndaten
+  const currentStreak = freshUser.streak || 0;
+  document.getElementById('streak-num').textContent = currentStreak;
+  const sd = document.getElementById('streak-days');
+  sd.innerHTML = '';
+  const dayNames = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+
+  // Baue Lookup der letzten 7 Tage (Datum als String)
+  const learnedDays = new Set(freshUser.learnHistory || []);
+  const today2 = new Date();
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(today2);
+    d.setDate(today2.getDate() - i);
+    const dayIdx = (d.getDay() + 6) % 7; // 0=Mo..6=So
+    const dateStr = d.toISOString().slice(0,10);
+    const done = learnedDays.has(dateStr);
+    sd.innerHTML += `<div class="sday${done?' done':''}" title="${dateStr}">${dayNames[dayIdx]}</div>`;
+  }
+
+  // Mini achievements
+  const ag = document.getElementById('ach-grid');
+  ag.innerHTML = '';
+  ACHIEVEMENTS.slice(0,8).forEach(a => {
+    const unlocked = a.condition(freshUser);
+    ag.innerHTML += `<div class="ach-item${unlocked?'':' locked'}" title="${a.name}">
+      <span class="ach-emoji">${a.emoji}</span>
+      <div class="ach-name">${a.name}</div>
+    </div>`;
+  });
+
+  // Daily challenge
+  renderDailyChallenge();
+
+  // Challenges-Badge: leuchtet wenn Belohnungen abholbereit sind
+  (function checkChallengeBadge(){
+    try {
+      const todayStr = new Date().toISOString().slice(0,10);
+      const lh = freshUser.learnHistory || [];
+      const cr = freshUser.claimedRewards || {};
+      const learnedToday = lh.includes(todayStr);
+      // Einfacher Check: hat heute gelernt aber daily-dashboard noch nicht abgeholt?
+      const dailyId = 'daily_dashboard_' + todayStr;
+      const hasReady = learnedToday && !cr[dailyId];
+      const badge = document.getElementById('challenges-badge');
+      if (badge) badge.style.display = hasReady ? 'block' : 'none';
+    } catch(e){}
+  })();
+
+  // Leaderboard
+  renderLeaderboard();
+
+  // Premium banner
+  if (freshUser.premium) document.getElementById('premium-banner').classList.add('hidden');
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   LIVE LEADERBOARD
+   Liest die Top 10 User aus Firebase Firestore,
+   sortiert nach XP, hebt den eingeloggten User hervor.
+   Aktualisiert sich automatisch alle 10 Sekunden.
+═══════════════════════════════════════════════════════════ */
+let _lbPrev = [];  // previous ranking to detect position changes
+
+function getLevelName(xp) {
+  let name = LEVELS[0].name;
+  for (const l of LEVELS) { if (xp >= l.xp) name = l.name; }
+  return name;
+}
+
+async function renderLeaderboard() {
+  const container = document.getElementById('lb-widget');
+  if (!container) return;
+
+  const currentUser = typeof FQ !== 'undefined' ? FQ.getCurrentUser() : null;
+  const currentUsername = currentUser ? currentUser.name : null;
+
+  let players = [];
+
+  // Firestore (geräteübergreifend) mit localStorage-Fallback
+  if (typeof window.fetchTopUsersFromFirestore === 'function') {
+    try {
+      const firestoreUsers = await window.fetchTopUsersFromFirestore();
+      players = firestoreUsers.map(p => ({
+        id: p.id,
+        name: p.username,
+        title: p.title || '',
+        xp: p.xp || 0,
+        level: getLevelName(p.xp || 0)
+      }));
+    } catch(e) { players = []; }
+  }
+
+  // Fallback: localStorage falls Firestore noch nicht geladen
+  if (players.length === 0) {
+    try {
+      const allUsers = JSON.parse(localStorage.getItem('fq_users') || '{}');
+      players = Object.values(allUsers)
+        .filter(u => u && u.name)
+        .map(u => ({ id: u.id || u.email, name: u.name, xp: u.totalXP || 0, title: '', level: getLevelName(u.totalXP || 0) }))
+        .sort((a, b) => b.xp - a.xp)
+        .slice(0, 10);
+    } catch(e) { players = []; }
+  }
+
+  const medals = ['🥇','🥈','🥉'];
+
+  if (players.length === 0) {
+    container.innerHTML = '<div class="lb-empty">Noch keine Einträge. Schließe eine Lektion ab!</div>';
+    return;
+  }
+
+  // Detect position changes vs previous render
+  const prevMap = {};
+  _lbPrev.forEach((p, i) => { prevMap[p.id] = i; });
+
+  container.innerHTML = '';
+  players.forEach((p, i) => {
+    const isMe = p.name === currentUsername;
+    const prevPos = prevMap[p.id];
+    const movedUp = (prevPos !== undefined && prevPos > i);
+
+    const row = document.createElement('div');
+    row.className = 'lb-row' + (isMe ? ' lb-me' : '') + (movedUp ? ' bumped' : '');
+
+    const rankEl = i < 3
+      ? `<div class="lb-rank">${medals[i]}</div>`
+      : `<div class="lb-rank">${i + 1}</div>`;
+
+    const initial = (p.name || '?')[0].toUpperCase();
+    const nameDisplay = isMe ? p.name + ' <span style="color:var(--p);font-size:10px">(Du)</span>' : p.name;
+    const titleDisplay = p.title ? p.title : p.level; // Falls Title vorhanden, zeige ihn statt Level an
+
+    row.innerHTML = rankEl +
+      `<div class="lb-av">${initial}</div>` +
+      `<div class="lb-info">
+        <div class="lb-name">${nameDisplay}</div>
+        <div class="lb-lvl">${titleDisplay}</div>
+      </div>` +
+      `<div class="lb-xp">${p.xp.toLocaleString('de')} XP</div>`;
+
+    container.appendChild(row);
+  });
+
+  // Update timestamp
+  const now = new Date();
+  const timeStr = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  const el = document.getElementById('lb-last-update');
+  if (el) el.textContent = 'Zuletzt: ' + timeStr;
+
+  // Toast when someone overtakes us
+  if (_lbPrev.length > 0 && currentUsername) {
+    const myNewPos = players.findIndex(p => p.name === currentUsername);
+    const myOldPos = _lbPrev.findIndex(p => p.name === currentUsername);
+    if (myNewPos > myOldPos && myOldPos !== -1) {
+      const overtaker = players[myNewPos - 1];
+      if (overtaker) showToast('📈', overtaker.name + ' hat dich überholt!', 'Lerne weiter um die Führung zu halten!');
+    }
+  }
+
+  _lbPrev = players;
+}
+
+// Auto-refresh every 60 seconds
+setInterval(renderLeaderboard, 60000);
+FQ.init();
+window._authCallback = render;
+
+// Wenn Fortschritt von einer anderen Seite (Kurs) gespeichert wird, Dashboard aktualisieren
+window.addEventListener('storage', (e) => {
+  if (e.key === 'fq_users' || e.key === 'fq_current_user') {
+    render();
+  }
+});
+
+render();
+</script>
+</body>
+</html>

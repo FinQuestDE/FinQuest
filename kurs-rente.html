@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script type="module" src="firebase-init.js"></script>
+<meta charset="UTF-8">
+<meta name="no-components">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Rente & Altersvorsorge – FinQuest</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap');
+
+    :root {
+      --p: #00D48A; --s: #1A1A2E; --acc: #FFD166; --hl: #FF6B6B;
+      --su: #16213E; --su2: #0F3460; --tx: #F0F4FF; --mu: #8892B0;
+      --bo: rgba(0,212,138,.2);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--s); color: var(--tx); }
+    h1,h2,h3 { font-family: 'Clash Display','DM Sans',sans-serif; }
+
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(26,26,46,.95);
+      backdrop-filter: blur(12px); border-bottom: 1px solid var(--bo); }
+    .nav-inner { max-width: 1100px; margin: 0 auto; padding: 0 24px;
+      height: 64px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { font-size: 20px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 5px; }
+    .logo-fin { color: var(--tx); } .logo-quest { color: var(--p); }
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+    .xp-nav { font-family: 'JetBrains Mono',monospace; font-size: 13px; color: var(--acc); }
+    .btn { display: inline-flex; align-items: center; padding: 8px 18px; border-radius: 50px;
+      font-family: 'DM Sans',sans-serif; font-weight: 600; font-size: 13px; cursor: pointer;
+      border: none; text-decoration: none; transition: transform .18s, box-shadow .18s; }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-ghost { background: rgba(255,255,255,.06); color: var(--tx); }
+    .btn-primary { background: var(--p); color: #0a0a14; }
+    .btn-primary:hover { box-shadow: 0 6px 20px rgba(0,212,138,.4); }
+    .btn-outline { background: transparent; color: var(--tx); border: 1.5px solid rgba(240,244,255,.25); }
+
+    .hero { background: linear-gradient(135deg, var(--su) 0%, var(--su2) 100%);
+      border-bottom: 1px solid var(--bo); padding: 40px 24px 36px; }
+    .hero-inner { max-width: 800px; margin: 0 auto; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px;
+      color: var(--mu); text-decoration: none; margin-bottom: 20px; transition: color .2s; }
+    .back-link:hover { color: var(--p); }
+    .course-tag { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 50px;
+      font-size: 11px; font-weight: 700; margin-bottom: 12px; }
+    .hero h1 { font-size: clamp(26px, 4vw, 38px); font-weight: 700; margin-bottom: 8px; }
+    .hero p { font-size: 15px; color: var(--mu); margin-bottom: 20px; }
+    .course-meta { display: flex; flex-wrap: wrap; gap: 16px; }
+    .meta-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--mu); }
+
+    .prog-wrap { max-width: 800px; margin: 24px auto; padding: 0 24px; }
+    .prog-header { display: flex; justify-content: space-between; margin-bottom: 8px;
+      font-size: 13px; color: var(--mu); }
+    .prog-track { height: 8px; background: var(--su2); border-radius: 99px; overflow: hidden; }
+    .prog-fill { height: 100%; background: var(--p); border-radius: 99px; transition: width .5s ease; width: 0%; }
+
+    .complete-banner { display: none; max-width: 800px; margin: 0 auto 16px; padding: 0 24px; }
+    .complete-banner.show { display: block; }
+    .complete-inner { background: rgba(0,212,138,.08); border: 1px solid rgba(0,212,138,.3);
+      border-radius: 18px; padding: 28px; text-align: center; }
+    .complete-inner h2 { margin-bottom: 8px; }
+    .complete-inner p { color: var(--mu); font-size: 14px; margin-bottom: 18px; }
+    .complete-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+    .lesson-list { max-width: 800px; margin: 0 auto; padding: 12px 24px 80px; }
+    .lesson-item { display: flex; align-items: center; gap: 14px; background: var(--su);
+      border: 1px solid rgba(255,255,255,.07); border-radius: 14px; padding: 16px 18px;
+      margin-bottom: 10px; cursor: pointer; transition: transform .18s, border-color .18s, box-shadow .18s; }
+    .lesson-item:hover { transform: translateY(-2px); border-color: var(--bo); box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+    .lesson-item.active { border-color: var(--p); box-shadow: 0 0 0 2px rgba(0,212,138,.15); }
+    .lesson-item.completed { opacity: .7; }
+    .lesson-item.completed:hover { opacity: 1; }
+    .lesson-icon { font-size: 24px; width: 40px; text-align: center; flex-shrink: 0; }
+    .lesson-content { flex: 1; }
+    .lesson-title { font-weight: 600; font-size: 15px; margin-bottom: 3px; }
+    .lesson-desc { font-size: 13px; color: var(--mu); }
+    .lesson-xp { font-family: 'JetBrains Mono',monospace; font-size: 12px; color: var(--acc);
+      font-weight: 600; white-space: nowrap; }
+    .lesson-status { font-size: 18px; width: 28px; text-align: center; flex-shrink: 0; }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.75);
+      z-index: 999; align-items: center; justify-content: center; padding: 16px; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--su); border: 1px solid var(--bo); border-radius: 20px;
+      width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto;
+      animation: slideUp .25s ease; }
+    @keyframes slideUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+    .modal-header { padding: 24px 24px 16px; border-bottom: 1px solid rgba(255,255,255,.07); }
+    .modal-tag { font-size: 11px; font-weight: 700; color: var(--p); text-transform: uppercase;
+      letter-spacing: .08em; margin-bottom: 8px; }
+    .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .modal-subtitle { font-size: 14px; color: var(--mu); }
+    .modal-body { padding: 20px 24px; }
+    .theory-box { background: var(--su2); border-radius: 12px; padding: 16px 18px;
+      font-size: 14px; line-height: 1.75; color: #c8d0e8; margin-bottom: 20px; }
+    .theory-box strong { color: var(--tx); }
+    .quiz-label { font-size: 11px; font-weight: 700; color: var(--mu); text-transform: uppercase;
+      letter-spacing: .08em; margin-bottom: 10px; }
+    .quiz-question { font-size: 15px; font-weight: 600; margin-bottom: 14px; line-height: 1.45; }
+    .quiz-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+    .quiz-option { display: flex; align-items: center; gap: 10px; background: var(--su2);
+      border: 1.5px solid rgba(255,255,255,.08); border-radius: 10px; padding: 12px 14px;
+      cursor: pointer; text-align: left; font-family: 'DM Sans',sans-serif; font-size: 14px;
+      color: var(--tx); transition: border-color .18s, background .18s; }
+    .quiz-option:hover:not(:disabled) { border-color: var(--p); background: rgba(0,212,138,.06); }
+    .quiz-option.correct { border-color: var(--p); background: rgba(0,212,138,.12); }
+    .quiz-option.wrong { border-color: var(--hl); background: rgba(255,107,107,.1); }
+    .quiz-option:disabled { cursor: default; }
+    .option-letter { font-weight: 700; font-size: 12px; width: 24px; height: 24px;
+      border-radius: 50%; background: rgba(255,255,255,.08); display: flex;
+      align-items: center; justify-content: center; flex-shrink: 0; }
+    .feedback-box { display: none; border-radius: 10px; padding: 12px 14px; font-size: 14px;
+      line-height: 1.6; margin-top: 4px; }
+    .feedback-box.correct { background: rgba(0,212,138,.1); border: 1px solid rgba(0,212,138,.3); }
+    .feedback-box.wrong { background: rgba(255,107,107,.08); border: 1px solid rgba(255,107,107,.25); }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid rgba(255,255,255,.07);
+      display: flex; align-items: center; justify-content: space-between; }
+    .xp-badge { font-family: 'JetBrains Mono',monospace; font-size: 13px; font-weight: 700;
+      color: var(--acc); background: rgba(255,209,102,.1); border: 1px solid rgba(255,209,102,.25);
+      border-radius: 50px; padding: 6px 14px; }
+    #btn-continue { display: none; }
+
+    .toast { position: fixed; bottom: 28px; right: 24px; background: var(--su);
+      border: 1px solid var(--bo); border-radius: 14px; padding: 12px 20px;
+      display: flex; align-items: center; gap: 10px; font-family: 'JetBrains Mono',monospace;
+      font-size: 15px; font-weight: 700; color: var(--p); z-index: 9999;
+      transform: translateY(80px); opacity: 0; transition: transform .4s ease, opacity .4s ease;
+      pointer-events: none; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ── GAMIFICATION EXTRAS ── */
+    .lesson-item { position: relative; overflow: hidden; }
+    .lesson-item::after { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(0,212,138,.06),transparent); transition:left .5s; }
+    .lesson-item:hover::after { left:100%; }
+    .lesson-item.completed .lesson-icon { filter: drop-shadow(0 0 6px rgba(0,212,138,.6)); }
+
+    /* Streak badge */
+    .streak-banner { background:linear-gradient(135deg,rgba(255,107,107,.12),rgba(255,107,107,.04)); border:1px solid rgba(255,107,107,.25); border-radius:16px; padding:14px 20px; margin:0 auto 20px; max-width:800px; display:flex; align-items:center; gap:12px; }
+    .streak-fire { font-size:28px; }
+    .streak-text { font-size:13px; color:var(--mu); }
+    .streak-text strong { color:var(--tx); font-size:15px; display:block; }
+
+    /* XP explosion on correct answer */
+    @keyframes xpPop { 0%{transform:scale(0) translateY(0);opacity:1} 80%{transform:scale(1.2) translateY(-30px);opacity:1} 100%{transform:scale(1) translateY(-50px);opacity:0} }
+    .xp-pop { position:fixed; font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; color:#00D48A; pointer-events:none; z-index:9999; animation:xpPop .8s ease forwards; }
+
+    /* Progress milestone badge */
+    .milestone-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(255,209,102,.1); border:1px solid rgba(255,209,102,.3); border-radius:50px; padding:4px 12px; font-size:11px; font-weight:700; color:var(--acc); margin:0 0 12px; }
+
+    /* Course section dividers */
+    .section-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:var(--mu); padding:8px 20px; background:rgba(255,255,255,.02); border-top:1px solid rgba(255,255,255,.04); border-bottom:1px solid rgba(255,255,255,.04); margin:4px 0; }
+
+    /* Quiz option animations */
+    .quiz-option { transition:transform .15s, background .2s, border-color .2s; }
+    .quiz-option:hover:not(:disabled) { transform:translateX(4px); }
+    .quiz-option.correct-anim { animation: correctPulse .4s ease; }
+    @keyframes correctPulse { 0%{transform:scale(1)} 50%{transform:scale(1.03)} 100%{transform:scale(1)} }
+
+    /* Lesson counter chip */
+    .lesson-counter-chip { display:inline-flex; align-items:center; gap:5px; background:rgba(0,212,138,.08); border:1px solid var(--bo); border-radius:50px; padding:3px 10px; font-size:11px; font-weight:600; color:var(--p); margin-bottom:16px; }
+
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="finquest.html" class="logo">
+      <span>🚀</span><span class="logo-fin">Fin</span><span class="logo-quest">Quest</span>
+    </a>
+    <div class="nav-right" id="navRight">
+      <a href="login.html" class="btn btn-outline">Einloggen</a>
+      <a href="register.html" class="btn btn-primary">Kostenlos starten</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <a href="dashboard.html" class="back-link">← Zurück zum Dashboard</a>
+    <div class="course-tag" style="background:rgba(255,209,102,.1);color:#FFD166;border:1px solid rgba(255,209,102,.25);">Fortgeschritten</div>
+    <h1>🏖️ Rente & Altersvorsorge</h1>
+    <p>Damit du im Alter nicht von der Hand in den Mund lebst</p>
+    <div class="course-meta">
+      <div class="meta-item">📚 20 Lektionen</div>
+      <div class="meta-item">⚡ 1000 XP möglich</div>
+      <div class="meta-item">⏱️ ca. 16 Minuten</div>
+    </div>
+  </div>
+</section>
+
+<div class="prog-wrap">
+  <div class="prog-header">
+    <span id="progLabel">0 von 16 Lektionen</span>
+    <span id="progXP">0 / 800 XP</span>
+  </div>
+  <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+</div>
+
+<div class="complete-banner" id="completeBanner">
+  <div class="complete-inner">
+    <div style="font-size:48px;margin-bottom:10px;">🏆</div>
+    <h2>Kurs abgeschlossen!</h2>
+    <p>Alle 20 Lektionen von <strong>Rente & Altersvorsorge</strong> abgeschlossen – 1000 XP verdient!</p>
+    <div class="complete-btns">
+      <a href="dashboard.html" class="btn btn-primary">Zum Dashboard →</a>
+      <button class="btn btn-ghost" onclick="resetCourse()">🔄 Wiederholen</button>
+    </div>
+  </div>
+</div>
+
+<div class="lesson-list">
+  <div class="lesson-item" id="li0" onclick="openLesson(0)">
+    <div class="lesson-icon">🏛️</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Das 3-Säulen-Modell</div>
+      <div class="lesson-desc">Die gesetzliche Rente ist nur eine von drei Säulen.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st0">▶</div>
+  </div>
+  <div class="lesson-item" id="li1" onclick="openLesson(1)">
+    <div class="lesson-icon">🏢</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Die gesetzliche Rentenversicherung</div>
+      <div class="lesson-desc">Umlageverfahren: Die Jungen zahlen für die Alten.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st1">▶</div>
+  </div>
+  <div class="lesson-item" id="li2" onclick="openLesson(2)">
+    <div class="lesson-icon">⚠️</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Die Rentenlücke</div>
+      <div class="lesson-desc">Was die gesetzliche Rente wirklich zahlt – ein Schockmoment.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st2">▶</div>
+  </div>
+  <div class="lesson-item" id="li3" onclick="openLesson(3)">
+    <div class="lesson-icon">🏭</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Betriebliche Altersvorsorge (bAV)</div>
+      <div class="lesson-desc">Dein Arbeitgeber zahlt mit – wenn du es richtig machst.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st3">▶</div>
+  </div>
+  <div class="lesson-item" id="li4" onclick="openLesson(4)">
+    <div class="lesson-icon">🦺</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Riester-Rente</div>
+      <div class="lesson-desc">Staatliche Förderung – aber für wen lohnt sie sich wirklich?</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st4">▶</div>
+  </div>
+  <div class="lesson-item" id="li5" onclick="openLesson(5)">
+    <div class="lesson-icon">📋</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Rürup-Rente</div>
+      <div class="lesson-desc">Besonders interessant für Selbstständige und Gutverdiener.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st5">▶</div>
+  </div>
+  <div class="lesson-item" id="li6" onclick="openLesson(6)">
+    <div class="lesson-icon">📦</div>
+    <div class="lesson-content">
+      <div class="lesson-title">ETF-Depot als private Vorsorge</div>
+      <div class="lesson-desc">Flexibler als Versicherungen – und oft rentabler.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st6">▶</div>
+  </div>
+  <div class="lesson-item" id="li7" onclick="openLesson(7)">
+    <div class="lesson-icon">🗓️</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Dein Altersvorsorge-Plan</div>
+      <div class="lesson-desc">Wie du jetzt anfängst – in 3 konkreten Schritten.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st7">▶</div>
+  </div>
+  <div class="lesson-item" id="li8" onclick="openLesson(8)">
+    <div class="lesson-icon">📈</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Rentenlücke berechnen</div>
+      <div class="lesson-desc">Der Schockmoment in Zahlen.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st8">🔒</div>
+  </div>
+  <div class="lesson-item" id="li9" onclick="openLesson(9)">
+    <div class="lesson-icon">🏛️</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Rentenpunkte sammeln – wie das System wirklich funktioniert</div>
+      <div class="lesson-desc">Ein Punkt, ein Wert – eine simple Logik.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st9">🔒</div>
+  </div>
+  <div class="lesson-item" id="li10" onclick="openLesson(10)">
+    <div class="lesson-icon">🧓</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Früher in Rente – die Abzüge verstehen</div>
+      <div class="lesson-desc">Jedes frühe Jahr kostet 3,6%.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st10">🔒</div>
+  </div>
+  <div class="lesson-item" id="li11" onclick="openLesson(11)">
+    <div class="lesson-icon">💼</div>
+    <div class="lesson-content">
+      <div class="lesson-title">ETF-Depot als private Rente</div>
+      <div class="lesson-desc">Warum das Depot die bAV oft schlägt.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st11">🔒</div>
+  </div>
+  <div class="lesson-item" id="li12" onclick="openLesson(12)">
+    <div class="lesson-icon">📱</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Fintech-Rente – neue Alternativen</div>
+      <div class="lesson-desc">Scalable, ETF Rente, fairriester.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st12">🔒</div>
+  </div>
+  <div class="lesson-item" id="li13" onclick="openLesson(13)">
+    <div class="lesson-icon">🌍</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Rente im Ausland – was gilt?</div>
+      <div class="lesson-desc">Wenn du im Ausland lebst und Rente beziehst.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st13">🔒</div>
+  </div>
+  <div class="lesson-item" id="li14" onclick="openLesson(14)">
+    <div class="lesson-icon">🏆</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Renten-Profi – du hast alles Wichtige gelernt</div>
+      <div class="lesson-desc">Von der Rentenlücke zum 3-Säulen-Plan.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st14">🔒</div>
+  </div>
+  <div class="lesson-item" id="li15" onclick="openLesson(15)">
+    <div class="lesson-icon">🚀</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Dein Rentenaktionsplan</div>
+      <div class="lesson-desc">Was du in den nächsten 30 Tagen tun solltest.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st15">🔒</div>
+  </div>
+  <div class="lesson-item" id="li16" onclick="openLesson(16)">
+    <div class="lesson-icon">💰</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Wie viel brauchst du wirklich im Alter?</div>
+      <div class="lesson-desc">Der Rentenbedarf ist individueller als du denkst.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st16">🔒</div>
+  </div>
+  <div class="lesson-item" id="li17" onclick="openLesson(17)">
+    <div class="lesson-icon">🎯</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Altersvorsorge-Check: Wo stehst du?</div>
+      <div class="lesson-desc">Mach jetzt eine ehrliche Bestandsaufnahme.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st17">🔒</div>
+  </div>
+  <div class="lesson-item" id="li18" onclick="openLesson(18)">
+    <div class="lesson-icon">🚀</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Renten-Aktionsplan: Deine nächsten Schritte</div>
+      <div class="lesson-desc">Vom Wissen zum Handeln.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st18">🔒</div>
+  </div>
+  <div class="lesson-item" id="li19" onclick="openLesson(19)">
+    <div class="lesson-icon">📊</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Renditevergleich: Alle Vorsorgeprodukte</div>
+      <div class="lesson-desc">Was bringt wirklich am meisten?</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st19">🔒</div>
+  </div>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-tag" id="mTag"></div>
+      <div class="modal-title" id="mTitle"></div>
+      <div class="modal-subtitle" id="mSub"></div>
+    </div>
+    <div class="modal-body">
+      <div class="theory-box" id="mTheory"></div>
+      <div class="quiz-label">Wissenscheck 🧠</div>
+      <div class="quiz-question" id="mQuestion"></div>
+      <div class="quiz-options" id="mOptions"></div>
+      <div class="feedback-box" id="mFeedback"></div>
+    </div>
+    <div class="modal-footer">
+      <div class="xp-badge" id="mXP">⚡ +50 XP</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="closeModal()">✕ Schließen</button>
+        <button class="btn btn-primary" id="btn-continue" onclick="nextLesson()">Weiter →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span>⚡</span><span id="toastMsg"></span></div>
+
+
+<script src="components.js"></script>
+<script src="auth.js"></script>
+<script>
+const COURSE_ID  = 'kurs-rente';
+const XP_EACH    = 50;
+
+const LESSONS = [
+
+  {
+    icon:`🏛️`, title:`Das 3-Säulen-Modell`, subtitle:`Die gesetzliche Rente ist nur eine von drei Säulen.`,
+    theory:`Das deutsche Rentensystem ruht auf **drei Säulen**:\n\n**Säule 1 – Gesetzliche Rente**: Pflichtversicherung für Arbeitnehmer. Finanziert durch laufende Beiträge (Umlageverfahren).\n\n**Säule 2 – Betriebliche Altersvorsorge (bAV)**: Dein Arbeitgeber zahlt mit. Steuerbegünstigt.\n\n**Säule 3 – Private Vorsorge**: Riester, Rürup, ETF-Depot. Freiwillig, aber unverzichtbar.\n\nDas Ziel: Alle drei Säulen kombinieren, um im Alter den Lebensstandard zu sichern.`,
+    question:`Wie viele Säulen hat das deutsche Altersvorsorgesystem?`,
+    options:[`2 Säulen`, `3 Säulen`, `4 Säulen`, `5 Säulen`],
+    correct:1,
+    explanation:`Richtig! Gesetzliche Rente, betriebliche Altersvorsorge und private Vorsorge bilden die drei Säulen.`
+  },
+  {
+    icon:`🏢`, title:`Die gesetzliche Rentenversicherung`, subtitle:`Umlageverfahren: Die Jungen zahlen für die Alten.`,
+    theory:`Die gesetzliche Rentenversicherung funktioniert nach dem **Umlageverfahren**: Deine Beiträge heute fließen direkt an heutige Rentner – du sparst kein eigenes Kapital an.\n\nAktueller Beitragssatz: **18,6% des Bruttogehalts** (je zur Hälfte von Arbeitnehmer und Arbeitgeber).\n\nProblem: Immer weniger Beitragszahler müssen immer mehr Rentner finanzieren. Das **Rentenniveau** sinkt von früher 53% auf heute ~48% – Tendenz weiter sinkend.`,
+    question:`Wie wird die gesetzliche Rente in Deutschland finanziert?`,
+    options:[`Durch ein eigenes Kapitalvermögen`, `Durch staatliche Kredite`, `Durch laufende Beiträge der Erwerbstätigen`, `Durch Steuereinnahmen allein`],
+    correct:2,
+    explanation:`Korrekt! Das Umlageverfahren bedeutet: Die heutigen Beitragszahler finanzieren die heutigen Rentner direkt.`
+  },
+  {
+    icon:`⚠️`, title:`Die Rentenlücke`, subtitle:`Was die gesetzliche Rente wirklich zahlt – ein Schockmoment.`,
+    theory:`Die **Rentenlücke** ist die Differenz zwischen deinem letzten Gehalt und deiner späteren Rente.\n\nBeispiel: Bruttogehalt 3.500€ → gesetzliche Rente ca. 1.600€ brutto. Netto bleiben vielleicht 1.300€.\n\nAber: Im Alter zahlt man immer noch Krankenversicherung, ggf. Steuern – und die Lebenshaltungskosten steigen durch Inflation.\n\nFaustregel: **Mindestens 80% des letzten Nettogehalts** wird für einen ähnlichen Lebensstandard benötigt. Die Lücke muss privat geschlossen werden.`,
+    question:`Was beschreibt die "Rentenlücke"?`,
+    options:[`Die Zeit zwischen Kündigung und Renteneintritt`, `Die Differenz zwischen letztem Gehalt und gesetzlicher Rente`, `Die fehlenden Beitragsjahre`, `Den Unterschied zwischen Riester und Rürup`],
+    correct:1,
+    explanation:`Genau! Die Rentenlücke zeigt, wie viel Einkommen im Alter fehlt – und warum private Vorsorge unverzichtbar ist.`
+  },
+  {
+    icon:`🏭`, title:`Betriebliche Altersvorsorge (bAV)`, subtitle:`Dein Arbeitgeber zahlt mit – wenn du es richtig machst.`,
+    theory:`Bei der **betrieblichen Altersvorsorge** (bAV) wird ein Teil deines Bruttogehalts direkt in einen Vorsorgevertrag eingezahlt – das nennt sich **Entgeltumwandlung**.\n\nVorteil: Du zahlst weniger Steuern und Sozialabgaben auf den umgewandelten Betrag.\n\nSeit 2019 **muss** dein Arbeitgeber mindestens **15% Zuschuss** leisten, wenn er durch deine Beiträge Sozialabgaben spart.\n\nAchtung: Im Alter sind bAV-Leistungen steuerpflichtig und krankenversicherungspflichtig – das schmälert die Nettorente.`,
+    question:`Was ist "Entgeltumwandlung" bei der bAV?`,
+    options:[`Dein Arbeitgeber zahlt allein in die Rente ein`, `Ein Teil deines Bruttogehalts fließt in einen Vorsorgevertrag`, `Du überweist Geld nach Steuerabzug`, `Eine freiwillige Zusatzleistung ohne Steuereffekt`],
+    correct:1,
+    explanation:`Richtig! Bei der Entgeltumwandlung wird Bruttolohn direkt in Altersvorsorge umgewandelt – steuer- und sozialabgabengünstig.`
+  },
+  {
+    icon:`🦺`, title:`Riester-Rente`, subtitle:`Staatliche Förderung – aber für wen lohnt sie sich wirklich?`,
+    theory:`Die **Riester-Rente** bietet staatliche Zulagen:\n- **175€ Grundzulage** pro Jahr\n- **300€ Kinderzulage** pro Kind (ab 2008 geboren)\n- Steuerliche Absetzbarkeit bis 2.100€/Jahr\n\nFür wen lohnt sie sich?\n✅ Familien mit Kindern (hohe Kinderzulagen)\n✅ Geringverdiener (staatliche Zulage macht großen Anteil aus)\n\nFür wen weniger?\n❌ Kinderlose mit mittlerem/hohem Einkommen\n❌ Wer hohe Flexibilität braucht (Kapital ist gebunden)`,
+    question:`Wie hoch ist die Grundzulage bei der Riester-Rente pro Jahr?`,
+    options:[`75€`, `100€`, `175€`, `300€`],
+    correct:2,
+    explanation:`Korrekt! Die Grundzulage beträgt 175€ pro Jahr – plus 300€ je Kind (Geburt ab 2008).`
+  },
+  {
+    icon:`📋`, title:`Rürup-Rente`, subtitle:`Besonders interessant für Selbstständige und Gutverdiener.`,
+    theory:`Die **Rürup-Rente** (auch Basisrente) ist speziell für Selbstständige und Freiberufler gedacht, die nicht in die gesetzliche Rente einzahlen.\n\nVorteil: Beiträge bis **27.566€ (2024)** können als Sonderausgaben steuerlich abgesetzt werden – je höher das Einkommen, desto mehr spart man.\n\nNachteile: Das Kapital ist **nicht vererbbar**, nicht beleihbar, nicht kündbar. Man erhält immer eine lebenslange Rente – kein Einmalbetrag.\n\nFazit: Sinnvoll für Gutverdiener als Steueroptimierung – aber weniger flexibel als ein ETF-Depot.`,
+    question:`Für wen ist die Rürup-Rente besonders geeignet?`,
+    options:[`Arbeitnehmer mit Kindern`, `Selbstständige und Gutverdiener`, `Beamte`, `Geringverdiener`],
+    correct:1,
+    explanation:`Richtig! Die Rürup-Rente ist ideal für Selbstständige ohne gesetzliche Rentenversicherung und für Gutverdiener zur Steueroptimierung.`
+  },
+  {
+    icon:`📦`, title:`ETF-Depot als private Vorsorge`, subtitle:`Flexibler als Versicherungen – und oft rentabler.`,
+    theory:`Ein **ETF-Sparplan** als dritte Säule der Altersvorsorge hat klare Vorteile:\n\n✅ **Flexibilität**: Jederzeit kündbar, entspar- oder pausierbar\n✅ **Transparenz**: Du siehst genau was du hast\n✅ **Rendite**: Historisch 7–8% p.a. beim MSCI World\n✅ **Vererbbar**: Kapital geht an deine Erben\n\nNachteil: Keine staatliche Förderung, keine Garantien.\n\nStrategie: Mit 25–35 Jahren 80–100% Aktien-ETFs. Ab 10 Jahren vor Rente langsam in sichere Anlagen umschichten (**Glide Path**).`,
+    question:`Was ist ein Vorteil des ETF-Depots gegenüber Rentenversicherungen?`,
+    options:[`Staatliche Förderung`, `Höhere Garantiezinsen`, `Volle Flexibilität und Vererbbarkeit`, `Steuerfreiheit im Alter`],
+    correct:2,
+    explanation:`Genau! ETF-Depots sind flexibel, transparent und vererbbar – das ist ein klarer Vorteil gegenüber gebundenen Versicherungsprodukten.`
+  },
+  {
+    icon:`🗓️`, title:`Dein Altersvorsorge-Plan`, subtitle:`Wie du jetzt anfängst – in 3 konkreten Schritten.`,
+    theory:`**Schritt 1 – Rentenlücke berechnen**\nHole dir deine Renteninformation der Deutschen Rentenversicherung. Berechne: Wunscheinkommen im Alter minus erwartete Rente = deine Lücke.\n\n**Schritt 2 – bAV prüfen**\nFrag deinen Arbeitgeber nach der betrieblichen Altersvorsorge. Mindestens den Arbeitgeberzuschuss von 15% mitnehmen!\n\n**Schritt 3 – Privat vorsorgen**\nStarte einen ETF-Sparplan ab 25–50€/Monat. Ziel: 15–20% des Nettoeinkommens für die Altersvorsorge insgesamt.`,
+    question:`Was ist der erste Schritt zur Planung der Altersvorsorge?`,
+    options:[`Sofort eine Riester-Versicherung abschließen`, `Die eigene Rentenlücke berechnen`, `Den gesamten Notgroschen investieren`, `Einen Finanzberater bezahlen`],
+    correct:1,
+    explanation:`Richtig! Ohne die eigene Rentenlücke zu kennen, tappt man im Dunkeln. Die Renteninformation der DRV ist der erste Schritt.`
+  },
+  {
+    icon:`📈`, title:`Rentenlücke berechnen`, subtitle:`Der Schockmoment in Zahlen.`,
+    theory:`**Rentenlücke** = was du brauchst minus was du kriegst.
+
+Beispiel:
+- Gewünschtes Netto: 2.500€/Monat
+- Erwartete gesetzl. Rente: 1.200€/Monat
+- **Lücke: 1.300€/Monat**
+
+Für 30 Jahre Rente: 1.300€ × 12 × 30 = **468.000€** Kapitalbedarf
+
+Mit 4%-Regel: 1.300€ × 12 ÷ 0,04 = **390.000€** Portfoliogröße nötig
+
+Diese Zahl zeigt warum früh vorsorgen so wichtig ist.`,
+    question:`Wie berechnet man die Rentenlücke?`,
+    options:[`Aktuelles Gehalt minus Rentenbeitrag`,`Gewünschter Rentenbetrag minus erwartete gesetzliche Rente`,`Rentenalter minus aktuelles Alter`,`Ersparnisse geteilt durch Alter`],
+    correct:1,
+    explanation:`Rentenlücke = Wunschrente − gesetzliche Rente. Diesen Betrag muss man privat absichern.`
+  },
+  {
+    icon:`🏛️`, title:`Rentenpunkte sammeln – wie das System wirklich funktioniert`, subtitle:`Ein Punkt, ein Wert – eine simple Logik.`,
+    theory:`Das gesetzliche Rentensystem basiert auf **Entgeltpunkten**:
+
+- 1 Punkt = Durchschnittsverdienst 1 Jahr einzahlen (~45.000€ brutto)
+- Mit 45 Arbeitsjahren: ~45 Punkte
+- Rentenwert 2024: ~37,60€ pro Punkt
+- 45 Punkte × 37,60€ = **~1.692€ Monatsrente**
+
+⚠️ Das ist das Maximum für Durchschnittsverdiener. Geringverdiener bekommen weniger.`,
+    question:`Was bestimmt die Höhe deiner gesetzlichen Rente?`,
+    options:[`Wie lange du eingezahlt hast und wie viel relativ zum Durchschnitt`,`Nur wie lange du gearbeitet hast`,`Deine letzten 5 Gehaltsjahre`,`Das Rentenalter allein`],
+    correct:0,
+    explanation:`Rentenpunkte = Einzahldauer × relative Beitragshöhe. Wer immer Durchschnitt verdient, bekommt pro Jahr einen Punkt.`
+  },
+  {
+    icon:`🧓`, title:`Früher in Rente – die Abzüge verstehen`, subtitle:`Jedes frühe Jahr kostet 3,6%.`,
+    theory:`Für jeden Monat VOR dem regulären Rentenalter (67):
+→ **0,3% Rentenabzug dauerhaft** (3,6% pro Jahr)
+
+Beispiel: 2 Jahre früher (mit 65):
+→ 2 × 3,6% = **7,2% weniger Rente lebenslang**
+
+Um Abzüge zu vermeiden: Ab 50 Jahren **freiwillige Einzahlungen** möglich (§ 187a SGB VI)
+
+Die Deutsche Rentenversicherung bietet individuelle Kontenklärungsgespräche an – kostenlos!`,
+    question:`Wie viel Rente verlierst du dauerhaft wenn du 2 Jahre früher in Rente gehst?`,
+    options:[`2%`,`4%`,`7,2%`,`10%`],
+    correct:2,
+    explanation:`0,3% pro Monat × 24 Monate = 7,2% dauerhafte Rentenkürzung – für den Rest des Lebens.`
+  },
+  {
+    icon:`💼`, title:`ETF-Depot als private Rente`, subtitle:`Warum das Depot die bAV oft schlägt.`,
+    theory:`**Direktvergleich**: ETF-Depot vs. betriebliche Altersvorsorge (bAV)
+
+ETF-Depot:
+✅ Volle Flexibilität
+✅ Günstiger (nur ETF-Kosten)
+✅ Im Todesfall vererbbar
+✅ Kein Sozialversicherungsabzug in der Auszahlung
+
+bAV:
+✅ Arbeitgeberzuschuss (mind. 15% Pflicht)
+✅ Steuervorteil in Einzahlungsphase
+⚠️ In Auszahlung: Volle Krankenkassenbeiträge!
+⚠️ Nicht immer portierbar bei Jobwechsel
+
+Faustregel: bAV JA – aber nur mit Arbeitgeberzuschuss.`,
+    question:`Was ist ein wichtiger Nachteil der betrieblichen Altersvorsorge?`,
+    options:[`Man kann nicht selbst entscheiden`,`In der Auszahlungsphase fallen volle Krankenkassenbeiträge an`,`Das Geld ist nicht sicher`,`Der Arbeitgeber behält das Geld`],
+    correct:1,
+    explanation:`bAV-Auszahlungen gelten als Einkommen → volle KV- und PV-Beiträge (~17%) fallen an. Das reduziert die Nettoauszahlung erheblich.`
+  },
+  {
+    icon:`📱`, title:`Fintech-Rente – neue Alternativen`, subtitle:`Scalable, ETF Rente, fairriester.`,
+    theory:`Neue Produkte für die Altersvorsorge:
+
+🟢 **ETF-Rente** (z.B. Rürup über Tipico, mylife): Rürup-Förderung + ETF-Rendite
+🔵 **fairriester** (Liqid, Oskar): Riester mit ETF-Anlage statt Versicherung
+🟡 **ETF-Sparplan als Selbstrente**: Einfachste Variante, maximale Flexibilität
+
+**Für wen?**
+- Angestellte mit hohem Einkommen: bAV + ETF-Depot
+- Selbstständige: Rürup + ETF-Depot
+- Alle anderen: ETF-Depot + freiwillige GRV-Beiträge`,
+    question:`Für wen ist ein Rürup-Vertrag besonders sinnvoll?`,
+    options:[`Für alle Arbeitnehmer`,`Vor allem für Selbstständige ohne gesetzliche Rentenversicherung`,`Nur für Gutverdiener`,`Für Riester-Berechtigte`],
+    correct:1,
+    explanation:`Rürup (Basisrente) ist steuerlich besonders attraktiv für Selbstständige, die nicht in die gesetzliche Rentenversicherung einzahlen.`
+  },
+  {
+    icon:`🌍`, title:`Rente im Ausland – was gilt?`, subtitle:`Wenn du im Ausland lebst und Rente beziehst.`,
+    theory:`**Deutsche Rente im Ausland:**
+
+✅ Du bekommst die deutsche gesetzliche Rente auch im Ausland
+⚠️ Aber: Quellensteuer kann abgezogen werden
+⚠️ Je nach Land: Doppelbesteuerungsabkommen beachten
+⚠️ Krankenversicherung: Deutsche GKV gilt oft nicht mehr im Ausland
+
+**Attraktive Rentenländer**: Portugal (NHR-Steuerregime für 10 Jahre), Spanien, Malta
+
+→ Steuerberater mit Auslandsexpertise empfohlen.`,
+    question:`Bekommt man die deutsche gesetzliche Rente auch wenn man im Ausland lebt?`,
+    options:[`Nein, nur im Inland`,`Ja, aber steuerliche und sozialversicherungsrechtliche Besonderheiten sind zu beachten`,`Nur in EU-Ländern`,`Nur wenn man 30+ Jahre eingezahlt hat`],
+    correct:1,
+    explanation:`Die gesetzliche Rente wird weltweit ausgezahlt – aber Steuern und Krankenversicherung müssen separat geprüft werden.`
+  },
+  {
+    icon:`🏆`, title:`Renten-Profi – du hast alles Wichtige gelernt`, subtitle:`Von der Rentenlücke zum 3-Säulen-Plan.`,
+    theory:`Du weißt jetzt:
+
+✅ Wie das Umlageverfahren funktioniert
+✅ Rentenpunkte und wie man sie sammelt
+✅ Wie man die persönliche Rentenlücke berechnet
+✅ bAV, Riester, Rürup – Vor- und Nachteile
+✅ Warum das ETF-Depot oft flexibler ist
+✅ Frühverrentung und ihre Kosten
+✅ Rente im Ausland
+
+**Eigenverantwortung ist keine Option – sie ist Pflicht.** Wer die gesetzliche Rente als Alleinlösung sieht, wird enttäuscht.`,
+    question:`Welche ist die wichtigste Ergänzung zur gesetzlichen Rente?`,
+    options:[`Ein zweiter Job im Alter`,`Private Vorsorge – entweder bAV, Riester, Rürup oder ETF-Depot`,`Mehr staatliche Unterstützung beantragen`,`Gar keine – die gesetzliche Rente reicht`],
+    correct:1,
+    explanation:`Gesetzliche Rente allein reicht für die meisten nicht. Private Vorsorge ist unverzichtbar – je früher, desto besser.`
+  },
+  {
+    icon:`🚀`, title:`Dein Rentenaktionsplan`, subtitle:`Was du in den nächsten 30 Tagen tun solltest.`,
+    theory:`**30-Tage-Rentenplan:**
+
+📌 **Woche 1**: Renteninformation von der DRV anfordern (drv.bund.de)
+📌 **Woche 2**: Rentenlücke berechnen
+📌 **Woche 3**: bAV beim Arbeitgeber prüfen (Zuschuss?)
+📌 **Woche 4**: ETF-Sparplan für Privatvorsorge einrichten
+
+🔑 **Goldene Regel der Rente**: Für jeden Euro den der Arbeitgeber zur bAV zuschießt, musst du nichts extra investieren – das ist Gratisgeld.`,
+    question:`Was ist "Gratisgeld" bei der betrieblichen Altersvorsorge?`,
+    options:[`Staatliche Subventionen`,`Der Pflicht-Arbeitgeberzuschuss von mind. 15% auf den Eigenbeitrag`,`Riester-Zulagen`,`Steuererstattungen`],
+    correct:1,
+    explanation:`Arbeitgeber müssen seit 2022 mindestens 15% auf den Eigenbeitrag zur bAV zuschießen. Dieses Gratisgeld sollte jeder mitnehmen.`
+  }
+,
+  {
+    icon:`💰`, title:`Wie viel brauchst du wirklich im Alter?`, subtitle:`Der Rentenbedarf ist individueller als du denkst.`,
+    theory:`**Typische Faustregeln** für den Rentenbedarf:
+
+- **70–80%** des letzten Nettoeinkommens (Kinder weg, Kredit abbezahlt)
+- Oder konkret: Was kostet dein gewünschter Lebensstil?
+
+Kosten die im Alter sinken: Fahrkosten, Kleidung, Kinder
+Kosten die im Alter steigen: Gesundheit, Pflege, Reisen
+
+⚠️ **Pflegekosten** oft unterschätzt: Heim kostet ~3.000–5.000€/Monat – davon zahlt die Pflegepflichtversicherung max. ~1.800€.`,
+    question:`Welche Kosten steigen typischerweise im Alter?`,
+    options:[`Kleidung und Mobilität`,`Gesundheits- und Pflegekosten`,`Lebensmittel werden billiger`,`Wohnkosten sinken immer`],
+    correct:1,
+    explanation:`Gesundheit und ggf. Pflege sind die größten unbekannten Kostentreiber im Alter – und oft unterschätzt.`
+  },
+  {
+    icon:`🎯`, title:`Altersvorsorge-Check: Wo stehst du?`, subtitle:`Mach jetzt eine ehrliche Bestandsaufnahme.`,
+    theory:`**Dein persönlicher Vorsorge-Check:**
+
+1. 📄 Renteninformation der DRV lesen – wie viele Punkte hast du?
+2. 💼 bAV prüfen – hat dein Arbeitgeber einen Vertrag, schießt er zu?
+3. 💰 Private Vorsorge prüfen – Riester, Rürup, ETF-Depot?
+4. 🏠 Immobilien als Teil des Plans?
+5. 📊 Lücke berechnen: Wunsch – erwartet = monatlicher Handlungsbedarf
+
+**Wer seinen Ist-Zustand nicht kennt, kann nicht zielgerichtet handeln.**`,
+    question:`Was ist der wichtigste erste Schritt beim Altersvorsorge-Check?`,
+    options:[`Sofort mehr Geld einzahlen`,`Die aktuelle Renteninformation der DRV lesen und Ist-Zustand kennen`,`Einen Finanzberater beauftragen`,`Alles in Immobilien investieren`],
+    correct:1,
+    explanation:`Erst verstehen was man hat, dann handeln. Die Renteninformation der DRV gibt den Ausgangspunkt.`
+  },
+  {
+    icon:`🚀`, title:`Renten-Aktionsplan: Deine nächsten Schritte`, subtitle:`Vom Wissen zum Handeln.`,
+    theory:`**Dein Renten-Aktionsplan:**
+
+📌 **Diese Woche**: Renteninformation anfordern (online unter drv.bund.de)
+📌 **Diesen Monat**: Rentenlücke berechnen
+📌 **Dieses Quartal**: bAV beim Arbeitgeber klären
+📌 **Dieses Jahr**: ETF-Sparplan für Privatvorsorge starten
+
+**Ziel**: 3-Säulen-Mix aus gesetzlicher Rente + bAV + Privat
+
+⏳ Jedes Jahr das du wartest kostet dich im Schnitt **3.000–5.000€** Rentenvermögen.`,
+    question:`Welche Kombination gilt als optimale Altersvorsorge?`,
+    options:[`Nur gesetzliche Rente`,`Gesetzliche Rente + betriebliche Vorsorge + private Vorsorge (3 Säulen)`,`Nur Immobilien`,`Nur ETF-Depot`],
+    correct:1,
+    explanation:`3 Säulen verteilen das Risiko – gesetzlich, betrieblich und privat ergänzen sich ideal.`
+  },
+  {
+    icon:`📊`, title:`Renditevergleich: Alle Vorsorgeprodukte`, subtitle:`Was bringt wirklich am meisten?`,
+    theory:`**Historische Renditen verschiedener Altersvorsorge:**
+
+📈 **ETF-Depot (MSCI World)**: ~7% p.a. brutto, ~5% netto nach Steuern
+🔵 **bAV (ETF-basiert)**: ~5–6% (Steuereffekt in Einzahlphase, Abgaben in Rente)
+🟡 **Riester**: ~2–3% (nach Zulagen, bei optimaler Nutzung)
+🔴 **Klassische Rentenversicherung**: ~1–2% (oft nicht mal Inflation)
+🏠 **Immobilien**: ~3–5% (inkl. Mietrendite, ohne Wertsteigerung)
+
+→ ETF-Depot ist für die meisten das renditeträchtigste Instrument.`,
+    question:`Welches Vorsorgeprodukt hat historisch die höchste Rendite?`,
+    options:[`Klassische Rentenversicherung`,`Riester-Vertrag`,`ETF-Depot (globale Aktien)`,`Sparbuch`],
+    correct:2,
+    explanation:`ETF-Depots mit globalen Aktienindizes haben historisch ~7% p.a. erzielt – weit mehr als Versicherungsprodukte.`
+  }
+];
+
+let current = -1;
+let answered = false;
+
+(function() {
+  var user = FQ.getCurrentUser();
+  if (!user) { window.location.href = 'login.html'; return; }
+  var _xpEl = document.getElementById('xpNav');
+  if (_xpEl) _xpEl.textContent = '⚡ ' + (user.totalXP || 0) + ' XP';
+  if (typeof fqUpdateNavbar === 'function') fqUpdateNavbar();
+  FQ.init && FQ.init();
+})();
+
+function getCompleted() {
+  const user = FQ.getCurrentUser();
+  if (!user) return [];
+  return (user.progress && user.progress[COURSE_ID]) || [];
+}
+
+function markComplete(idx) {
+  const user = FQ.getCurrentUser();
+  if (!user) return;
+  const completed = getCompleted();
+  if (completed.includes(idx)) return;
+  const newArr = [...completed, idx];
+  FQ.saveProgress(COURSE_ID, newArr, XP_EACH);
+  const fresh = FQ.getCurrentUser();
+  const _xpEl = document.getElementById('xpNav'); if (_xpEl) _xpEl.textContent = '⚡ ' + (user.totalXP || 0) + ' XP';
+}
+
+function render() {
+  const completed = getCompleted();
+  const count = completed.length;
+  const total = LESSONS.length;
+  const xpEarned = count * XP_EACH;
+  const totalXP  = total * XP_EACH;
+
+  document.getElementById('progLabel').textContent = count + ' von ' + total + ' Lektionen';
+  document.getElementById('progXP').textContent = xpEarned + ' / ' + totalXP + ' XP';
+  document.getElementById('progFill').style.width = (count / total * 100) + '%';
+
+  LESSONS.forEach(function(_, i) {
+    const item = document.getElementById('li' + i);
+    const st   = document.getElementById('st' + i);
+    if (!item) return;
+    if (completed.includes(i)) {
+      item.className = 'lesson-item completed';
+      st.textContent = '✅';
+    } else if (i === count) {
+      item.className = 'lesson-item active';
+      st.textContent = '▶';
+    } else {
+      item.className = 'lesson-item';
+      st.textContent = '🔒';
+    }
+  });
+
+  if (count === total) {
+    document.getElementById('completeBanner').classList.add('show');
+  }
+}
+
+function openLesson(idx) {
+  const completed = getCompleted();
+  if (idx > 0 && !completed.includes(idx) && !completed.includes(idx - 1) && completed.length < idx) {
+    showToast('🔒 Schließe zuerst die vorherige Lektion ab!', '#FF6B6B');
+    return;
+  }
+  current = idx;
+  answered = false;
+
+  const l = LESSONS[idx];
+  document.getElementById('mTag').textContent = 'Lektion ' + (idx + 1) + ' / ' + LESSONS.length;
+  document.getElementById('mTitle').textContent = l.title;
+  document.getElementById('mSub').textContent = l.subtitle;
+  document.getElementById('mTheory').innerHTML =
+    l.theory.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+  document.getElementById('mQuestion').textContent = l.question;
+  document.getElementById('mXP').textContent = '⚡ +' + XP_EACH + ' XP';
+
+  const opts = document.getElementById('mOptions');
+  opts.innerHTML = '';
+  ['A','B','C','D'].forEach(function(letter, i) {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option';
+    btn.innerHTML = '<span class="option-letter">' + letter + '</span>' + l.options[i];
+    btn.dataset.idx = i;
+    btn.addEventListener('click', function() { checkAnswer(parseInt(this.dataset.idx), this); });
+    opts.appendChild(btn);
+  });
+
+  const fb = document.getElementById('mFeedback');
+  fb.style.display = 'none';
+  fb.className = 'feedback-box';
+  document.getElementById('btn-continue').style.display = 'none';
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function checkAnswer(chosen, btn) {
+  if (answered) return;
+  answered = true;
+
+  const l = LESSONS[current];
+  document.querySelectorAll('.quiz-option').forEach(function(b) { b.disabled = true; });
+  document.querySelectorAll('.quiz-option')[l.correct].classList.add('correct');
+
+  const fb = document.getElementById('mFeedback');
+  if (chosen === l.correct) {
+    btn.classList.add('correct');
+    fb.className = 'feedback-box correct';
+    fb.innerHTML = '✅ ' + l.explanation;
+    markComplete(current);
+    showToast('+' + XP_EACH + ' XP verdient! ⚡', '#00D48A');
+    render();
+  } else {
+    btn.classList.add('wrong');
+    fb.className = 'feedback-box wrong';
+    fb.innerHTML = '❌ Falsch. 💡 ' + l.explanation;
+  }
+  fb.style.display = 'block';
+  document.getElementById('btn-continue').style.display = 'inline-flex';
+}
+
+function nextLesson() {
+  closeModal();
+  if (current + 1 < LESSONS.length) {
+    setTimeout(function() { openLesson(current + 1); }, 280);
+  }
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+// outsideClick handled via addEventListener below
+function outsideClick(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+function resetCourse() {
+  const user = FQ.getCurrentUser();
+  if (!user) return;
+  FQ.saveProgress(COURSE_ID, [], XP_EACH);
+  document.getElementById('completeBanner').classList.remove('show');
+  
+  // Re-fetch user to get updated XP
+  const freshUser = FQ.getCurrentUser();
+  if (freshUser) {
+    const _xpEl = document.getElementById('xpNav'); if (_xpEl) _xpEl.textContent = '⚡ ' + (user.totalXP || 0) + ' XP';
+  }
+  render();
+}
+
+function showToast(msg, color) {
+  const t = document.getElementById('toast');
+  const m = document.getElementById('toastMsg');
+  m.textContent = msg;
+  t.style.color = color || '#00D48A';
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 3000);
+}
+
+render();
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+
+// ── XP Pop Animation ─────────────────────────────────────────
+function showXpPop(x, y) {
+  const el = document.createElement('div');
+  el.className = 'xp-pop';
+  el.textContent = '+50 XP ⚡';
+  el.style.left = x + 'px';
+  el.style.top  = y + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 900);
+}
+
+// ── Milestone check ───────────────────────────────────────────
+function checkMilestone(count, total) {
+  const milestones = [
+    { at: Math.floor(total*0.25), msg: '25% geschafft! 🔥' },
+    { at: Math.floor(total*0.5),  msg: 'Halbzeit! Du bist auf dem richtigen Weg! ⚡' },
+    { at: Math.floor(total*0.75), msg: '75%! Fast am Ziel! 🚀' },
+  ];
+  const hit = milestones.find(m => m.at === count);
+  if (hit) showToast('🎯 ' + hit.msg, '#FFD166');
+}
+
+// ── Override checkAnswer to add gamification ──────────────────
+const _origCheckAnswer = window.checkAnswer;
+</script>
+</body>
+</html>
