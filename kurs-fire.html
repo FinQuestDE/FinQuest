@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script type="module" src="firebase-init.js"></script>
+<meta charset="UTF-8">
+<meta name="no-components">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>FIRE-Bewegung – FinQuest</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap');
+
+    :root {
+      --p: #00D48A; --s: #1A1A2E; --acc: #FFD166; --hl: #FF6B6B;
+      --su: #16213E; --su2: #0F3460; --tx: #F0F4FF; --mu: #8892B0;
+      --bo: rgba(0,212,138,.2);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--s); color: var(--tx); }
+    h1,h2,h3 { font-family: 'Clash Display','DM Sans',sans-serif; }
+
+    /* NAV */
+    nav { position: sticky; top: 0; z-index: 100; background: rgba(26,26,46,.95);
+      backdrop-filter: blur(12px); border-bottom: 1px solid var(--bo); }
+    .nav-inner { max-width: 1100px; margin: 0 auto; padding: 0 24px;
+      height: 64px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { font-size: 20px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 5px; }
+    .logo-fin { color: var(--tx); } .logo-quest { color: var(--p); }
+    .nav-right { display: flex; align-items: center; gap: 10px; }
+    .xp-nav { font-family: 'JetBrains Mono',monospace; font-size: 13px; color: var(--acc); }
+    .btn { display: inline-flex; align-items: center; padding: 8px 18px; border-radius: 50px;
+      font-family: 'DM Sans',sans-serif; font-weight: 600; font-size: 13px; cursor: pointer;
+      border: none; text-decoration: none; transition: transform .18s, box-shadow .18s; }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-ghost { background: rgba(255,255,255,.06); color: var(--tx); }
+    .btn-primary { background: var(--p); color: #0a0a14; }
+    .btn-primary:hover { box-shadow: 0 6px 20px rgba(0,212,138,.4); }
+    .btn-outline { background: transparent; color: var(--tx); border: 1.5px solid rgba(240,244,255,.25); }
+
+    /* HERO */
+    .hero { background: linear-gradient(135deg, var(--su) 0%, var(--su2) 100%);
+      border-bottom: 1px solid var(--bo); padding: 40px 24px 36px; }
+    .hero-inner { max-width: 800px; margin: 0 auto; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px;
+      color: var(--mu); text-decoration: none; margin-bottom: 20px; transition: color .2s; }
+    .back-link:hover { color: var(--p); }
+    .course-tag { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 50px;
+      font-size: 11px; font-weight: 700; margin-bottom: 12px; }
+    .hero h1 { font-size: clamp(26px, 4vw, 38px); font-weight: 700; margin-bottom: 8px; }
+    .hero p { font-size: 15px; color: var(--mu); margin-bottom: 20px; }
+    .course-meta { display: flex; flex-wrap: wrap; gap: 16px; }
+    .meta-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--mu); }
+
+    /* PROGRESS BAR */
+    .prog-wrap { max-width: 800px; margin: 24px auto; padding: 0 24px; }
+    .prog-header { display: flex; justify-content: space-between; margin-bottom: 8px;
+      font-size: 13px; color: var(--mu); }
+    .prog-track { height: 8px; background: var(--su2); border-radius: 99px; overflow: hidden; }
+    .prog-fill { height: 100%; background: var(--p); border-radius: 99px; transition: width .5s ease; width: 0%; }
+
+    /* COMPLETE BANNER */
+    .complete-banner { display: none; max-width: 800px; margin: 0 auto 16px; padding: 0 24px; }
+    .complete-banner.show { display: block; }
+    .complete-inner { background: rgba(0,212,138,.08); border: 1px solid rgba(0,212,138,.3);
+      border-radius: 18px; padding: 28px; text-align: center; }
+    .complete-inner h2 { margin-bottom: 8px; }
+    .complete-inner p { color: var(--mu); font-size: 14px; margin-bottom: 18px; }
+    .complete-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+    /* LESSON LIST */
+    .lesson-list { max-width: 800px; margin: 0 auto; padding: 12px 24px 80px; }
+    .lesson-item { display: flex; align-items: center; gap: 14px; background: var(--su);
+      border: 1px solid rgba(255,255,255,.07); border-radius: 14px; padding: 16px 18px;
+      margin-bottom: 10px; cursor: pointer; transition: transform .18s, border-color .18s, box-shadow .18s; }
+    .lesson-item:hover { transform: translateY(-2px); border-color: var(--bo); box-shadow: 0 8px 24px rgba(0,0,0,.2); }
+    .lesson-item.active { border-color: var(--p); box-shadow: 0 0 0 2px rgba(0,212,138,.15); }
+    .lesson-item.completed { opacity: .7; }
+    .lesson-item.completed:hover { opacity: 1; }
+    .lesson-icon { font-size: 24px; width: 40px; text-align: center; flex-shrink: 0; }
+    .lesson-content { flex: 1; }
+    .lesson-title { font-weight: 600; font-size: 15px; margin-bottom: 3px; }
+    .lesson-desc { font-size: 13px; color: var(--mu); }
+    .lesson-xp { font-family: 'JetBrains Mono',monospace; font-size: 12px; color: var(--acc);
+      font-weight: 600; white-space: nowrap; }
+    .lesson-status { font-size: 18px; width: 28px; text-align: center; flex-shrink: 0; }
+
+    /* MODAL */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.75);
+      z-index: 999; align-items: center; justify-content: center; padding: 16px; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--su); border: 1px solid var(--bo); border-radius: 20px;
+      width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto;
+      animation: slideUp .25s ease; }
+    @keyframes slideUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+    .modal-header { padding: 24px 24px 16px; border-bottom: 1px solid rgba(255,255,255,.07); }
+    .modal-tag { font-size: 11px; font-weight: 700; color: var(--p); text-transform: uppercase;
+      letter-spacing: .08em; margin-bottom: 8px; }
+    .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .modal-subtitle { font-size: 14px; color: var(--mu); }
+    .modal-body { padding: 20px 24px; }
+    .theory-box { background: var(--su2); border-radius: 12px; padding: 16px 18px;
+      font-size: 14px; line-height: 1.75; color: #c8d0e8; margin-bottom: 20px; }
+    .theory-box strong { color: var(--tx); }
+    .quiz-label { font-size: 11px; font-weight: 700; color: var(--mu); text-transform: uppercase;
+      letter-spacing: .08em; margin-bottom: 10px; }
+    .quiz-question { font-size: 15px; font-weight: 600; margin-bottom: 14px; line-height: 1.45; }
+    .quiz-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+    .quiz-option { display: flex; align-items: center; gap: 10px; background: var(--su2);
+      border: 1.5px solid rgba(255,255,255,.08); border-radius: 10px; padding: 12px 14px;
+      cursor: pointer; text-align: left; font-family: 'DM Sans',sans-serif; font-size: 14px;
+      color: var(--tx); transition: border-color .18s, background .18s; }
+    .quiz-option:hover:not(:disabled) { border-color: var(--p); background: rgba(0,212,138,.06); }
+    .quiz-option.correct { border-color: var(--p); background: rgba(0,212,138,.12); }
+    .quiz-option.wrong { border-color: var(--hl); background: rgba(255,107,107,.1); }
+    .quiz-option:disabled { cursor: default; }
+    .option-letter { font-weight: 700; font-size: 12px; width: 24px; height: 24px;
+      border-radius: 50%; background: rgba(255,255,255,.08); display: flex;
+      align-items: center; justify-content: center; flex-shrink: 0; }
+    .feedback-box { display: none; border-radius: 10px; padding: 12px 14px; font-size: 14px;
+      line-height: 1.6; margin-top: 4px; }
+    .feedback-box.correct { background: rgba(0,212,138,.1); border: 1px solid rgba(0,212,138,.3); }
+    .feedback-box.wrong { background: rgba(255,107,107,.08); border: 1px solid rgba(255,107,107,.25); }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid rgba(255,255,255,.07);
+      display: flex; align-items: center; justify-content: space-between; }
+    .xp-badge { font-family: 'JetBrains Mono',monospace; font-size: 13px; font-weight: 700;
+      color: var(--acc); background: rgba(255,209,102,.1); border: 1px solid rgba(255,209,102,.25);
+      border-radius: 50px; padding: 6px 14px; }
+    #btn-continue { display: none; }
+
+    /* TOAST */
+    .toast { position: fixed; bottom: 28px; right: 24px; background: var(--su);
+      border: 1px solid var(--bo); border-radius: 14px; padding: 12px 20px;
+      display: flex; align-items: center; gap: 10px; font-family: 'JetBrains Mono',monospace;
+      font-size: 15px; font-weight: 700; color: var(--p); z-index: 9999;
+      transform: translateY(80px); opacity: 0; transition: transform .4s ease, opacity .4s ease;
+      pointer-events: none; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="finquest.html" class="logo">
+      <span>🚀</span><span class="logo-fin">Fin</span><span class="logo-quest">Quest</span>
+    </a>
+    <div class="nav-right" id="navRight">
+      <a href="login.html" class="btn btn-outline">Einloggen</a>
+      <a href="register.html" class="btn btn-primary">Kostenlos starten</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-inner">
+    <a href="dashboard.html" class="back-link">← Zurück zum Dashboard</a>
+    <div class="course-tag" style="background:rgba(0,212,138,.1);color:#FF6B6B;border:1px solid rgba(0,212,138,.25);">Fortgeschritten</div>
+    <h1>🔥 FIRE-Bewegung</h1>
+    <p>Financial Independence, Retire Early</p>
+    <div class="course-meta">
+      <div class="meta-item">📚 10 Lektionen</div>
+      <div class="meta-item">⚡ 500 XP möglich</div>
+      <div class="meta-item">⏱️ ca. 10 Minuten</div>
+    </div>
+  </div>
+</section>
+
+<div class="prog-wrap">
+  <div class="prog-header">
+    <span id="progLabel">0 von 10 Lektionen</span>
+    <span id="progXP">0 / 500 XP</span>
+  </div>
+  <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+</div>
+
+<div class="complete-banner" id="completeBanner">
+  <div class="complete-inner">
+    <div style="font-size:48px;margin-bottom:10px;">🏆</div>
+    <h2>Kurs abgeschlossen!</h2>
+    <p>Alle 10 Lektionen von <strong>FIRE-Bewegung</strong> abgeschlossen – 500 XP verdient!</p>
+    <div class="complete-btns">
+      <a href="dashboard.html" class="btn btn-primary">Zum Dashboard →</a>
+      <button class="btn btn-ghost" onclick="resetCourse()">🔄 Wiederholen</button>
+    </div>
+  </div>
+</div>
+
+<div class="lesson-list">
+  <div class="lesson-item" id="li0" onclick="openLesson(0)">
+    <div class="lesson-icon">🔥</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Was ist FIRE?</div>
+      <div class="lesson-desc">Finanzielle Unabhängigkeit ist Mathematik, kein Traum.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st0">▶</div>
+  </div>
+  <div class="lesson-item" id="li1" onclick="openLesson(1)">
+    <div class="lesson-icon">📐</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Die 4%-Regel</div>
+      <div class="lesson-desc">Die Grundformel der FIRE-Bewegung.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st1">▶</div>
+  </div>
+  <div class="lesson-item" id="li2" onclick="openLesson(2)">
+    <div class="lesson-icon">💰</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Sparrate – der wichtigste Hebel</div>
+      <div class="lesson-desc">Nicht dein Gehalt entscheidet – was du behältst.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st2">▶</div>
+  </div>
+  <div class="lesson-item" id="li3" onclick="openLesson(3)">
+    <div class="lesson-icon">📉</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Ausgaben senken</div>
+      <div class="lesson-desc">Jeden Euro den du nicht ausgibst, musst du 25× nicht ansparen.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st3">▶</div>
+  </div>
+  <div class="lesson-item" id="li4" onclick="openLesson(4)">
+    <div class="lesson-icon">🌍</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Investieren für FIRE</div>
+      <div class="lesson-desc">Das FIRE-Portfolio – simpel und effektiv.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st4">▶</div>
+  </div>
+  <div class="lesson-item" id="li5" onclick="openLesson(5)">
+    <div class="lesson-icon">⚡</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Einnahmen erhöhen</div>
+      <div class="lesson-desc">Sparen hat eine Grenze. Einnahmen nicht.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st5">▶</div>
+  </div>
+  <div class="lesson-item" id="li6" onclick="openLesson(6)">
+    <div class="lesson-icon">🏥</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Absicherung bei FIRE</div>
+      <div class="lesson-desc">Der oft unterschätzte Teil.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st6">▶</div>
+  </div>
+  <div class="lesson-item" id="li7" onclick="openLesson(7)">
+    <div class="lesson-icon">🧮</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Sequence-of-Returns-Risiko</div>
+      <div class="lesson-desc">Der gefährlichste Feind des Frührentners.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st7">▶</div>
+  </div>
+  <div class="lesson-item" id="li8" onclick="openLesson(8)">
+    <div class="lesson-icon">🌴</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Geo-Arbitrage</div>
+      <div class="lesson-desc">Wo du lebst entscheidet genauso wie wie viel du sparst.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st8">▶</div>
+  </div>
+  <div class="lesson-item" id="li9" onclick="openLesson(9)">
+    <div class="lesson-icon">🎯</div>
+    <div class="lesson-content">
+      <div class="lesson-title">Dein persönlicher FIRE-Plan</div>
+      <div class="lesson-desc">Zahlen rein, Plan raus.</div>
+    </div>
+    <div class="lesson-xp">+50 XP</div>
+    <div class="lesson-status" id="st9">▶</div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-tag" id="mTag"></div>
+      <div class="modal-title" id="mTitle"></div>
+      <div class="modal-subtitle" id="mSub"></div>
+    </div>
+    <div class="modal-body">
+      <div class="theory-box" id="mTheory"></div>
+      <div class="quiz-label">Wissenscheck 🧠</div>
+      <div class="quiz-question" id="mQuestion"></div>
+      <div class="quiz-options" id="mOptions"></div>
+      <div class="feedback-box" id="mFeedback"></div>
+    </div>
+    <div class="modal-footer">
+      <div class="xp-badge" id="mXP">⚡ +50 XP</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="closeModal()">✕ Schließen</button>
+        <button class="btn btn-primary" id="btn-continue" onclick="nextLesson()">Weiter →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span>⚡</span><span id="toastMsg"></span></div>
+
+<script src="components.js"></script>
+<script src="auth.js"></script>
+<script>
+// ── Data ──────────────────────────────────────────────────────
+const COURSE_ID  = 'kurs-fire';
+const XP_EACH    = 50;
+
+const LESSONS = [
+  {
+    icon:`🔥`, title:`Was ist FIRE?`, subtitle:`Finanzielle Unabhängigkeit ist Mathematik, kein Traum.`,
+    theory:`**FIRE** = **F**inancial **I**ndependence, **R**etire **E**arly.
+
+Das Ziel: Ein Vermögen aufbauen das so groß ist, dass du von den Erträgen leben kannst – ohne arbeiten zu müssen.
+
+Varianten: **Fat FIRE** (üppiger Stil), **Lean FIRE** (minimalistisch), **Barista FIRE** (Teilzeit als Ergänzung).`,
+    question:`Was bedeutet das Akronym FIRE?`,
+    options:[`Fast Income Retire Early`, `Financial Independence Retire Early`, `Frugal Investment Real Estate`, `Future Income Retirement Estimator`],
+    correct:1,
+    explanation:`Richtig! Financial Independence, Retire Early – finanzielle Unabhängigkeit, frühzeitiger Ruhestand.`
+  },
+  {
+    icon:`📐`, title:`Die 4%-Regel`, subtitle:`Die Grundformel der FIRE-Bewegung.`,
+    theory:`Die **4%-Regel** (Trinity Study, 1998):
+
+Wenn du jährlich max. 4% deines Portfolios entnimmst, reicht es historisch für 30+ Jahre.
+
+**FIRE-Zahl** = Jährliche Ausgaben × 25
+
+Beispiel: 2.000€/Monat = 24.000€/Jahr → FIRE-Zahl: **600.000€**`,
+    question:`Wie berechnet man die FIRE-Zahl?`,
+    options:[`Monatsausgaben × 100`, `Jahresausgaben × 25`, `Jahresgehalt × 10`, `Monatsausgaben × 300`],
+    correct:1,
+    explanation:`Korrekt! Jahresausgaben × 25 = FIRE-Zahl. Das ist die Umkehrung der 4%-Entnahmeregel.`
+  },
+  {
+    icon:`💰`, title:`Sparrate – der wichtigste Hebel`, subtitle:`Nicht dein Gehalt entscheidet – was du behältst.`,
+    theory:`Jahre bis FIRE nach Sparrate (bei 7% Rendite p.a.):
+- 10% Sparrate → ~43 Jahre
+- 25% Sparrate → ~32 Jahre
+- 50% Sparrate → ~17 Jahre
+- 75% Sparrate → ~7 Jahre
+
+Doppelter Effekt: Mehr sparen = schneller Vermögen + niedrigere FIRE-Zahl.`,
+    question:`Was passiert wenn man die Sparrate von 10% auf 50% erhöht?`,
+    options:[`Zeit halbiert sich`, `Zeit sinkt von ~43 auf ~17 Jahre`, `Kaum Änderung`, `Man braucht mehr Kapital`],
+    correct:1,
+    explanation:`Richtig! Höhere Sparrate = mehr investiert + weniger Ausgaben im Ruhestand = viel früher FIRE.`
+  },
+  {
+    icon:`📉`, title:`Ausgaben senken`, subtitle:`Jeden Euro den du nicht ausgibst, musst du 25× nicht ansparen.`,
+    theory:`Jede Ausgabe ist im FIRE-Kontext **doppelt wichtig**:
+1. Du sparst diesen Euro jetzt
+2. Du musst 25× diesen Euro NICHT ansparen
+
+Beispiel: 50€/Monat Streaming (600€/Jahr):
+600 × 25 = **15.000€ mehr FIRE-Kapital nötig**
+
+**Value-Based Spending**: Viel wofür es sich lohnt, nichts für den Rest.`,
+    question:`Was bedeuten die 25× bei FIRE?`,
+    options:[`Sicherheitspuffer`, `Du musst 25× mehr ansparen weil du diese Ausgabe im Ruhestand hast`, `Inflationsrate`, `Durchschnittliche Arbeitszeit`],
+    correct:1,
+    explanation:`Genau! 100€/Jahr Ausgabe = 2.500€ mehr Kapital nötig. Jede Ausgabe kostet 25×.`
+  },
+  {
+    icon:`🌍`, title:`Investieren für FIRE`, subtitle:`Das FIRE-Portfolio – simpel und effektiv.`,
+    theory:`Standard-FIRE-Portfolio:
+
+**Ein oder zwei Index-ETFs**:
+- MSCI World oder ACWI (~85% Industrieländer)
+- Optional: MSCI Emerging Markets (~15%)
+
+Warum so einfach?
+- Niedrige Kosten (TER ~0,2%)
+- Maximale Diversifikation
+- Historisch ~7% p.a.`,
+    question:`Was ist laut FIRE-Community das effektivste Portfolio?`,
+    options:[`Viele aktive Fonds`, `Ein oder zwei Index-ETFs`, `Immobilien und Gold`, `Einzelaktien von Top-Unternehmen`],
+    correct:1,
+    explanation:`Korrekt! Einfach, günstig, breit – ein MSCI World ETF schlägt die Mehrheit der aktiven Strategien.`
+  },
+  {
+    icon:`⚡`, title:`Einnahmen erhöhen`, subtitle:`Sparen hat eine Grenze. Einnahmen nicht.`,
+    theory:`Neben Sparen: **Einnahmen erhöhen**.
+
+Wege:
+- Gehaltserhöhung: Regelmäßig verhandeln!
+- Jobwechsel: Oft 10–30% mehr
+- Nebeneinkommen: Freelancing, Beratung
+- Passive Einnahmen: Dividenden, Mieteinnahmen
+
+**Warnung**: Mehr verdienen hilft nur wenn die Sparrate nicht sinkt (Lifestyle Inflation vermeiden!).`,
+    question:`Was ist Lifestyle Inflation?`,
+    options:[`Staatliche Inflationsberechnung`, `Ausgaben die mit dem Gehalt proportional steigen`, `Inflation bei Luxusgütern`, `Eine Investitionsstrategie`],
+    correct:1,
+    explanation:`Richtig! Mehr verdienen aber gleichzeitig mehr ausgeben – der klassische FIRE-Killer.`
+  },
+  {
+    icon:`🏥`, title:`Absicherung bei FIRE`, subtitle:`Der oft unterschätzte Teil.`,
+    theory:`Wer früh in Rente geht muss die Krankenversicherung selbst regeln:
+
+**Optionen**:
+- Freiwillige GKV: ab ~200€/Monat
+- Private KV: umfangreicher, im Alter teurer
+
+Vor FIRE unbedingt:
+- **Berufsunfähigkeitsversicherung** abschließen
+- **Cash-Puffer** für 6–12 Monate (Sequence-of-Returns-Risiko)`,
+    question:`Warum BU-Versicherung VOR FIRE abschließen?`,
+    options:[`Danach illegal`, `Im Ruhestand nicht mehr möglich`, `Danach kein Beruf mehr absicherbar und höhere Prämien`, `Danach günstiger`],
+    correct:2,
+    explanation:`Richtig! BU am günstigsten wenn man jung und gesund ist – danach steigen Preis und Ausschlüsse.`
+  },
+  {
+    icon:`🧮`, title:`Sequence-of-Returns-Risiko`, subtitle:`Der gefährlichste Feind des Frührentners.`,
+    theory:`Wenn der Markt kurz **nach** dem FIRE-Datum stark fällt, kann das dein Portfolio dauerhaft schädigen.
+
+Beispiel: 500.000€, 4% Entnahme. Markt fällt 40% → nur noch 300.000€. Jetzt sind 20.000€ = 6,7% des Portfolios.
+
+**Lösungen**:
+- Cash-Puffer für 1–2 Jahre
+- Flexible Entnahme in schlechten Jahren
+- Konservativere Rate (3–3,5% statt 4%)`,
+    question:`Was beschreibt das Sequence-of-Returns-Risiko?`,
+    options:[`Risiko dass Aktien fallen`, `Früher Markteinbruch nach FIRE schädigt Portfolio dauerhaft`, `Falscher Sparrate-Risiko`, `Inflationsrisiko`],
+    correct:1,
+    explanation:`Korrekt! Timing des Marktes kurz nach dem Ausstieg ist entscheidend. Frühe Einbrüche sind gefährlicher.`
+  },
+  {
+    icon:`🌴`, title:`Geo-Arbitrage`, subtitle:`Wo du lebst entscheidet genauso wie wie viel du sparst.`,
+    theory:`**Geo-Arbitrage**: In günstigeren Ländern leben während das Vermögen in starken Währungen angelegt ist.
+
+Mit 2.000€/Monat:
+- München: kaum möglich
+- Madrid: komfortabel
+- Lissabon: sehr gut
+
+Das senkt die FIRE-Zahl drastisch. Statt 600.000€ vielleicht nur 300.000€.`,
+    question:`Was beschreibt Geo-Arbitrage im FIRE-Kontext?`,
+    options:[`In teuren Städten investieren`, `In günstigeren Ländern leben um die FIRE-Zahl zu senken`, `Auslandsimmobilien kaufen`, `Steuern durch Auslandswohnsitz sparen`],
+    correct:1,
+    explanation:`Richtig! Günstigere Kosten = niedrigere Ausgaben = niedrigere FIRE-Zahl = früher frei.`
+  },
+  {
+    icon:`🎯`, title:`Dein persönlicher FIRE-Plan`, subtitle:`Zahlen rein, Plan raus.`,
+    theory:`**5 Schritte zum FIRE-Plan**:
+
+1. Aktuelle Ausgaben ermitteln
+2. FIRE-Zahl berechnen: Jahresausgaben × 25
+3. Nettovermögen berechnen
+4. Lücke: FIRE-Zahl − Nettovermögen
+5. Zeitplan: Bei X€/Monat Sparrate in Z Jahren
+
+**Wichtigster Grundsatz**: Anfangen schlägt Perfektionieren.`,
+    question:`Was ist der erste Schritt beim FIRE-Plan?`,
+    options:[`Sofort investieren`, `Aktuelle Ausgaben ermitteln`, `FIRE-Zahl berechnen`, `Depot eröffnen`],
+    correct:1,
+    explanation:`Richtig! Erst Ausgaben kennen, dann FIRE-Zahl berechnen. Ohne ehrliche Analyse sind alle Zahlen wertlos.`
+  }
+];
+
+// ── State ─────────────────────────────────────────────────────
+let current = -1;
+let answered = false;
+
+// ── Auth guard ────────────────────────────────────────────────
+(function() {
+  var user = FQ.getCurrentUser();
+  if (!user) { window.location.href = 'login.html'; return; }
+  var _xpEl = document.getElementById('xpNav');
+  if (_xpEl) _xpEl.textContent = '⚡ ' + (user.totalXP || 0) + ' XP';
+  if (typeof fqUpdateNavbar === 'function') fqUpdateNavbar();
+  FQ.init && FQ.init();
+})();
+
+// ── Progress helpers ──────────────────────────────────────────
+function getCompleted() {
+  const user = FQ.getCurrentUser();
+  if (!user) return [];
+  return (user.progress && user.progress[COURSE_ID]) || [];
+}
+
+function markComplete(idx) {
+  const user = FQ.getCurrentUser();
+  if (!user) return;
+  const completed = getCompleted();
+  if (completed.includes(idx)) return; // already saved
+  const newArr = [...completed, idx];
+  FQ.saveProgress(COURSE_ID, newArr, XP_EACH);
+  // refresh XP in nav
+  const fresh = FQ.getCurrentUser();
+  (function(){var _e=document.getElementById('xpNav');if(_e)_e.textContent='⚡ '+(fresh.totalXP || 0) + ' XP';})();
+}
+
+// ── Render lesson list ────────────────────────────────────────
+function render() {
+  const completed = getCompleted();
+  const count = completed.length;
+  const total = LESSONS.length;
+  const xpEarned = count * XP_EACH;
+  const totalXP  = total * XP_EACH;
+
+  document.getElementById('progLabel').textContent = count + ' von ' + total + ' Lektionen';
+  document.getElementById('progXP').textContent = xpEarned + ' / ' + totalXP + ' XP';
+  document.getElementById('progFill').style.width = (count / total * 100) + '%';
+
+  LESSONS.forEach(function(_, i) {
+    const item = document.getElementById('li' + i);
+    const st   = document.getElementById('st' + i);
+    if (!item) return;
+    if (completed.includes(i)) {
+      item.className = 'lesson-item completed';
+      st.textContent = '✅';
+    } else if (i === count) {
+      item.className = 'lesson-item active';
+      st.textContent = '▶';
+    } else {
+      item.className = 'lesson-item';
+      st.textContent = '🔒';
+    }
+  });
+
+  if (count === total) {
+    document.getElementById('completeBanner').classList.add('show');
+  }
+}
+
+// ── Open lesson modal ─────────────────────────────────────────
+function openLesson(idx) {
+  const completed = getCompleted();
+  // Allow opening if already completed OR is the next unlocked lesson
+  if (idx > 0 && !completed.includes(idx) && !completed.includes(idx - 1) && completed.length < idx) {
+    showToast('🔒 Schließe zuerst die vorherige Lektion ab!', '#FF6B6B');
+    return;
+  }
+  current = idx;
+  answered = false;
+
+  const l = LESSONS[idx];
+  document.getElementById('mTag').textContent = 'Lektion ' + (idx + 1) + ' / ' + LESSONS.length;
+  document.getElementById('mTitle').textContent = l.title;
+  document.getElementById('mSub').textContent = l.subtitle;
+  document.getElementById('mTheory').innerHTML =
+    l.theory.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+  document.getElementById('mQuestion').textContent = l.question;
+  document.getElementById('mXP').textContent = '⚡ +' + XP_EACH + ' XP';
+
+  const opts = document.getElementById('mOptions');
+  opts.innerHTML = '';
+  ['A','B','C','D'].forEach(function(letter, i) {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option';
+    btn.innerHTML = '<span class="option-letter">' + letter + '</span>' + l.options[i];
+    btn.dataset.idx = i;
+    btn.addEventListener('click', function() { checkAnswer(parseInt(this.dataset.idx), this); });
+    opts.appendChild(btn);
+  });
+
+  const fb = document.getElementById('mFeedback');
+  fb.style.display = 'none';
+  fb.className = 'feedback-box';
+  document.getElementById('btn-continue').style.display = 'none';
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+// ── Check answer ──────────────────────────────────────────────
+function checkAnswer(chosen, btn) {
+  if (answered) return;
+  answered = true;
+
+  const l = LESSONS[current];
+  document.querySelectorAll('.quiz-option').forEach(function(b) { b.disabled = true; });
+  document.querySelectorAll('.quiz-option')[l.correct].classList.add('correct');
+
+  const fb = document.getElementById('mFeedback');
+  if (chosen === l.correct) {
+    btn.classList.add('correct');
+    fb.className = 'feedback-box correct';
+    fb.innerHTML = '✅ ' + l.explanation;
+    markComplete(current);
+    showToast('+' + XP_EACH + ' XP verdient! ⚡', '#00D48A');
+    render();
+  } else {
+    btn.classList.add('wrong');
+    fb.className = 'feedback-box wrong';
+    fb.innerHTML = '❌ Falsch. 💡 ' + l.explanation;
+  }
+  fb.style.display = 'block';
+  document.getElementById('btn-continue').style.display = 'inline-flex';
+}
+
+// ── Next / close ──────────────────────────────────────────────
+function nextLesson() {
+  closeModal();
+  if (current + 1 < LESSONS.length) {
+    setTimeout(function() { openLesson(current + 1); }, 280);
+  }
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+// outsideClick handled via addEventListener below
+function outsideClick(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+// ── Reset ─────────────────────────────────────────────────────
+function resetCourse() {
+  const currentCompleted = getCompleted().length;
+  if (currentCompleted > 0) {
+    FQ.saveProgress(COURSE_ID, [], -(currentCompleted * XP_EACH));
+  }
+  document.getElementById('completeBanner').classList.remove('show');
+  const fresh = FQ.getCurrentUser();
+  if (fresh) (function(){var _e=document.getElementById('xpNav');if(_e)_e.textContent='⚡ '+(fresh.totalXP || 0) + ' XP';})();
+  render();
+}
+
+// ── Toast ─────────────────────────────────────────────────────
+function showToast(msg, color) {
+  const t = document.getElementById('toast');
+  const m = document.getElementById('toastMsg');
+  m.textContent = msg;
+  t.style.color = color || '#00D48A';
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 3000);
+}
+
+// ── Init ──────────────────────────────────────────────────────
+render();
+
+// Overlay: close when clicking the dark backdrop (NOT the modal card)
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>
