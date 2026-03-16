@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Accounts löschen – FinQuest</title>
+<style>
+  body{font-family:sans-serif;background:#1A1A2E;color:#F0F4FF;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
+  .box{background:#16213E;border:1px solid rgba(0,212,138,.3);border-radius:20px;padding:40px;max-width:480px;width:90%;text-align:center}
+  h2{margin-bottom:12px;font-size:24px}
+  p{color:#8892B0;font-size:14px;margin-bottom:24px;line-height:1.6}
+  .result{font-size:15px;font-weight:600;margin-bottom:20px;display:none}
+  .result.ok{color:#00D48A}
+  .btn{background:#00D48A;color:#0a0a14;border:none;padding:12px 28px;border-radius:50px;font-size:15px;font-weight:700;cursor:pointer}
+  a{color:#00D48A;font-size:14px}
+</style>
+</head>
+<body>
+<div class="box">
+  <div style="font-size:48px;margin-bottom:16px">🗑️</div>
+  <h2>Alle Accounts löschen</h2>
+  <p>Löscht alle registrierten User-Accounts, Sessions und Fortschritte aus dem localStorage.</p>
+  <div class="result" id="result"></div>
+  <button class="btn" onclick="reset()">Jetzt alle Accounts löschen</button><br><br>
+  <a href="finquest.html">← Zurück zur Startseite</a>
+</div>
+<script>
+function reset() {
+  const users = JSON.parse(localStorage.getItem('fq_users') || '{}');
+  const count = Object.keys(users).length;
+
+  // Delete all FinQuest-related keys
+  const toDelete = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('fq_')) toDelete.push(key);
+  }
+  toDelete.forEach(k => localStorage.removeItem(k));
+
+  const r = document.getElementById('result');
+  r.textContent = '✅ ' + count + ' Account' + (count !== 1 ? 's' : '') + ' erfolgreich gelöscht!';
+  r.style.display = 'block';
+  document.querySelector('.btn').disabled = true;
+  document.querySelector('.btn').textContent = 'Erledigt ✓';
+  document.querySelector('.btn').style.opacity = '0.5';
+}
+</script>
+<script src="theme.js"></script>
+</body>
+</html>

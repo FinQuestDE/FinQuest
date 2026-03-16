@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kostenlos registrieren – FinQuest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    @import url('https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap');
+    
+:root {
+  --color-primary: #00D48A;
+  --color-secondary: #1A1A2E;
+  --color-accent: #FFD166;
+  --color-highlight: #FF6B6B;
+  --color-surface: #16213E;
+  --color-surface-2: #0F3460;
+  --color-text-main: #F0F4FF;
+  --color-text-muted: #8892B0;
+  --color-border: rgba(0,212,138,0.2);
+  --color-footer: #0D0D1A;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--color-secondary);color:var(--color-text-main);overflow-x:hidden;}
+h1,h2,h3,h4,.logo{font-family:'Clash Display','DM Sans',sans-serif;}
+.mono{font-family:'JetBrains Mono',monospace;}
+a{color:inherit;}
+
+/* ── UTILS ── */
+.container{max-width:1180px;margin:0 auto;padding:0 24px;}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:50px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;cursor:pointer;border:none;transition:transform .2s,box-shadow .2s,background .2s;text-decoration:none;line-height:1;}
+.btn:hover{transform:translateY(-2px);}
+.btn-primary{background:var(--color-primary);color:#0a0a14;}
+.btn-primary:hover{box-shadow:0 8px 30px rgba(0,212,138,.4);}
+.btn-ghost{background:transparent;color:var(--color-text-main);border:1.5px solid rgba(240,244,255,.25);}
+.btn-ghost:hover{border-color:rgba(240,244,255,.6);}
+.btn-outline{background:transparent;color:var(--color-text-main);border:1.5px solid rgba(240,244,255,.3);}
+.btn-outline:hover{background:rgba(255,255,255,.05);}
+.btn-danger{background:rgba(255,107,107,.15);color:var(--color-highlight);border:1px solid rgba(255,107,107,.3);}
+.btn-danger:hover{background:rgba(255,107,107,.25);}
+
+/* ── NAVBAR ── */
+.navbar{position:sticky;top:0;z-index:200;background:rgba(26,26,46,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--color-border);}
+.navbar-inner{max-width:1180px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;}
+.logo{font-size:22px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:6px;}
+.logo-fin{color:var(--color-text-main);}
+.logo-quest{color:var(--color-primary);}
+.nav-links{display:flex;align-items:center;gap:28px;list-style:none;}
+.nav-links a{color:var(--color-text-muted);text-decoration:none;font-size:14px;font-weight:500;transition:color .2s;}
+.nav-links a:hover{color:var(--color-text-main);}
+.nav-actions{display:flex;gap:10px;align-items:center;}
+.nav-actions .btn{padding:9px 18px;font-size:13px;}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px;}
+.hamburger span{display:block;width:22px;height:2px;background:var(--color-text-main);border-radius:2px;}
+.mobile-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:300;}
+.mobile-menu{position:fixed;top:0;right:-100%;width:280px;height:100vh;background:var(--color-surface);z-index:400;padding:72px 28px 40px;display:flex;flex-direction:column;gap:4px;border-left:1px solid var(--color-border);transition:right .35s cubic-bezier(.25,.46,.45,.94);}
+.mobile-menu.open{right:0;}
+.mobile-menu a{color:var(--color-text-main);text-decoration:none;font-size:17px;font-weight:600;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.06);}
+.mobile-close{position:absolute;top:18px;right:18px;background:none;border:none;color:var(--color-text-main);font-size:22px;cursor:pointer;}
+
+/* User avatar pill in nav */
+.nav-user{display:flex;align-items:center;gap:10px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:50px;padding:5px 14px 5px 6px;font-size:13px;text-decoration:none;transition:border-color .2s;}
+.nav-user:hover{border-color:var(--color-primary);}
+.nav-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--color-primary),#00a06a);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#0a0a14;}
+.nav-xp{font-family:'JetBrains Mono',monospace;color:var(--color-accent);font-weight:600;}
+
+/* ── XP TOAST ── */
+.xp-toast{position:fixed;top:76px;right:24px;z-index:999;background:var(--color-surface);border:1px solid var(--color-border);border-radius:14px;padding:12px 20px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,.4),0 0 20px rgba(0,212,138,.15);transform:translateX(180%);transition:transform .45s cubic-bezier(.25,.46,.45,.94);}
+.xp-toast.show{transform:translateX(0);}
+.xp-toast-txt{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:var(--color-primary);}
+
+/* ── REVEAL ── */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.in{opacity:1;transform:translateY(0);}
+
+/* ── FOOTER ── */
+footer{background:var(--color-footer);border-top:1px solid rgba(255,255,255,.06);padding:56px 24px 0;}
+.footer-wrap{max-width:1180px;margin:0 auto;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;padding-bottom:48px;}
+.footer-brand p{font-size:14px;color:var(--color-text-muted);line-height:1.65;max-width:260px;margin-top:12px;}
+.footer-socials{display:flex;gap:10px;margin-top:20px;}
+.footer-soc{width:36px;height:36px;border-radius:8px;background:var(--color-surface);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:15px;text-decoration:none;transition:border-color .2s,transform .2s;}
+.footer-soc:hover{border-color:var(--color-border);transform:translateY(-2px);}
+.footer-col h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px;color:var(--color-text-main);}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:9px;}
+.footer-col ul a{font-size:13px;color:var(--color-text-muted);text-decoration:none;transition:color .2s;}
+.footer-col ul a:hover{color:var(--color-text-main);}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.06);padding:18px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;font-size:12px;color:rgba(255,255,255,.25);}
+.footer-bottom a{color:inherit;text-decoration:none;}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes float{0%,100%{transform:perspective(900px) rotateY(-8deg) rotateX(3deg) translateY(0);}50%{transform:perspective(900px) rotateY(-8deg) rotateX(3deg) translateY(-8px);}}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes glow{0%,100%{box-shadow:0 0 8px rgba(0,212,138,.5);}50%{box-shadow:0 0 18px rgba(0,212,138,.9);}}
+@keyframes pulseAnim{0%,100%{box-shadow:0 0 0 0 rgba(255,107,107,.25);}50%{box-shadow:0 0 0 8px rgba(255,107,107,0);}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1024px){
+  .footer-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:768px){
+  .nav-links,.nav-actions{display:none;}
+  .hamburger{display:flex;}
+  .footer-grid{grid-template-columns:1fr;gap:28px;}
+  .footer-bottom{flex-direction:column;align-items:flex-start;}
+}
+
+    
+.auth-page{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:80px 24px;position:relative;overflow:hidden;}
+.auth-page::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 60% 40%,rgba(0,212,138,.07),transparent 60%);}
+.auth-card{background:var(--color-surface);border:1px solid var(--color-border);border-radius:24px;padding:40px 36px;width:100%;max-width:440px;position:relative;z-index:1;box-shadow:0 40px 80px rgba(0,0,0,.4);}
+.auth-logo{text-align:center;margin-bottom:28px;}
+.auth-title{font-size:26px;font-weight:700;text-align:center;margin-bottom:6px;}
+.auth-sub{font-size:14px;color:var(--color-text-muted);text-align:center;margin-bottom:28px;}
+.form-group{margin-bottom:16px;}
+.form-label{display:block;font-size:13px;font-weight:600;margin-bottom:6px;color:var(--color-text-muted);}
+.form-input{width:100%;background:var(--color-surface-2);border:1.5px solid rgba(255,255,255,.1);border-radius:12px;padding:12px 16px;font-size:15px;color:var(--color-text-main);font-family:'DM Sans',sans-serif;transition:border-color .2s,box-shadow .2s;outline:none;}
+.form-input:focus{border-color:var(--color-primary);box-shadow:0 0 0 3px rgba(0,212,138,.12);}
+.form-input::placeholder{color:var(--color-text-muted);}
+.form-input.error{border-color:var(--color-highlight);}
+.form-error{font-size:12px;color:var(--color-highlight);margin-top:5px;display:none;}
+.form-error.show{display:block;}
+.auth-submit{width:100%;padding:14px;font-size:15px;border-radius:50px;margin-top:8px;}
+.auth-divider{text-align:center;font-size:13px;color:var(--color-text-muted);margin:20px 0;}
+.auth-switch{text-align:center;font-size:14px;color:var(--color-text-muted);margin-top:20px;}
+.auth-switch a{color:var(--color-primary);text-decoration:none;font-weight:600;}
+.auth-switch a:hover{text-decoration:underline;}
+.spinner{width:18px;height:18px;border:2px solid rgba(10,10,20,.3);border-top-color:#0a0a14;border-radius:50%;animation:spin .6s linear infinite;display:none;}
+.global-error{background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.3);border-radius:10px;padding:12px 16px;font-size:13px;color:var(--color-highlight);margin-bottom:16px;display:none;}
+.global-error.show{display:block;}
+
+.password-strength{height:4px;border-radius:2px;background:var(--color-surface-2);margin-top:6px;overflow:hidden;}
+.ps-fill{height:100%;border-radius:2px;width:0%;transition:width .3s,background .3s;}
+.ps-label{font-size:11px;color:var(--color-text-muted);margin-top:4px;}
+.benefit-list{list-style:none;display:flex;flex-direction:column;gap:8px;margin-bottom:24px;}
+.benefit-list li{font-size:13px;color:var(--color-text-muted);display:flex;align-items:center;gap:8px;}
+.benefit-list li span:first-child{color:var(--color-primary);}
+
+  </style>
+</head>
+<body>
+<div class="xp-toast" id="xpToast"><span style="font-size:18px">⚡</span><span class="xp-toast-txt">+50 XP</span></div>
+<script type="module" src="firebase-init.js"></script>
+<script src="components.js"></script>
+<script src="auth.js"></script>
+<script>
+// Inject navbar auth state
+(function(){
+  const user = typeof FQ !== 'undefined' && FQ.getCurrentUser ? FQ.getCurrentUser() : null;
+  const na = document.getElementById('navActions');
+  const ma = document.getElementById('mobileAuthLinks');
+  if(user){
+    const initials = user.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const xp = user.totalXP || user.xpTotal || 0;
+    na.innerHTML = `<a href="dashboard.html" class="nav-user"><div class="nav-avatar">${initials}</div><span>${user.name.split(' ')[0]}</span><span class="nav-xp">⚡${xp}</span></a><button class="btn btn-ghost" onclick="FQ.logout ? FQ.logout() : (localStorage.removeItem('fq_current_user'),location.reload())" style="padding:8px 16px;font-size:13px;">Logout</button>`;
+    ma.innerHTML = `<a href="dashboard.html" onclick="closeMenu()" style="color:var(--color-primary)">👤 Mein Profil</a><a href="#" onclick="(FQ.logout ? FQ.logout() : (localStorage.removeItem('fq_current_user'),location.reload()))" style="color:var(--color-highlight)">🚪 Ausloggen</a>`;
+  }else{
+    na.innerHTML = `<a href="login.html" class="btn btn-outline">Einloggen</a><a href="register.html" class="btn btn-primary">Kostenlos starten</a>`;
+    ma.innerHTML = `<a href="login.html" onclick="closeMenu()">Einloggen</a><a href="register.html" onclick="closeMenu()" style="color:var(--color-primary)">Kostenlos starten →</a>`;
+  }
+})();
+</script>
+<section class="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo"><a href="finquest.html" class="logo"><span>🚀</span><span class="logo-fin">Fin</span><span class="logo-quest">Quest</span></a></div>
+    <h1 class="auth-title">Konto erstellen</h1>
+    <p class="auth-sub">Kostenlos starten. Kein Kreditkarte nötig.</p>
+
+    <ul class="benefit-list">
+      <li><span>✓</span><span>Fortschritt über alle Geräte gespeichert</span></li>
+      <li><span>✓</span><span>XP-System & Achievements freischalten</span></li>
+      <li><span>✓</span><span>Alle Basiskurse kostenlos</span></li>
+    </ul>
+
+    <div class="global-error" id="globalErr"></div>
+
+    <div class="form-group">
+      <label class="form-label">Dein Name</label>
+      <input class="form-input" type="text" id="name" placeholder="Max Mustermann" autocomplete="name">
+    </div>
+    <div class="form-group">
+      <label class="form-label">E-Mail-Adresse</label>
+      <input class="form-input" type="email" id="email" placeholder="du@beispiel.de" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Passwort</label>
+      <input class="form-input" type="password" id="password" placeholder="Mindestens 6 Zeichen" autocomplete="new-password" oninput="checkStrength(this.value)">
+      <div class="password-strength"><div class="ps-fill" id="psFill"></div></div>
+      <div class="ps-label" id="psLabel">Passwort eingeben</div>
+    </div>
+
+    <button class="btn btn-primary auth-submit" onclick="doRegister()" id="submitBtn">
+      <span id="btnText">Jetzt kostenlos starten →</span>
+      <span class="spinner" id="spinner"></span>
+    </button>
+
+    <div class="auth-switch">Bereits ein Konto? <a href="login.html">Einloggen</a></div>
+    <div class="auth-switch" style="margin-top:8px;"><a href="finquest.html" style="color:var(--color-text-muted);font-weight:400;">← Zurück zur Startseite</a></div>
+  </div>
+</section>
+
+<script>
+
+
+
+// ── Toast helper ──
+function showToast(msg, color) {
+  let t = document.getElementById('xpToast');
+  if (!t) return;
+  t.querySelector('.xp-toast-txt').textContent = msg;
+  t.querySelector('.xp-toast-txt').style.color = color || 'var(--color-primary)';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+// ── Mobile menu ──
+function openMenu(){
+  document.getElementById('mobileMenu')?.classList.add('open');
+  document.getElementById('mobileOverlay').style.display='block';
+  document.body.style.overflow='hidden';
+}
+function closeMenu(){
+  document.getElementById('mobileMenu')?.classList.remove('open');
+  document.getElementById('mobileOverlay').style.display='none';
+  document.body.style.overflow='';
+}
+
+// ── Scroll reveal ──
+document.addEventListener('DOMContentLoaded',()=>{
+  const obs = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target);}});
+  },{threshold:.1});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+});
+
+
+if (typeof FQ !== 'undefined' && FQ.getCurrentUser && FQ.getCurrentUser()) window.location.href = 'dashboard.html';
+
+function checkStrength(pw) {
+  const fill = document.getElementById('psFill');
+  const label = document.getElementById('psLabel');
+  let score = 0;
+  if (pw.length >= 6) score++;
+  if (pw.length >= 10) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  const colors = ['#FF6B6B','#FFD166','#00D48A','#00ffaa'];
+  const labels = ['Zu schwach','Schwach','Gut','Stark 💪'];
+  fill.style.width = (score/4*100)+'%';
+  fill.style.background = colors[score-1] || '#333';
+  label.textContent = score ? labels[score-1] : 'Passwort eingeben';
+}
+
+async function doRegister() {
+  const name = document.getElementById('name').value.trim();
+  const email = document.getElementById('email').value.trim();
+  const pw = document.getElementById('password').value;
+  const err = document.getElementById('globalErr');
+  err.classList.remove('show');
+
+  if (!name || !email || !pw) {
+    err.textContent = 'Bitte alle Felder ausfüllen.';
+    err.classList.add('show');
+    return;
+  }
+
+  document.getElementById('btnText').textContent = 'Konto erstellen...';
+  document.getElementById('spinner').style.display = 'block';
+  document.getElementById('submitBtn').disabled = true;
+
+  try {
+    const res = await FQ.register(name, email, pw);
+    document.getElementById('spinner').style.display = 'none';
+    document.getElementById('btnText').textContent = 'Jetzt kostenlos starten →';
+    document.getElementById('submitBtn').disabled = false;
+
+    if (res.ok) {
+      if (res.needsVerification) {
+        // Zeige Verifikations-Screen
+        document.querySelector('.auth-card').innerHTML = `
+          <div style="text-align:center;padding:12px 0 4px">
+            <div style="font-size:56px;margin-bottom:18px">📧</div>
+            <div class="auth-logo" style="justify-content:center;margin-bottom:10px">
+              <a href="finquest.html" class="logo"><span>🚀</span><span class="logo-fin">Fin</span><span class="logo-quest">Quest</span></a>
+            </div>
+            <h2 style="font-size:22px;font-weight:700;margin-bottom:10px;color:var(--color-text-main)">Fast geschafft!</h2>
+            <p style="font-size:14px;color:var(--color-text-muted);line-height:1.7;margin-bottom:8px">
+              Wir haben eine Bestätigungs-E-Mail an<br>
+              <strong style="color:var(--color-text-main)">${email}</strong><br>
+              gesendet.
+            </p>
+            <p style="font-size:13px;color:var(--color-text-muted);line-height:1.6;margin-bottom:28px">
+              Klicke auf den Link in der E-Mail und komm dann hierher zurück um dich einzuloggen.<br>
+              <span style="font-size:12px;opacity:0.7">Schau auch in deinen Spam-Ordner.</span>
+            </p>
+            <a href="login.html" class="btn btn-primary" style="display:inline-flex;justify-content:center;width:100%;margin-bottom:14px">
+              Zum Login →
+            </a>
+            <div style="font-size:12px;color:var(--color-text-muted)">
+              Keine E-Mail erhalten?
+              <a href="register.html" style="color:var(--color-primary);text-decoration:none;font-weight:600">Erneut versuchen</a>
+            </div>
+          </div>`;
+      } else {
+        window.location.href = 'dashboard.html';
+      }
+    } else {
+      err.textContent = res.msg || 'Registrierung fehlgeschlagen.';
+      err.classList.add('show');
+    }
+  } catch(e) {
+    document.getElementById('spinner').style.display = 'none';
+    document.getElementById('btnText').textContent = 'Jetzt kostenlos starten →';
+    document.getElementById('submitBtn').disabled = false;
+    err.textContent = 'Systemfehler: ' + (e.message || e);
+    err.classList.add('show');
+    console.error("doRegister crash:", e);
+  }
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Enter') doRegister(); });
+
+</script>
+<script src="lang.js"></script>
+<script src="theme.js"></script>
+</body></html>

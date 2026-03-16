@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Presse &amp; Medien &#8211; FinQuest</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@700,600,500&display=swap');
+:root{--p:#00D48A;--s:#1A1A2E;--acc:#FFD166;--hl:#FF6B6B;--su:#16213E;--su2:#0F3460;--tx:#F0F4FF;--mu:#8892B0;--bo:rgba(0,212,138,.2)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--s);color:var(--tx);min-height:100vh;display:flex;flex-direction:column}
+h1,h2,h3,.logo{font-family:'Clash Display','DM Sans',sans-serif}
+a{color:inherit;text-decoration:none}
+.nav{position:sticky;top:0;z-index:99;background:rgba(26,26,46,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--bo)}
+.ni{max-width:1100px;margin:0 auto;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between}
+.logo{font-size:21px;font-weight:700;display:flex;align-items:center;gap:5px}
+.lf{color:var(--tx)}.lq{color:var(--p)}
+.nr{display:flex;gap:10px;align-items:center}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 18px;border-radius:50px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;cursor:pointer;border:none;transition:transform .18s,box-shadow .18s;text-decoration:none;line-height:1}
+.btn:hover{transform:translateY(-2px)}
+.bp{background:var(--p);color:#0a0a14}.bp:hover{box-shadow:0 6px 18px rgba(0,212,138,.4)}
+.bo2{background:transparent;color:var(--tx);border:1.5px solid rgba(240,244,255,.26)}
+main{flex:1}
+/* PAGE LAYOUT */
+.hero{padding:60px 24px 48px;position:relative;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.06)}
+.hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 70% 30%,rgba(255,209,102,.07),transparent 60%);pointer-events:none}
+.hi{max-width:960px;margin:0 auto;position:relative;z-index:1}
+.back{display:inline-flex;align-items:center;gap:5px;font-size:13px;color:var(--mu);margin-bottom:22px;transition:color .2s}
+.back:hover{color:var(--p)}
+.htag{display:inline-flex;align-items:center;gap:5px;background:rgba(255,209,102,.1);border:1px solid rgba(255,209,102,.28);border-radius:50px;padding:4px 13px;font-size:11px;font-weight:700;color:var(--acc);margin-bottom:14px}
+.hero h1{font-size:clamp(28px,4vw,46px);font-weight:700;margin-bottom:10px}
+.hero .sub{font-size:16px;color:var(--mu);max-width:540px;line-height:1.7;margin-bottom:28px}
+/* STATS BAR */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:0}
+.sbar-item{background:var(--su);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:18px 14px;text-align:center}
+.sbar-v{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;color:var(--p)}
+.sbar-k{font-size:11px;color:var(--mu);margin-top:3px}
+/* MAIN GRID */
+.page{max-width:960px;margin:0 auto;padding:44px 24px 80px}
+.section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--p);margin-bottom:18px;margin-top:36px;display:flex;align-items:center;gap:9px}
+.section-title::after{content:'';flex:1;height:1px;background:rgba(0,212,138,.14)}
+/* FACT SHEET */
+.factsheet{background:var(--su);border:1px solid rgba(255,255,255,.07);border-radius:18px;padding:28px;margin-bottom:16px}
+.factsheet h2{font-size:16px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.fact-row{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:14px;align-items:flex-start}
+.fact-row:last-child{border:none;padding-bottom:0}
+.fact-k{color:var(--mu);flex-shrink:0;width:160px;font-size:13px}
+.fact-v{color:var(--tx);line-height:1.55}
+/* ZITATE */
+.quote-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+.qcard{background:var(--su);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:22px;position:relative;transition:transform .2s,border-color .2s}
+.qcard:hover{transform:translateY(-3px);border-color:var(--bo)}
+.qcard::before{content:'C';font-family:'Clash Display',sans-serif;font-size:48px;color:var(--p);line-height:0;position:absolute;top:28px;left:20px;opacity:.4}
+.qtext{font-size:14px;line-height:1.7;color:var(--tx);padding-top:18px;font-style:italic}
+.qauthor{margin-top:14px;font-size:12px;color:var(--mu);font-weight:600}
+.qrole{font-size:11px;color:var(--mu);font-weight:400}
+/* MEDIENBERICHTE */
+.press-list{display:flex;flex-direction:column;gap:12px;margin-bottom:16px}
+.pcard{background:var(--su);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:18px 22px;display:flex;align-items:center;gap:16px;transition:transform .2s,border-color .2s}
+.pcard:hover{transform:translateY(-3px);border-color:var(--bo)}
+.pcard-logo{width:44px;height:44px;border-radius:10px;background:var(--su2);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.pcard-info{flex:1}
+.pcard-outlet{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--mu);margin-bottom:3px}
+.pcard-title{font-size:14px;font-weight:600;color:var(--tx);margin-bottom:3px}
+.pcard-date{font-size:11px;color:var(--mu)}
+.pcard-link{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--p);white-space:nowrap}
+.pcard-link:hover{text-decoration:underline}
+/* ASSETS */
+.asset-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+.asset-card{background:var(--su);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:20px;text-align:center;transition:transform .2s,border-color .2s;cursor:pointer}
+.asset-card:hover{transform:translateY(-3px);border-color:var(--bo)}
+.asset-icon{font-size:32px;margin-bottom:10px;display:block}
+.asset-name{font-size:13px;font-weight:700;margin-bottom:4px}
+.asset-desc{font-size:11px;color:var(--mu)}
+.asset-btn{display:inline-flex;align-items:center;gap:4px;background:rgba(0,212,138,.1);color:var(--p);border:1px solid rgba(0,212,138,.2);border-radius:50px;padding:5px 12px;font-size:11px;font-weight:700;margin-top:10px;transition:background .2s}
+.asset-card:hover .asset-btn{background:rgba(0,212,138,.18)}
+/* KONTAKT BOX */
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.cbox{background:var(--su);border:1px solid rgba(255,255,255,.07);border-radius:14px;padding:22px;transition:transform .2s,border-color .2s}
+.cbox:hover{transform:translateY(-3px);border-color:var(--bo)}
+.cbox-icon{font-size:26px;margin-bottom:10px;display:block}
+.cbox h3{font-size:15px;font-weight:700;margin-bottom:5px}
+.cbox p{font-size:13px;color:var(--mu);line-height:1.6;margin-bottom:10px}
+.cbox a.ml{display:inline-flex;align-items:center;gap:5px;color:var(--p);font-size:13px;font-weight:700;transition:gap .2s}
+.cbox a.ml:hover{gap:9px}
+/* HINWEIS */
+.notice{background:rgba(255,209,102,.06);border:1px solid rgba(255,209,102,.2);border-radius:12px;padding:14px 18px;font-size:12px;color:var(--mu);line-height:1.6;margin-top:6px}
+/* FOOTER */
+footer{background:#0D0D1A;border-top:1px solid rgba(255,255,255,.06);padding:44px 24px 0}
+.fw{max-width:1100px;margin:0 auto}
+.fg{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;padding-bottom:40px}
+.fb p{font-size:13px;color:var(--mu);line-height:1.65;max-width:220px;margin-top:8px}
+.fsoc{display:flex;gap:7px;margin-top:16px}
+.fs{width:32px;height:32px;border-radius:7px;background:var(--su);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:13px;transition:border-color .2s,transform .2s}
+.fs:hover{border-color:var(--bo);transform:translateY(-2px)}
+.fc h4{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;margin-bottom:11px;color:var(--tx)}
+.fc ul{list-style:none;display:flex;flex-direction:column;gap:7px}
+.fc ul a{font-size:13px;color:var(--mu);transition:color .2s}
+.fc ul a:hover{color:var(--tx)}
+.fb2{border-top:1px solid rgba(255,255,255,.06);padding:16px 0;display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;font-size:11px;color:rgba(255,255,255,.22)}
+.fb2 a{color:inherit}
+@media(max-width:700px){
+  .stats-bar,.quote-grid,.contact-grid{grid-template-columns:1fr 1fr}
+  .asset-grid{grid-template-columns:1fr 1fr}
+  .fg{grid-template-columns:1fr 1fr;gap:28px}
+  .fact-k{width:110px}
+}
+@media(max-width:480px){
+  .stats-bar,.asset-grid,.quote-grid,.contact-grid{grid-template-columns:1fr}
+  .fg{grid-template-columns:1fr;gap:20px}
+}
+</style>
+</head>
+<body>
+<script type="module" src="firebase-init.js"></script>
+<script src="components.js"></script>
+<script src="auth.js"></script>
+<main>
+<!-- HERO -->
+<section class="hero">
+  <div class="hi">
+    <a href="finquest.html" class="back">&#8592; Zur&uuml;ck zur Startseite</a>
+    <div class="htag">&#128240; Presse &amp; Medien</div>
+    <h1>Pressezentrum</h1>
+    <p class="sub">Alle Informationen, Materialien und Ansprechpartner f&uuml;r eure Berichterstattung &uuml;ber FinQuest.</p>
+    <div class="stats-bar">
+      <div class="sbar-item"><div class="sbar-v">50K+</div><div class="sbar-k">Aktive Lernende</div></div>
+      <div class="sbar-item"><div class="sbar-v">9</div><div class="sbar-k">Kurse</div></div>
+      <div class="sbar-item"><div class="sbar-v">100+</div><div class="sbar-k">Lektionen</div></div>
+      <div class="sbar-item"><div class="sbar-v">2025</div><div class="sbar-k">Gegr&uuml;ndet</div></div>
+    </div>
+  </div>
+</section>
+
+<div class="page">
+
+  <!-- FACT SHEET -->
+  <div class="section-title">&#128203; Fact Sheet</div>
+  <div class="factsheet">
+    <h2>&#128640; FinQuest auf einen Blick</h2>
+    <div class="fact-row"><span class="fact-k">Produkt</span><span class="fact-v">Gamifizierte Finanzbildungsplattform &#8211; Duolingo-Stil f&uuml;r Finanzwissen</span></div>
+    <div class="fact-row"><span class="fact-k">Gegr&uuml;ndet</span><span class="fact-v">2025, als Universit&auml;tsprojekt an der International School of Management (ISM)</span></div>
+    <div class="fact-row"><span class="fact-k">Gr&uuml;nderteam</span><span class="fact-v">6 Studierende aus dem Bereich Wirtschaft</span></div>
+    <div class="fact-row"><span class="fact-k">Sitz</span><span class="fact-v">Hamburg, Deutschland</span></div>
+    <div class="fact-row"><span class="fact-k">Gesch&auml;ftsmodell</span><span class="fact-v">Freemium &#8211; kostenloser Basiszugang, Premium-Abo ab 2,99&nbsp;&#8364;/Monat</span></div>
+    <div class="fact-row"><span class="fact-k">Zielgruppe</span><span class="fact-v">16&#8211;35 Jahre, finanzielle Einsteiger, Berufseinsteiger, Studenten</span></div>
+    <div class="fact-row"><span class="fact-k">Kurse</span><span class="fact-v">Geld 101 &middot; Schulden &amp; Kredit &middot; Investieren &middot; Immobilien &middot; Steuern &middot; FIRE-Bewegung &middot; Rente &amp; Altersvorsorge &middot; Zinseszins &middot; ETFs verstehen &amp; nutzen</span></div>
+    <div class="fact-row"><span class="fact-k">Plattformen</span><span class="fact-v">Web (Desktop &amp; Mobile), iOS &amp; Android App fr&uuml;hestens ab 2027 geplant</span></div>
+    <div class="fact-row"><span class="fact-k">Datenschutz</span><span class="fact-v">DSGVO-konform, keine Datenweitergabe an Dritte, kein Tracking</span></div>
+    <div class="fact-row"><span class="fact-k">Finanzierung</span><span class="fact-v">Eigenfinanziert, Bootstrap &middot; Universit&auml;tsf&ouml;rderung &middot; aktuell pr&auml;-Seed</span></div>
+    <div class="fact-row"><span class="fact-k">Rechtliches</span><span class="fact-v">Keine Finanzberatung. Alle Inhalte dienen ausschlie&szlig;lich der allgemeinen Bildung.</span></div>
+  </div>
+
+
+  <!-- KONTAKT -->
+  <div class="section-title">&#128222; Pressekontakt</div>
+  <div class="contact-grid">
+    <div class="cbox">
+      <span class="cbox-icon">&#128222;</span>
+      <h3>Presseanfragen</h3>
+      <p>F&uuml;r Interviewanfragen, Zitate, Hintergrundinformationen und Fakten-Checks.</p>
+      <a href="/cdn-cgi/l/email-protection#0b7b796e78786e4b6d62657a7e6e787f266f6e6664256f6e" class="ml"><span class="__cf_email__" data-cfemail="8ffffdeafcfceacfe9e6e1fefaeafcfba2ebeae2e0a1ebea">[email&#160;protected]</span> &#8594;</a>
+    </div>
+    <div class="cbox">
+      <span class="cbox-icon">&#9889;</span>
+      <h3>Schnellantwort</h3>
+      <p>Kurze Deadline? Wir antworten auf dringende Presseanfragen in der Regel innerhalb von 2 Stunden.</p>
+      <a href="/cdn-cgi/l/email-protection#e7979582949482a7818e899692829493ca83828a88c98382d89492858d828493daa3b5aea9a0a2a9a3" class="ml">Dringende Anfrage &#8594;</a>
+    </div>
+    <div class="cbox">
+      <span class="cbox-icon">&#128247;</span>
+      <h3>Social Media</h3>
+      <p>Fotos, Clips und Content f&uuml;r Social-Media-Berichte auf Anfrage oder direkt auf unseren Kan&auml;len.</p>
+      <a href="https://instagram.com" target="_blank" class="ml">Instagram &#8594;</a>
+    </div>
+    <div class="cbox">
+      <span class="cbox-icon">&#128196;</span>
+      <h3>Alle Kontakte</h3>
+      <p>Allgemeine Anfragen, Kooperationen, Schulen und mehr &uuml;bersichtlich auf einer Seite.</p>
+      <a href="kontakt.html" class="ml">Kontaktseite &#8594;</a>
+    </div>
+  </div>
+
+  <div class="notice">
+    &#9888;&#65039; <strong>Hinweis:</strong> FinQuest ist ein Universit&auml;tsprojekt an der International School of Management (ISM) Hamburg und dient prim&auml;r Demonstrationszwecken.
+    Alle Inhalte stellen keine Finanzberatung dar. Pressematerial auf Anfrage verf&uuml;gbar.
+  </div>
+
+</div>
+</main>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+try{
+  const user = typeof FQ !== 'undefined' && FQ.getCurrentUser ? FQ.getCurrentUser() : null;
+  const nr = document.getElementById('navRight');
+  if(user && nr){
+    const i = user.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const xp = user.totalXP || user.xpTotal || 0;
+    nr.innerHTML=`<a href="dashboard.html" style="display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:50px;padding:4px 12px 4px 5px"><div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#00D48A,#00a06a);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#0a0a14">${i}</div><span style="font-size:13px;font-weight:600">${user.name.split(' ')[0]}</span><span style="font-family:JetBrains Mono,monospace;font-size:11px;color:#FFD166">⚡${xp}</span></a>
+  <button class="btn bo2" onclick="(FQ.logout ? FQ.logout() : (localStorage.removeItem('fq_current_user'),location.reload()))" style="font-size:12px;padding:7px 14px">Logout</button>`;
+  }
+}catch(e){}
+</script>-e 
+<script src="lang.js"></script>
+<script src="theme.js"></script>
+</body>
+</html>

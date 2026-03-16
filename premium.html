@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Premium – FinQuest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    @import url('https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap');
+    
+:root {
+  --color-primary: #00D48A;
+  --color-secondary: #1A1A2E;
+  --color-accent: #FFD166;
+  --color-highlight: #FF6B6B;
+  --color-surface: #16213E;
+  --color-surface-2: #0F3460;
+  --color-text-main: #F0F4FF;
+  --color-text-muted: #8892B0;
+  --color-border: rgba(0,212,138,0.2);
+  --color-footer: #0D0D1A;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--color-secondary);color:var(--color-text-main);overflow-x:hidden;}
+h1,h2,h3,h4,.logo{font-family:'Clash Display','DM Sans',sans-serif;}
+.mono{font-family:'JetBrains Mono',monospace;}
+a{color:inherit;}
+
+/* ── UTILS ── */
+.container{max-width:1180px;margin:0 auto;padding:0 24px;}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 22px;border-radius:50px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;cursor:pointer;border:none;transition:transform .2s,box-shadow .2s,background .2s;text-decoration:none;line-height:1;}
+.btn:hover{transform:translateY(-2px);}
+.btn-primary{background:var(--color-primary);color:#0a0a14;}
+.btn-primary:hover{box-shadow:0 8px 30px rgba(0,212,138,.4);}
+.btn-ghost{background:transparent;color:var(--color-text-main);border:1.5px solid rgba(240,244,255,.25);}
+.btn-ghost:hover{border-color:rgba(240,244,255,.6);}
+.btn-outline{background:transparent;color:var(--color-text-main);border:1.5px solid rgba(240,244,255,.3);}
+.btn-outline:hover{background:rgba(255,255,255,.05);}
+.btn-danger{background:rgba(255,107,107,.15);color:var(--color-highlight);border:1px solid rgba(255,107,107,.3);}
+.btn-danger:hover{background:rgba(255,107,107,.25);}
+
+/* ── NAVBAR ── */
+.navbar{position:sticky;top:0;z-index:200;background:rgba(26,26,46,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--color-border);}
+.navbar-inner{max-width:1180px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;}
+.logo{font-size:22px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:6px;}
+.logo-fin{color:var(--color-text-main);}
+.logo-quest{color:var(--color-primary);}
+.nav-links{display:flex;align-items:center;gap:28px;list-style:none;}
+.nav-links a{color:var(--color-text-muted);text-decoration:none;font-size:14px;font-weight:500;transition:color .2s;}
+.nav-links a:hover{color:var(--color-text-main);}
+.nav-actions{display:flex;gap:10px;align-items:center;}
+.nav-actions .btn{padding:9px 18px;font-size:13px;}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px;}
+.hamburger span{display:block;width:22px;height:2px;background:var(--color-text-main);border-radius:2px;}
+.mobile-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:300;}
+.mobile-menu{position:fixed;top:0;right:-100%;width:280px;height:100vh;background:var(--color-surface);z-index:400;padding:72px 28px 40px;display:flex;flex-direction:column;gap:4px;border-left:1px solid var(--color-border);transition:right .35s cubic-bezier(.25,.46,.45,.94);}
+.mobile-menu.open{right:0;}
+.mobile-menu a{color:var(--color-text-main);text-decoration:none;font-size:17px;font-weight:600;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.06);}
+.mobile-close{position:absolute;top:18px;right:18px;background:none;border:none;color:var(--color-text-main);font-size:22px;cursor:pointer;}
+
+/* User avatar pill in nav */
+.nav-user{display:flex;align-items:center;gap:10px;background:var(--color-surface);border:1px solid var(--color-border);border-radius:50px;padding:5px 14px 5px 6px;font-size:13px;text-decoration:none;transition:border-color .2s;}
+.nav-user:hover{border-color:var(--color-primary);}
+.nav-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--color-primary),#00a06a);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#0a0a14;}
+.nav-xp{font-family:'JetBrains Mono',monospace;color:var(--color-accent);font-weight:600;}
+
+/* ── XP TOAST ── */
+.xp-toast{position:fixed;top:76px;right:24px;z-index:999;background:var(--color-surface);border:1px solid var(--color-border);border-radius:14px;padding:12px 20px;display:flex;align-items:center;gap:10px;box-shadow:0 8px 32px rgba(0,0,0,.4),0 0 20px rgba(0,212,138,.15);transform:translateX(180%);transition:transform .45s cubic-bezier(.25,.46,.45,.94);}
+.xp-toast.show{transform:translateX(0);}
+.xp-toast-txt{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:var(--color-primary);}
+
+/* ── REVEAL ── */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease;}
+.reveal.in{opacity:1;transform:translateY(0);}
+
+/* ── FOOTER ── */
+footer{background:var(--color-footer);border-top:1px solid rgba(255,255,255,.06);padding:56px 24px 0;}
+.footer-wrap{max-width:1180px;margin:0 auto;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;padding-bottom:48px;}
+.footer-brand p{font-size:14px;color:var(--color-text-muted);line-height:1.65;max-width:260px;margin-top:12px;}
+.footer-socials{display:flex;gap:10px;margin-top:20px;}
+.footer-soc{width:36px;height:36px;border-radius:8px;background:var(--color-surface);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:15px;text-decoration:none;transition:border-color .2s,transform .2s;}
+.footer-soc:hover{border-color:var(--color-border);transform:translateY(-2px);}
+.footer-col h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px;color:var(--color-text-main);}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:9px;}
+.footer-col ul a{font-size:13px;color:var(--color-text-muted);text-decoration:none;transition:color .2s;}
+.footer-col ul a:hover{color:var(--color-text-main);}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.06);padding:18px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;font-size:12px;color:rgba(255,255,255,.25);}
+.footer-bottom a{color:inherit;text-decoration:none;}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes float{0%,100%{transform:perspective(900px) rotateY(-8deg) rotateX(3deg) translateY(0);}50%{transform:perspective(900px) rotateY(-8deg) rotateX(3deg) translateY(-8px);}}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes glow{0%,100%{box-shadow:0 0 8px rgba(0,212,138,.5);}50%{box-shadow:0 0 18px rgba(0,212,138,.9);}}
+@keyframes pulseAnim{0%,100%{box-shadow:0 0 0 0 rgba(255,107,107,.25);}50%{box-shadow:0 0 0 8px rgba(255,107,107,0);}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+@keyframes slideUp{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1024px){
+  .footer-grid{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:768px){
+  .nav-links,.nav-actions{display:none;}
+  .hamburger{display:flex;}
+  .footer-grid{grid-template-columns:1fr;gap:28px;}
+  .footer-bottom{flex-direction:column;align-items:flex-start;}
+}
+
+    
+.premium-hero{padding:80px 24px 60px;text-align:center;position:relative;overflow:hidden;}
+.premium-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(0,212,138,.1),transparent 60%);}
+.premium-hero-inner{position:relative;z-index:1;max-width:700px;margin:0 auto;}
+.premium-hero h1{font-size:clamp(36px,5vw,60px);font-weight:700;line-height:1.05;margin-bottom:16px;}
+.gold{background:linear-gradient(90deg,#FFD166,#ffb700);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.premium-hero p{font-size:18px;color:var(--color-text-muted);line-height:1.7;margin-bottom:40px;}
+.pricing-grid{max-width:860px;margin:0 auto;padding:0 24px 80px;display:grid;grid-template-columns:1fr 1.05fr;gap:20px;align-items:start;}
+.price-card{background:var(--color-surface);border:1px solid rgba(255,255,255,.08);border-radius:24px;padding:36px 32px;}
+.price-card.premium-card{border-color:var(--color-primary);box-shadow:0 0 0 1px var(--color-primary),0 0 50px rgba(0,212,138,.12);position:relative;}
+.price-badge{position:absolute;top:-14px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,var(--color-primary),#00ffaa);color:#0a0a14;border-radius:50px;padding:5px 18px;font-size:12px;font-weight:700;white-space:nowrap;}
+.price-plan{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--color-text-muted);margin-bottom:10px;}
+.premium-card .price-plan{color:var(--color-primary);}
+.price-old{font-size:14px;color:var(--color-text-muted);text-decoration:line-through;min-height:20px;}
+.price-main{font-family:'Clash Display',sans-serif;font-size:46px;font-weight:700;margin:4px 0;}
+.price-period{font-size:14px;color:var(--color-text-muted);}
+.price-divider{border:none;border-top:1px solid rgba(255,255,255,.07);margin:22px 0;}
+.price-features{list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:26px;}
+.price-features li{display:flex;align-items:center;gap:10px;font-size:14px;}
+.price-features li.yes .fi{color:var(--color-primary);}
+.price-features li.no{color:var(--color-text-muted);}
+.price-features li.no .fi{opacity:.25;}
+.billing-toggle{display:flex;align-items:center;justify-content:center;gap:12px;margin:0 auto 40px;font-size:14px;color:var(--color-text-muted);}
+.toggle-wrap{position:relative;width:52px;height:28px;cursor:pointer;display:inline-block;flex-shrink:0;}
+.toggle-wrap input{opacity:0;width:0;height:0;position:absolute;}
+.t-track{position:absolute;inset:0;background:var(--color-surface-2);border-radius:14px;border:1px solid var(--color-border);}
+.t-thumb{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--color-primary);transition:left .3s;}
+.toggle-wrap input:checked~.t-thumb{left:27px;}
+.save-badge{background:rgba(0,212,138,.1);color:var(--color-primary);border-radius:50px;padding:3px 10px;font-size:12px;font-weight:600;}
+@media(max-width:700px){.pricing-grid{grid-template-columns:1fr;}}
+
+  </style>
+</head>
+<body>
+<div class="mobile-overlay" id="mobileOverlay" onclick="closeMenu()"></div>
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-close" onclick="closeMenu()">✕</button>
+  <a href="finquest.html#how" onclick="closeMenu()">Wie es funktioniert</a>
+  <a href="finquest.html#courses" onclick="closeMenu()">Kurse</a>
+  <a href="finquest.html#pricing" onclick="closeMenu()">Preise</a>
+  <div id="mobileAuthLinks"></div>
+</div>
+<div class="xp-toast" id="xpToast"><span style="font-size:18px">⚡</span><span class="xp-toast-txt">+50 XP</span></div>
+<script type="module" src="firebase-init.js"></script>
+<script src="components.js"></script>
+<script src="auth.js"></script>
+<script>
+// Inject navbar auth state
+(function(){
+  const user = typeof FQ !== 'undefined' && FQ.getCurrentUser ? FQ.getCurrentUser() : null;
+  const na = document.getElementById('navActions');
+  const ma = document.getElementById('mobileAuthLinks');
+  if(user){
+    const initials = user.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const xp = user.totalXP || user.xpTotal || 0;
+    na.innerHTML = `<a href="profil.html" class="nav-user"><div class="nav-avatar">${initials}</div><span>${user.name.split(' ')[0]}</span><span class="nav-xp">⚡${xp}</span></a><button class="btn btn-ghost" onclick="FQ.logout ? FQ.logout() : (localStorage.removeItem('fq_current_user'),location.reload())" style="padding:8px 16px;font-size:13px;">Logout</button>`;
+    ma.innerHTML = `<a href="profil.html" onclick="closeMenu()" style="color:var(--color-primary)">👤 Mein Profil</a><a href="#" onclick="(FQ.logout ? FQ.logout() : (localStorage.removeItem('fq_current_user'),location.reload()))" style="color:var(--color-highlight)">🚪 Ausloggen</a>`;
+  }else{
+    na.innerHTML = `<a href="login.html" class="btn btn-outline">Einloggen</a><a href="register.html" class="btn btn-primary">Kostenlos starten</a>`;
+    ma.innerHTML = `<a href="login.html" onclick="closeMenu()">Einloggen</a><a href="register.html" onclick="closeMenu()" style="color:var(--color-primary)">Kostenlos starten →</a>`;
+  }
+})();
+</script>
+<section class="premium-hero">
+  <div class="premium-hero-inner">
+    <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,209,102,.1);border:1px solid rgba(255,209,102,.3);border-radius:50px;padding:8px 18px;font-size:13px;font-weight:600;color:var(--color-accent);margin-bottom:24px;">⭐ FinQuest Premium</div>
+    <h1>Lerne ohne Ablenkung.<br><span class="gold">Werde finanziell frei.</span></h1>
+    <p>Keine Werbung, Offline-Modus, exklusive Kurse und doppelte XP-Belohnungen. Für die, die es ernst meinen.</p>
+  </div>
+</section>
+
+<div class="billing-toggle">
+  Monatlich
+  <label class="toggle-wrap">
+    <input type="checkbox" id="billingToggle" onchange="updatePricing()">
+    <div class="t-track"></div>
+    <div class="t-thumb"></div>
+  </label>
+  Jährlich <span class="save-badge">40% sparen</span>
+</div>
+
+<div class="pricing-grid">
+  <!-- Free -->
+  <div class="price-card">
+    <div class="price-plan">Free</div>
+    <div class="price-old">&nbsp;</div>
+    <div class="price-main">0 €</div>
+    <div class="price-period">Für immer kostenlos</div>
+    <hr class="price-divider">
+    <ul class="price-features">
+      <li class="yes"><span class="fi">✓</span> Alle Basiskurse</li>
+      <li class="yes"><span class="fi">✓</span> XP & Streak-System</li>
+      <li class="yes"><span class="fi">✓</span> Quizze & Achievements</li>
+      <li class="no"><span class="fi">✗</span> Werbung vorhanden</li>
+      <li class="no"><span class="fi">✗</span> Offline lernen</li>
+      <li class="no"><span class="fi">✗</span> Exklusive Kurse</li>
+      <li class="no"><span class="fi">✗</span> 2× XP-Belohnungen</li>
+    </ul>
+    <a href="register.html" class="btn btn-ghost" style="width:100%;justify-content:center;">Kostenlos starten</a>
+  </div>
+
+  <!-- Premium -->
+  <div class="price-card premium-card">
+    <div class="price-badge">⭐ Beliebteste Wahl</div>
+    <div class="price-plan">Premium</div>
+    <div class="price-old" id="oldPrice">4,99 €/Monat</div>
+    <div class="price-main" id="mainPrice">4,99 €</div>
+    <div class="price-period" id="pricePeriod">pro Monat</div>
+    <div style="font-size:12px;color:var(--color-text-muted);margin-top:4px;" id="noteText">7 Tage kostenlos testen</div>
+    <hr class="price-divider">
+    <ul class="price-features">
+      <li class="yes"><span class="fi">✓</span> Alle Basiskurse</li>
+      <li class="yes"><span class="fi">✓</span> XP & Streak-System</li>
+      <li class="yes"><span class="fi">✓</span> Quizze & Achievements</li>
+      <li class="yes"><span class="fi">✓</span> Keine Werbung</li>
+      <li class="yes"><span class="fi">✓</span> Offline lernen</li>
+      <li class="yes"><span class="fi">✓</span> Exklusive Kurse</li>
+      <li class="yes"><span class="fi">✓</span> 2× XP-Belohnungen</li>
+    </ul>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;padding:15px;" onclick="activatePremium()">Premium testen – 7 Tage gratis →</button>
+    <div style="text-align:center;font-size:12px;color:var(--color-text-muted);margin-top:10px;">Jederzeit kündbar · Keine Kreditkarte für Test</div>
+  </div>
+</div>
+
+
+<script>
+
+
+// ── Toast helper ──
+function showToast(msg, color) {
+  let t = document.getElementById('xpToast');
+  if (!t) return;
+  t.querySelector('.xp-toast-txt').textContent = msg;
+  t.querySelector('.xp-toast-txt').style.color = color || 'var(--color-primary)';
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 3200);
+}
+
+// ── Mobile menu ──
+function openMenu(){
+  document.getElementById('mobileMenu')?.classList.add('open');
+  document.getElementById('mobileOverlay').style.display='block';
+  document.body.style.overflow='hidden';
+}
+function closeMenu(){
+  document.getElementById('mobileMenu')?.classList.remove('open');
+  document.getElementById('mobileOverlay').style.display='none';
+  document.body.style.overflow='';
+}
+
+// ── Scroll reveal ──
+document.addEventListener('DOMContentLoaded',()=>{
+  const obs = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target);}});
+  },{threshold:.1});
+  document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
+});
+
+
+function updatePricing() {
+  const annual = document.getElementById('billingToggle').checked;
+  document.getElementById('mainPrice').textContent = annual ? '2,99 €' : '4,99 €';
+  document.getElementById('oldPrice').textContent = annual ? '4,99 €/Monat' : '';
+  document.getElementById('noteText').textContent = annual ? 'Jährlich abgerechnet (35,88 €/Jahr)' : '7 Tage kostenlos testen';
+}
+
+function activatePremium() {
+  const user = typeof FQ !== 'undefined' && FQ.getCurrentUser ? FQ.getCurrentUser() : null;
+  if (!user) {
+    window.location.href = 'register.html';
+    return;
+  }
+  user.premium = true;
+  if (typeof FQ !== 'undefined' && FQ.saveUser) {
+    FQ.saveUser(user);
+  } else {
+    // fallback
+    let users = JSON.parse(localStorage.getItem('fq_users')||'{}');
+    if(users[user.email]) {
+      users[user.email].premium = true;
+      localStorage.setItem('fq_users', JSON.stringify(users));
+    }
+  }
+  showToast('⭐ Premium aktiviert! Viel Spaß!', 'var(--color-accent)');
+  setTimeout(() => window.location.href = 'profil.html', 2000);
+}
+
+</script>
+<script src="lang.js"></script>
+<script src="theme.js"></script>
+</body></html>
