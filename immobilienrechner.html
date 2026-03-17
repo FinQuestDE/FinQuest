@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="de" translate="no" class="notranslate">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google" content="notranslate">
+  <title>Immobilien-Investment-Rechner – FinQuest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    @import url('https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap');
+    :root{--p:#00D48A;--s:#1A1A2E;--acc:#FFD166;--hl:#FF6B6B;--surf:#16213E;--surf2:#0F3460;--txt:#F0F4FF;--muted:#8892B0;--border:rgba(0,212,138,0.2)}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'DM Sans',sans-serif;background:var(--s);color:var(--txt);overflow-x:hidden;min-height:100vh}
+    h1,h2,h3,h4{font-family:'Clash Display','DM Sans',sans-serif}
+    /* Range inputs */
+    input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--surf2);outline:none;cursor:pointer}
+    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--p);cursor:pointer;box-shadow:0 0 8px rgba(0,212,138,0.5);transition:transform .15s}
+    input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
+    input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--p);cursor:pointer;border:none}
+    input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+    input[type=number]{-moz-appearance:textfield}
+    /* Navbar */
+    .navbar{position:sticky;top:0;z-index:200;background:rgba(26,26,46,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+    .navbar-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px}
+    .logo-link{font-size:22px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:6px}
+    .logo-fin{color:var(--txt)}.logo-quest{color:var(--p)}
+    .btn-back{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:50px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:13px;cursor:pointer;border:1.5px solid rgba(240,244,255,0.25);background:transparent;color:var(--txt);text-decoration:none;transition:all .2s}
+    .btn-back:hover{background:rgba(255,255,255,0.06)}
+    .tool-badge{background:rgba(0,212,138,0.12);border:1px solid var(--border);border-radius:50px;padding:5px 14px;font-size:12px;font-weight:700;color:var(--p);letter-spacing:.04em}
+    /* Scrollbar */
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--surf2)}::-webkit-scrollbar-thumb{background:rgba(0,212,138,.3);border-radius:10px}
+    /* Animations */
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="dashboard.html" class="logo-link"><span class="logo-fin">Fin</span><span class="logo-quest">Quest</span></a>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="tool-badge">🏠 Immobilien-Rechner</span>
+      <a href="dashboard.html" class="btn-back">← Dashboard</a>
+    </div>
+  </div>
+</nav>
+
+<div id="app-root"></div>
+
+<!-- 1. React UMD (synchronous, no async issues) -->
+<script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
+
+<!-- 2. auth.js — provides FQ object (async Firebase init inside) -->
+<script src="auth.js"></script>
+
+<!-- 3. App — plain React.createElement, zero Babel/JSX, mounts immediately -->
+<script>
+(function () {
+'use strict';
+
+/* ─── Shortcuts ─── */
+const ce = React.createElement;
+const { useState, useMemo, useEffect } = React;
+const RC = Recharts;
+
+/* ─── Auth helpers ───
+   Works regardless of whether FQ has fully initialized yet.
+   Falls back to raw localStorage if FQ isn't ready.                */
+function readCosm() {
+  try { if (typeof FQ !== 'undefined') return FQ.getCosmetics() || {}; } catch(_){}
+  try {
+    const email = localStorage.getItem('fq_current_user');
+    if (!email) return {};
+    const users = JSON.parse(localStorage.getItem('fq_users') || '{}');
+    const u = users[email] || {};
+    return u.cosmetics || {};
+  } catch(_){ return {}; }
+}
+function readUser() {
+  try { if (typeof FQ !== 'undefined') return FQ.getCurrentUser(); } catch(_){}
+  try {
+    const email = localStorage.getItem('fq_current_user');
+    if (!email) return null;
+    const users = JSON.parse(localStorage.getItem('fq_users') || '{}');
+    return users[email] || null;
+  } catch(_){ return null; }
+}
+function isUnlocked() {
+  if (!readUser()) return false;
+  const c = readCosm();
+  return Array.isArray(c.unlockedTools) && c.unlockedTools.includes('immorechner');
+}
+
+/* ─── Formatters ─── */
+const fmt    = (n, d=0) => new Intl.NumberFormat('de-DE',{minimumFractionDigits:d,maximumFractionDigits:d}).format(n);
+const eur    = (n, d=0) => fmt(n,d) + ' €';
+const pct    = (n, d=1) => fmt(n,d) + ' %';
+const monat  = (n)      => fmt(Math.round(n)) + ' €/Mo';
+
+/* ─── Shared style tokens ─── */
+const mono = {fontFamily:"'JetBrains Mono',monospace"};
+const card = {background:'var(--surf)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:'20px',padding:'24px',marginBottom:'16px'};
+
+/* ─── KPI color ─── */
+const kColor = (v, hi, lo) => v >= hi ? '#00D48A' : v >= lo ? '#FFD166' : '#FF6B6B';
+
+/* ────────────────────────────────────
+   TOOLTIP COMPONENT
+──────────────────────────────────── */
+function Tip({text}) {
+  const [open, setOpen] = useState(false);
+  return ce('span', {
+    style:{position:'relative',display:'inline-flex',verticalAlign:'middle',marginLeft:'5px'},
+    onMouseEnter:()=>setOpen(true), onMouseLeave:()=>setOpen(false)
+  },
+    ce('span',{style:{
+      width:'16px',height:'16px',borderRadius:'50%',background:'rgba(255,255,255,0.08)',
+      border:'1px solid rgba(255,255,255,0.12)',fontSize:'10px',display:'inline-flex',
+      alignItems:'center',justifyContent:'center',cursor:'help',color:'var(--muted)',flexShrink:0
+    }},'?'),
+    open && ce('span',{style:{
+      position:'absolute',bottom:'calc(100% + 8px)',left:'50%',transform:'translateX(-50%)',
+      width:'220px',padding:'10px 14px',background:'#0a0a1e',
+      border:'1px solid rgba(0,212,138,0.25)',borderRadius:'12px',fontSize:'11px',
+      lineHeight:'1.6',color:'var(--txt)',boxShadow:'0 8px 24px rgba(0,0,0,0.6)',
+      zIndex:100,fontFamily:"'DM Sans',sans-serif",fontWeight:'400',
+      whiteSpace:'normal',pointerEvents:'none'
+    }}, text)
+  );
+}
+
+/* ────────────────────────────────────
+   INPUT ROW
+──────────────────────────────────── */
+function InputRow({label, value, min, max, step, onChange, tip, disp}) {
+  const display = disp ? disp(value) : eur(value);
+  return ce('div',{style:{marginBottom:'18px'}},
+    ce('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'8px'}},
+      ce('span',{style:{fontSize:'13px',fontWeight:'600',display:'flex',alignItems:'center'}},
+        label, tip && ce(Tip,{text:tip})
+      ),
+      ce('span',{className:'notranslate',style:{...mono,fontSize:'13px',fontWeight:'700',color:'var(--p)'}}, display)
+    ),
+    ce('input',{type:'range',min,max,step,value,onChange:ev=>onChange(parseFloat(ev.target.value))}),
+    ce('input',{
+      type:'number',min,max,step,value,
+      style:{width:'100%',background:'var(--surf2)',border:'1.5px solid rgba(255,255,255,0.08)',
+             borderRadius:'10px',padding:'8px 12px',marginTop:'8px',
+             ...mono,fontSize:'13px',color:'var(--txt)',outline:'none',textAlign:'right'},
+      onChange:ev=>{const v=parseFloat(ev.target.value);if(!isNaN(v))onChange(Math.max(min,Math.min(max,v)));},
+      onFocus:ev=>ev.target.style.borderColor='var(--p)',
+      onBlur :ev=>ev.target.style.borderColor='rgba(255,255,255,0.08)'
+    })
+  );
+}
+
+/* ────────────────────────────────────
+   DEAL BANNER
+──────────────────────────────────── */
+function DealBanner({rating, cashflow, netto, ekRendite}) {
+  const cfg = {
+    green :{c:'#00D48A',bg:'rgba(0,212,138,0.09)',  bd:'rgba(0,212,138,0.38)',  icon:'✅',lab:'DEAL',    msg:'Positiver Cashflow & starke Rendite – dieses Investment lohnt sich!'},
+    yellow:{c:'#FFD166',bg:'rgba(255,209,102,0.09)',bd:'rgba(255,209,102,0.38)',icon:'⚠️',lab:'NEUTRAL',msg:'Solider Vermögensaufbau durch Tilgung, aber kaum bis kein Cashflow.'},
+    red   :{c:'#FF6B6B',bg:'rgba(255,107,107,0.09)',bd:'rgba(255,107,107,0.38)',icon:'❌',lab:'NO DEAL',msg:'Hohe monatliche Belastung – monatliche Zuzahlung nötig. Kritisch prüfen!'},
+  }[rating];
+  return ce('div',{style:{
+    background:cfg.bg,border:`2px solid ${cfg.bd}`,borderRadius:'20px',
+    padding:'20px 28px',marginBottom:'28px',
+    display:'flex',alignItems:'center',gap:'20px',flexWrap:'wrap',
+    animation:'fadeUp .4s ease both'
+  }},
+    ce('div',{style:{fontSize:'36px'}}, cfg.icon),
+    ce('div',{style:{flex:1,minWidth:'180px'}},
+      ce('div',{style:{fontFamily:"'Clash Display','DM Sans',sans-serif",fontSize:'22px',fontWeight:'700',color:cfg.c,letterSpacing:'.02em'}}, cfg.lab),
+      ce('div',{style:{fontSize:'13px',opacity:'.85',marginTop:'3px',lineHeight:'1.5'}}, cfg.msg)
+    ),
+    ce('div',{style:{display:'flex',gap:'10px',flexWrap:'wrap'}},
+      [
+        [monat(cashflow),  'Monatl. Cashflow', cashflow>=0?'#00D48A':'#FF6B6B'],
+        [pct(netto),       'Nettomietrendite',  netto>=4?'#00D48A':netto>=2.5?'#FFD166':'#FF6B6B'],
+        [pct(ekRendite),   'EK-Rendite',        ekRendite>=5?'#00D48A':ekRendite>=0?'#FFD166':'#FF6B6B'],
+      ].map(([val,key,col]) =>
+        ce('div',{key,style:{textAlign:'center',padding:'10px 14px',borderRadius:'12px',background:'rgba(0,0,0,0.18)'}},
+          ce('div',{className:'notranslate',style:{...mono,fontSize:'17px',fontWeight:'700',color:col}}, val),
+          ce('div',{style:{fontSize:'10px',opacity:'.6',marginTop:'2px',whiteSpace:'nowrap'}}, key)
+        )
+      )
+    )
+  );
+}
+
+/* ────────────────────────────────────
+   CUSTOM CHART TOOLTIPS
+──────────────────────────────────── */
+function PieTip({active,payload}) {
+  if (!active||!payload?.length) return null;
+  const d=payload[0];
+  return ce('div',{style:{background:'#0a0a1e',border:'1px solid rgba(0,212,138,.2)',borderRadius:'12px',padding:'10px 14px',fontSize:'12px'}},
+    ce('div',{style:{fontWeight:'700',color:'#F0F4FF',marginBottom:'4px'}},d.name),
+    ce('div',{style:{...mono,color:'#00D48A',fontWeight:'700'}}, eur(d.value)+' /Mo'),
+    ce('div',{style:{color:'#8892B0',fontSize:'11px',marginTop:'2px'}},d.payload.pct)
+  );
+}
+function BarTip({active,payload,label}) {
+  if (!active||!payload?.length) return null;
+  return ce('div',{style:{background:'#0a0a1e',border:'1px solid rgba(0,212,138,.2)',borderRadius:'12px',padding:'10px 14px',fontSize:'12px'}},
+    ce('div',{style:{fontWeight:'700',color:'#F0F4FF',marginBottom:'6px'}},label),
+    payload.map(p=>ce('div',{key:p.name,style:{...mono,color:p.color,marginBottom:'2px'}},
+      ce('span',{style:{color:'#8892B0',fontFamily:"'DM Sans',sans-serif",fontWeight:'600'}},p.name+': '),
+      eur(p.value)
+    ))
+  );
+}
+
+/* ────────────────────────────────────
+   LOCK SCREEN
+──────────────────────────────────── */
+function LockScreen() {
+  return ce('div',{style:{
+    minHeight:'70vh',display:'flex',flexDirection:'column',alignItems:'center',
+    justifyContent:'center',gap:'20px',padding:'24px',textAlign:'center'
+  }},
+    ce('div',{style:{fontSize:'64px',animation:'float 3s ease-in-out infinite'}},'🔒'),
+    ce('h1',{style:{fontSize:'28px',fontWeight:'700',fontFamily:"'Clash Display','DM Sans',sans-serif"}},'Rechner noch nicht freigeschaltet'),
+    ce('p',{style:{fontSize:'15px',color:'var(--muted)',maxWidth:'400px',lineHeight:'1.6'}},
+      'Schalte den Immobilien-Investment-Rechner im Dashboard für ',
+      ce('strong',{style:{color:'var(--p)'}},'500 FinCoins'),
+      ' frei und analysiere Investments in Sekunden.'
+    ),
+    ce('a',{href:'dashboard.html',style:{
+      display:'inline-flex',alignItems:'center',gap:'8px',padding:'12px 28px',borderRadius:'50px',
+      background:'var(--p)',color:'#0a0a14',fontFamily:"'DM Sans',sans-serif",
+      fontWeight:'700',fontSize:'15px',textDecoration:'none',marginTop:'8px'
+    }},'🏠 Zum Dashboard →'),
+    ce('p',{style:{fontSize:'12px',color:'rgba(255,255,255,0.18)',marginTop:'8px'}},'Bereits freigeschaltet? Bitte einloggen.')
+  );
+}
+
+/* ────────────────────────────────────
+   LOADING SCREEN
+──────────────────────────────────── */
+function Loader() {
+  return ce('div',{style:{minHeight:'60vh',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:'16px'}},
+    ce('div',{style:{width:'40px',height:'40px',border:'3px solid rgba(0,212,138,0.15)',borderTopColor:'var(--p)',borderRadius:'50%',animation:'spin .8s linear infinite'}}),
+    ce('div',{style:{fontSize:'14px',color:'var(--muted)'}},'Rechner wird geladen…')
+  );
+}
+
+/* ────────────────────────────────────
+   MAIN CALCULATOR
+──────────────────────────────────── */
+function Calculator() {
+  const [kaufpreis,    setKaufpreis]    = useState(300000);
+  const [nebenkosten,  setNebenkosten]  = useState(10);
+  const [eigenkapital, setEigenkapital] = useState(80000);
+  const [zinssatz,     setZinssatz]     = useState(3.5);
+  const [tilgung,      setTilgung]      = useState(2);
+  const [kaltmiete,    setKaltmiete]    = useState(1200);
+  const [nichtUmlag,   setNichtUmlag]   = useState(200);
+  const [instand,      setInstand]      = useState(100);
+
+  const r = useMemo(()=>{
+    const gesamtK  = kaufpreis*(1+nebenkosten/100);
+    const darlehen = Math.max(0,gesamtK-eigenkapital);
+    const annRate  = (zinssatz+tilgung)/100;
+    const ann      = darlehen*annRate/12;
+    const zinsMo   = darlehen*zinssatz/100/12;
+    const tilgMo   = Math.max(0,ann-zinsMo);
+    const jahrM    = kaltmiete*12;
+    const jahrB    = (nichtUmlag+instand)*12;
+    const brutto   = kaufpreis>0?(jahrM/kaufpreis)*100:0;
+    const netto    = gesamtK>0?((jahrM-jahrB)/gesamtK)*100:0;
+    const cashflow = kaltmiete-ann-nichtUmlag-instand;
+    const ekRend   = eigenkapital>0?(cashflow*12/eigenkapital)*100:0;
+    const gKosten  = ann+nichtUmlag+instand;
+    const deckung  = gKosten>0?Math.min(1,kaltmiete/gKosten):1;
+    const verv     = kaltmiete>0?kaufpreis/(kaltmiete*12):0;
+    const rating   = cashflow>=0&&netto>=4?'green':cashflow>=-300&&netto>=2.5?'yellow':'red';
+
+    // 10-year wealth
+    const years=[];
+    let rest=darlehen;
+    for(let y=0;y<=10;y++){
+      years.push({label:y===0?'Start':`J${y}`,Restschuld:Math.round(Math.max(0,rest)),Getilgt:Math.round(Math.max(0,darlehen-rest))});
+      const jz=Math.max(0,rest)*zinssatz/100;
+      rest-=(ann*12-jz);
+    }
+
+    // Pie
+    const tot=zinsMo+tilgMo+instand+nichtUmlag;
+    const pp=v=>'('+( tot>0?fmt(v/tot*100,0):0 )+'%)';
+    const pie=[
+      {name:'Zinsen',         value:Math.round(zinsMo), color:'#FF6B6B',pct:pp(zinsMo)},
+      {name:'Tilgung',        value:Math.round(tilgMo), color:'#00D48A',pct:pp(tilgMo)},
+      {name:'Instandhaltung', value:instand,             color:'#FFD166',pct:pp(instand)},
+      {name:'Verwaltung/NK',  value:nichtUmlag,          color:'#88CFFF',pct:pp(nichtUmlag)},
+    ].filter(d=>d.value>0);
+
+    return{gesamtK,darlehen,ann,zinsMo,tilgMo,brutto,netto,cashflow,ekRend,gKosten,deckung,verv,rating,years,pie};
+  },[kaufpreis,nebenkosten,eigenkapital,zinssatz,tilgung,kaltmiete,nichtUmlag,instand]);
+
+  const cfC = r.cashflow>=0?'#00D48A':r.cashflow>=-300?'#FFD166':'#FF6B6B';
+
+  return ce('div',{style:{maxWidth:'1200px',margin:'0 auto',padding:'32px 24px 80px'}},
+
+    ce(DealBanner,{rating:r.rating,cashflow:r.cashflow,netto:r.netto,ekRendite:r.ekRend}),
+
+    // 2-col grid
+    ce('div',{style:{display:'grid',gridTemplateColumns:'minmax(0,1fr) minmax(0,1.45fr)',gap:'24px',alignItems:'start'}},
+
+      /* ── LEFT: INPUTS ── */
+      ce('div',null,
+
+        // Kaufdaten
+        ce('div',{style:card},
+          ce('div',{style:{fontSize:'14px',fontWeight:'700',marginBottom:'18px',display:'flex',alignItems:'center',gap:'8px'}},
+            '🏠 Kaufdaten',
+            ce('span',{style:{marginLeft:'auto',...mono,fontSize:'11px',color:'var(--muted)',background:'rgba(255,255,255,0.06)',borderRadius:'8px',padding:'3px 9px'}},
+              'Gesamt: '+eur(r.gesamtK))
+          ),
+          ce(InputRow,{label:'Kaufpreis',value:kaufpreis,min:50000,max:2000000,step:5000,onChange:setKaufpreis,
+            tip:'Der Nettokaufpreis der Immobilie ohne Nebenkosten.'}),
+          ce(InputRow,{label:'Kaufnebenkosten',value:nebenkosten,min:0,max:20,step:0.5,onChange:setNebenkosten,
+            tip:`Notar, Grunderwerbsteuer, Makler etc. Meist 8–12 %. Aktuell: +${eur(kaufpreis*nebenkosten/100)}`,
+            disp:v=>pct(v)})
+        ),
+
+        // Finanzierung
+        ce('div',{style:card},
+          ce('div',{style:{fontSize:'14px',fontWeight:'700',marginBottom:'18px',display:'flex',alignItems:'center',gap:'8px'}},
+            '💳 Finanzierung',
+            ce('span',{style:{marginLeft:'auto',...mono,fontSize:'11px',color:'var(--muted)',background:'rgba(255,255,255,0.06)',borderRadius:'8px',padding:'3px 9px'}},
+              'Darlehen: '+eur(r.darlehen))
+          ),
+          ce(InputRow,{label:'Eigenkapital',value:eigenkapital,min:0,max:500000,step:1000,onChange:setEigenkapital,
+            tip:'Dein eingesetztes Kapital (Anzahlung). Je höher, desto geringer das Darlehen.'}),
+          ce(InputRow,{label:'Zinssatz p.a.',value:zinssatz,min:0.1,max:10,step:0.1,onChange:setZinssatz,
+            tip:'Der jährliche Nominalzinssatz deines Hypothekendarlehens.',disp:v=>pct(v)}),
+          ce(InputRow,{label:'Anfängl. Tilgung p.a.',value:tilgung,min:0.5,max:10,step:0.5,onChange:setTilgung,
+            tip:'2 % = Standardwert. Höhere Tilgung = schnellere Schuldenfreiheit.',disp:v=>pct(v)}),
+          // Annuität info box
+          ce('div',{style:{background:'var(--surf2)',borderRadius:'12px',padding:'12px 14px',marginTop:'12px'}},
+            ce('div',{style:{display:'flex',justifyContent:'space-between',marginBottom:'8px'}},
+              ce('span',{style:{fontSize:'12px',color:'var(--muted)'}},'Monatliche Annuität'),
+              ce('span',{className:'notranslate',style:{...mono,fontSize:'14px',fontWeight:'700',color:'var(--acc)'}}, monat(r.ann))
+            ),
+            ce('div',{style:{display:'flex',gap:'16px'}},
+              ce('div',{style:{flex:1}},
+                ce('div',{style:{fontSize:'11px',color:'var(--muted)',marginBottom:'2px'}},'davon Zinsen'),
+                ce('div',{className:'notranslate',style:{...mono,fontSize:'13px',fontWeight:'700',color:'#FF6B6B'}}, monat(r.zinsMo))
+              ),
+              ce('div',{style:{flex:1}},
+                ce('div',{style:{fontSize:'11px',color:'var(--muted)',marginBottom:'2px'}},'davon Tilgung'),
+                ce('div',{className:'notranslate',style:{...mono,fontSize:'13px',fontWeight:'700',color:'var(--p)'}}, monat(r.tilgMo))
+              )
+            )
+          )
+        ),
+
+        // Bewirtschaftung
+        ce('div',{style:{...card,marginBottom:0}},
+          ce('div',{style:{fontSize:'14px',fontWeight:'700',marginBottom:'18px'}},'🔑 Bewirtschaftung'),
+          ce(InputRow,{label:'Monatl. Kaltmiete',value:kaltmiete,min:100,max:5000,step:50,onChange:setKaltmiete,
+            tip:'Die monatliche Nettokaltmiete ohne Betriebskosten. Basis aller Renditeberechnungen.'}),
+          ce(InputRow,{label:'Nicht umlagefähige NK',value:nichtUmlag,min:0,max:1000,step:10,onChange:setNichtUmlag,
+            tip:'Kosten die du als Vermieter trägst: Hausverwaltung, Versicherungen (Vermieteranteil).'}),
+          ce(InputRow,{label:'Instandhaltungsrücklage',value:instand,min:0,max:1000,step:10,onChange:setInstand,
+            tip:'Empfehlung: 1–1,5 € pro m² und Monat als Puffer für Reparaturen & Modernisierungen.'})
+        )
+      ),
+
+      /* ── RIGHT: OUTPUTS ── */
+      ce('div',null,
+
+        // BIG CASHFLOW
+        ce('div',{style:{
+          background:'var(--surf)',borderRadius:'20px',padding:'24px',marginBottom:'16px',
+          textAlign:'center',border:`2px solid ${cfC}55`,boxShadow:`0 0 40px ${cfC}18`,
+          transition:'all .4s cubic-bezier(.22,1,.36,1)'
+        }},
+          ce('div',{style:{fontSize:'13px',fontWeight:'700',letterSpacing:'.08em',textTransform:'uppercase',
+            marginBottom:'8px',opacity:'.6',display:'flex',alignItems:'center',justifyContent:'center',gap:'6px'}},
+            '📊 Monatlicher Cashflow',
+            ce(Tip,{text:'Mieteinnahmen minus alle monatlichen Kosten (Annuität + NK + Instandhaltung). Zeigt ob das Investment Geld ein- oder ausbringt.'})
+          ),
+          ce('div',{className:'notranslate',style:{...mono,fontSize:'52px',fontWeight:'700',lineHeight:'1',marginBottom:'8px',color:cfC,transition:'color .4s'}},
+            (r.cashflow>=0?'+':'')+fmt(Math.round(r.cashflow)),
+            ce('span',{style:{fontSize:'18px',opacity:'.5',fontWeight:'400'}},' €/Mo')
+          ),
+          ce('div',{style:{fontSize:'12px',color:'var(--muted)',lineHeight:'1.5'}},
+            'Miete: ',ce('strong',{className:'notranslate',style:{color:'var(--p)'}},monat(kaltmiete)),
+            ' · Annuität: ',ce('strong',{className:'notranslate',style:{color:'var(--acc)'}},monat(r.ann)),
+            ' · Kosten: ',ce('strong',{className:'notranslate',style:{color:'var(--muted)'}},monat(nichtUmlag+instand))
+          )
+        ),
+
+        // KPI GRID
+        ce('div',{style:{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px',marginBottom:'16px'}},
+          ...[
+            {lab:'📈 Bruttomietrendite',tip:'Jahreskaltmiete ÷ Kaufpreis × 100. Rohrendite ohne Kosten. Richtwert: ≥ 5 % = gut.',val:pct(r.brutto),color:kColor(r.brutto,5,3.5),sub:'Ziel: ≥ 5,0 %'},
+            {lab:'💰 Nettomietrendite', tip:'(Jahreskaltmiete – jährl. Bewirtschaftungskosten) ÷ Gesamtinvestition × 100.',val:pct(r.netto),color:kColor(r.netto,4,2.5),sub:'Ziel: ≥ 4,0 %'},
+            {lab:'🏦 Eigenkapitalrendite',tip:'Jährl. Cashflow ÷ eingesetztes EK × 100. Wie effizient arbeitet dein Kapital?',val:pct(r.ekRend),color:kColor(r.ekRend,5,0),sub:'EK: '+eur(eigenkapital)},
+            {lab:'🔢 Vervielfältiger',  tip:'Kaufpreis ÷ Jahreskaltmiete. In wie vielen Jahren amortisiert sich der Kauf? Ziel: unter 25.',val:r.verv>0?fmt(r.verv,1)+'x':'–',color:kColor(r.verv>0?50-r.verv:0,25,0),sub:'Kaufpreis / Jahreskaltmiete'},
+          ].map(k=>
+            ce('div',{key:k.lab,style:{background:'var(--surf)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:'16px',padding:'16px'}},
+              ce('div',{style:{fontSize:'11px',color:'var(--muted)',marginBottom:'4px',display:'flex',alignItems:'center'}},
+                k.lab, ce(Tip,{text:k.tip})
+              ),
+              ce('div',{className:'notranslate',style:{...mono,fontSize:'22px',fontWeight:'700',color:k.color}},k.val),
+              ce('div',{style:{fontSize:'10px',color:'var(--muted)',marginTop:'4px'}},k.sub)
+            )
+          )
+        ),
+
+        // DECKUNGSGRAD
+        ce('div',{style:{background:'var(--surf)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:'16px',padding:'18px',marginBottom:'16px'}},
+          ce('div',{style:{fontSize:'12px',fontWeight:'700',color:'var(--muted)',textTransform:'uppercase',letterSpacing:'.06em',marginBottom:'12px'}},'📊 Gesamtkostendeckung'),
+          ce('div',{style:{display:'flex',justifyContent:'space-between',marginBottom:'8px',fontSize:'12px'}},
+            ce('span',null,'Einnahmen ',ce('strong',{className:'notranslate',style:{color:'var(--p)'}},monat(kaltmiete))),
+            ce('span',null,'Kosten ',   ce('strong',{className:'notranslate',style:{color:'var(--acc)'}},monat(r.gKosten)))
+          ),
+          ce('div',{style:{height:'10px',background:'var(--surf2)',borderRadius:'5px',overflow:'hidden',marginBottom:'8px'}},
+            ce('div',{style:{height:'100%',borderRadius:'5px',transition:'width .6s cubic-bezier(.22,1,.36,1)',
+              width:`${Math.min(100,r.deckung*100)}%`,
+              background:r.deckung>=1?'var(--p)':r.deckung>=0.85?'#FFD166':'#FF6B6B'}})
+          ),
+          ce('div',{style:{display:'flex',justifyContent:'space-between',fontSize:'11px',color:'var(--muted)'}},
+            ce('span',{className:'notranslate'},fmt(r.deckung*100,0)+' % gedeckt'),
+            ce('span',{style:{color:r.cashflow>=0?'var(--p)':'var(--hl)',fontWeight:'700'}},
+              r.cashflow>=0?'✓ Selbsttragend':'⚠ Zuzahlung: '+monat(-r.cashflow))
+          )
+        ),
+
+        // PIE CHART
+        ce('div',{style:{...card}},
+          ce('div',{style:{fontSize:'14px',fontWeight:'700',marginBottom:'4px'}},'🥧 Monatliche Kostenverteilung'),
+          ce('div',{style:{fontSize:'11px',color:'var(--muted)',marginBottom:'18px',lineHeight:'1.4'}},
+            'Aufteilung der Gesamtkosten ',ce('strong',{className:'notranslate'},monat(r.gKosten)),' vs. Mieteinnahmen'
+          ),
+          ce(RC.ResponsiveContainer,{width:'100%',height:220},
+            ce(RC.PieChart,null,
+              ce(RC.Pie,{data:r.pie,cx:'50%',cy:'50%',innerRadius:55,outerRadius:90,paddingAngle:3,dataKey:'value'},
+                ...r.pie.map((d,i)=>ce(RC.Cell,{key:i,fill:d.color,strokeWidth:0}))
+              ),
+              ce(RC.Tooltip,{content:ce(PieTip)}),
+              ce(RC.Legend,{iconType:'circle',iconSize:8,
+                formatter:v=>ce('span',{style:{fontSize:'12px',color:'#8892B0'}},v)})
+            )
+          ),
+          ce('div',{style:{display:'flex',alignItems:'center',justifyContent:'space-between',background:'var(--surf2)',borderRadius:'12px',padding:'10px 16px',marginTop:'8px'}},
+            ce('span',{style:{fontSize:'12px',color:'var(--muted)'}},'🏠 Mieteinnahmen'),
+            ce('span',{className:'notranslate',style:{...mono,fontSize:'14px',fontWeight:'700',color:'var(--p)'}},monat(kaltmiete)),
+            ce('span',{style:{fontSize:'12px',fontWeight:'700',color:r.cashflow>=0?'#00D48A':'#FF6B6B'}},
+              r.cashflow>=0?'▲ Überschuss':'▼ Unterdeckung')
+          )
+        ),
+
+        // BAR CHART
+        ce('div',{style:{...card}},
+          ce('div',{style:{fontSize:'14px',fontWeight:'700',marginBottom:'4px'}},'📈 Vermögensaufbau – 10 Jahre'),
+          ce('div',{style:{fontSize:'11px',color:'var(--muted)',marginBottom:'18px',lineHeight:'1.4'}},
+            'Restschuld sinkt von ',ce('strong',{className:'notranslate'},eur(r.darlehen)),
+            ' → getilgter Anteil wächst mit der Zeit'
+          ),
+          ce(RC.ResponsiveContainer,{width:'100%',height:220},
+            ce(RC.BarChart,{data:r.years,barSize:18,margin:{top:4,right:4,left:0,bottom:0}},
+              ce(RC.CartesianGrid,{strokeDasharray:'3 3',stroke:'rgba(255,255,255,0.05)',vertical:false}),
+              ce(RC.XAxis,{dataKey:'label',tick:{fill:'#8892B0',fontSize:11},axisLine:false,tickLine:false}),
+              ce(RC.YAxis,{tickFormatter:v=>fmt(v/1000)+'k',tick:{fill:'#8892B0',fontSize:10},axisLine:false,tickLine:false,width:40}),
+              ce(RC.Tooltip,{content:ce(BarTip)}),
+              ce(RC.Legend,{iconType:'square',iconSize:10,
+                formatter:v=>ce('span',{style:{fontSize:'12px',color:'#8892B0'}},v)}),
+              ce(RC.Bar,{dataKey:'Restschuld',stackId:'a',fill:'#FF6B6B',fillOpacity:0.8,radius:[0,0,4,4]}),
+              ce(RC.Bar,{dataKey:'Getilgt',   stackId:'a',fill:'#00D48A',fillOpacity:0.9,radius:[4,4,0,0]})
+            )
+          ),
+          ce('div',{style:{display:'flex',gap:'12px',marginTop:'12px',flexWrap:'wrap'}},
+            ...[
+              {lab:'Restschuld nach 10 J.',     val:eur(r.years[10]?.Restschuld??0), c:'#FF6B6B',bg:'rgba(255,107,107,0.08)',bd:'rgba(255,107,107,0.2)'},
+              {lab:'Getilgt nach 10 J.',         val:eur(r.years[10]?.Getilgt??0),   c:'var(--p)', bg:'rgba(0,212,138,0.08)', bd:'rgba(0,212,138,0.2)'},
+              {lab:'Eigenkapital (EK + Tilgung)',val:eur(eigenkapital+(r.years[10]?.Getilgt??0)),c:'var(--acc)',bg:'rgba(255,209,102,0.08)',bd:'rgba(255,209,102,0.2)'},
+            ].map(s=>
+              ce('div',{key:s.lab,style:{flex:'1 1 100px',background:s.bg,border:`1px solid ${s.bd}`,borderRadius:'12px',padding:'10px 14px'}},
+                ce('div',{style:{fontSize:'11px',color:'#8892B0',marginBottom:'3px'}},s.lab),
+                ce('div',{className:'notranslate',style:{...mono,fontSize:'16px',fontWeight:'700',color:s.c}},s.val)
+              )
+            )
+          )
+        ),
+
+        ce('div',{style:{fontSize:'11px',color:'var(--muted)',lineHeight:'1.6',padding:'12px 16px',
+          background:'rgba(255,255,255,0.02)',borderRadius:'12px',border:'1px solid rgba(255,255,255,0.05)'}},
+          '⚠️ ',ce('strong',null,'Kein Finanzrat:'),
+          ' Dieser Rechner dient ausschließlich Bildungszwecken. Leerstand, Steueraspekte und Wertsteigerungen sind nicht berücksichtigt. Bitte konsultiere einen Finanzberater.'
+        )
+      ) // end right col
+    ) // end grid
+  ); // end page
+} // end Calculator
+
+/* ────────────────────────────────────
+   ROOT APP  ← handles auth state
+──────────────────────────────────── */
+function App() {
+  // 'loading' | 'locked' | 'open'
+  const [status, setStatus] = useState('loading');
+
+  useEffect(()=>{
+    function check() {
+      try {
+        const unlocked = isUnlocked();
+        setStatus(unlocked ? 'open' : 'locked');
+      } catch(_) {
+        setStatus('locked');
+      }
+    }
+
+    // Check immediately (handles localStorage-only auth)
+    check();
+
+    // Hook FQ auth callback → re-check when Firebase resolves
+    window._authCallback = check;
+
+    // Safety net: re-check after 600 ms and 1.5 s in case Firebase is slow
+    const t1 = setTimeout(check, 600);
+    const t2 = setTimeout(check, 1500);
+    return ()=>{ clearTimeout(t1); clearTimeout(t2); };
+  }, []);
+
+  if (status === 'loading') return ce(Loader);
+  if (status === 'locked')  return ce(LockScreen);
+  return ce(Calculator);
+}
+
+/* ─── MOUNT ─── */
+ReactDOM.createRoot(document.getElementById('app-root')).render(ce(App));
+
+})();
+</script>
+
+<!-- lang.js & theme.js — unchanged, always last -->
+<script src="lang.js"></script>
+<script src="theme.js"></script>
+</body>
+</html>
