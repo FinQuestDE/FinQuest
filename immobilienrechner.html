@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="de" translate="no" class="notranslate">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="google" content="notranslate">
+  <title>Immobilien-Investment-Rechner – FinQuest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    @import url('https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap');
+    :root{--p:#00D48A;--s:#1A1A2E;--acc:#FFD166;--hl:#FF6B6B;--surf:#16213E;--surf2:#0F3460;--txt:#F0F4FF;--muted:#8892B0;--border:rgba(0,212,138,0.2)}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'DM Sans',sans-serif;background:var(--s);color:var(--txt);overflow-x:hidden;min-height:100vh}
+    h1,h2,h3,h4,.logo{font-family:'Clash Display','DM Sans',sans-serif}
+    input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:var(--surf2);outline:none;cursor:pointer}
+    input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:18px;height:18px;border-radius:50%;background:var(--p);cursor:pointer;box-shadow:0 0 8px rgba(0,212,138,0.5);transition:transform .15s}
+    input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.2)}
+    input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--p);cursor:pointer;border:none}
+    input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+    input[type=number]{-moz-appearance:textfield}
+
+    /* ── NAVBAR ── */
+    .navbar{position:sticky;top:0;z-index:200;background:rgba(26,26,46,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+    .navbar-inner{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px}
+    .logo{font-size:22px;font-weight:700;text-decoration:none;display:flex;align-items:center;gap:6px}
+    .logo-fin{color:var(--txt)}.logo-quest{color:var(--p)}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:50px;font-family:'DM Sans',sans-serif;font-weight:600;font-size:14px;cursor:pointer;border:none;transition:transform .2s,box-shadow .2s;text-decoration:none;line-height:1}
+    .btn:hover{transform:translateY(-2px)}
+    .btn-ghost{background:transparent;color:var(--txt);border:1.5px solid rgba(240,244,255,0.25)}
+    .btn-primary{background:var(--p);color:#0a0a14}
+    .btn-primary:hover{box-shadow:0 8px 24px rgba(0,212,138,0.4)}
+    .tool-badge{background:rgba(0,212,138,0.12);border:1px solid var(--border);border-radius:50px;padding:5px 14px;font-size:12px;font-weight:700;color:var(--p);letter-spacing:.04em}
+
+    /* ── LOCK SCREEN ── */
+    #lock-screen{position:fixed;inset:0;z-index:500;background:var(--s);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:24px;text-align:center}
+    .lock-icon{font-size:64px;margin-bottom:8px;animation:float 3s ease-in-out infinite}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+    .lock-title{font-size:28px;font-weight:700;margin-bottom:8px}
+    .lock-desc{font-size:15px;color:var(--muted);max-width:400px;line-height:1.6;margin-bottom:8px}
+    .lock-hint{font-size:13px;color:rgba(255,255,255,0.2);margin-top:12px}
+
+    /* ── PAGE ── */
+    .page{max-width:1200px;margin:0 auto;padding:32px 24px 80px}
+
+    /* ── DEAL BANNER ── */
+    .deal-banner{border-radius:20px;padding:20px 28px;margin-bottom:28px;display:flex;align-items:center;gap:20px;position:relative;overflow:hidden;transition:all .4s cubic-bezier(.22,1,.36,1)}
+    .deal-banner::before{content:'';position:absolute;inset:0;opacity:.04;pointer-events:none}
+    .deal-label{font-family:'Clash Display','DM Sans',sans-serif;font-size:22px;font-weight:700;letter-spacing:.02em}
+    .deal-msg{font-size:13px;opacity:.8;margin-top:3px;line-height:1.5}
+    .deal-icon{font-size:40px;flex-shrink:0}
+    .deal-metrics{margin-left:auto;display:flex;gap:20px;flex-shrink:0}
+    .deal-metric{text-align:center;padding:8px 16px;border-radius:12px;background:rgba(0,0,0,0.15)}
+    .deal-metric-val{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700}
+    .deal-metric-key{font-size:10px;opacity:.6;margin-top:2px}
+
+    /* ── GRID ── */
+    .calc-grid{display:grid;grid-template-columns:1fr 1.4fr;gap:24px;align-items:start}
+    @media(max-width:900px){.calc-grid{grid-template-columns:1fr}}
+
+    /* ── CARDS ── */
+    .card{background:var(--surf);border:1px solid rgba(255,255,255,0.07);border-radius:20px;padding:24px;margin-bottom:16px}
+    .card:last-child{margin-bottom:0}
+    .card-title{font-size:14px;font-weight:700;margin-bottom:18px;display:flex;align-items:center;gap:8px;color:var(--txt)}
+    .card-title-badge{background:rgba(255,255,255,0.07);border-radius:8px;padding:3px 10px;font-size:11px;color:var(--muted);font-weight:600;margin-left:auto}
+
+    /* ── INPUTS ── */
+    .input-row{margin-bottom:18px}
+    .input-row:last-child{margin-bottom:0}
+    .input-label{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .input-label-text{font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px}
+    .input-val{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--p)}
+    .tooltip-wrap{position:relative;display:inline-flex}
+    .tooltip-icon{width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);font-size:10px;display:inline-flex;align-items:center;justify-content:center;cursor:help;color:var(--muted);transition:background .15s;flex-shrink:0}
+    .tooltip-icon:hover{background:rgba(0,212,138,0.15);color:var(--p)}
+    .tooltip-popup{position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);width:220px;padding:10px 14px;background:#0a0a1e;border:1px solid rgba(0,212,138,0.25);border-radius:12px;font-size:11px;line-height:1.6;color:var(--txt);box-shadow:0 8px 24px rgba(0,0,0,0.6);z-index:100;pointer-events:none;opacity:0;transition:opacity .15s;font-family:'DM Sans',sans-serif;font-weight:400}
+    .tooltip-wrap:hover .tooltip-popup{opacity:1}
+    .num-input{width:100%;background:var(--surf2);border:1.5px solid rgba(255,255,255,0.08);border-radius:10px;padding:8px 12px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--txt);outline:none;transition:border-color .2s;text-align:right}
+    .num-input:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(0,212,138,0.12)}
+
+    /* ── KPI CARDS ── */
+    .kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px}
+    .kpi-card{background:var(--surf);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:16px;transition:border-color .2s}
+    .kpi-card:hover{border-color:rgba(255,255,255,0.15)}
+    .kpi-label{font-size:11px;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;gap:5px}
+    .kpi-val{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:700;line-height:1}
+    .kpi-sub{font-size:10px;color:var(--muted);margin-top:4px;line-height:1.4}
+
+    /* ── CASHFLOW BIG ── */
+    .cashflow-card{background:var(--surf);border-radius:20px;padding:24px;margin-bottom:16px;text-align:center;border:2px solid transparent;transition:all .4s cubic-bezier(.22,1,.36,1);position:relative;overflow:hidden}
+    .cashflow-card::before{content:'';position:absolute;inset:0;opacity:.03;pointer-events:none}
+    .cashflow-label{font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px;opacity:.6;display:flex;align-items:center;justify-content:center;gap:6px}
+    .cashflow-val{font-family:'JetBrains Mono',monospace;font-size:52px;font-weight:700;line-height:1;margin-bottom:8px;transition:color .4s}
+    .cashflow-unit{font-size:18px;opacity:.5;font-weight:400}
+    .cashflow-sub{font-size:12px;color:var(--muted);line-height:1.5}
+
+    /* ── CHART CARDS ── */
+    .chart-card{background:var(--surf);border:1px solid rgba(255,255,255,0.07);border-radius:20px;padding:24px;margin-bottom:16px}
+    .chart-card:last-child{margin-bottom:0}
+    .chart-title{font-size:14px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+    .chart-sub{font-size:11px;color:var(--muted);margin-bottom:18px;line-height:1.4}
+
+    /* ── COVERAGE BAR ── */
+    .coverage-wrap{background:var(--surf);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:18px;margin-bottom:16px}
+    .coverage-title{font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+    .coverage-bar-track{height:10px;background:var(--surf2);border-radius:5px;overflow:hidden;margin-bottom:8px;position:relative}
+    .coverage-bar-fill{height:100%;border-radius:5px;transition:width .6s cubic-bezier(.22,1,.36,1)}
+    .coverage-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+
+    /* ── TOAST ── */
+    .toast{position:fixed;bottom:28px;right:28px;z-index:999;background:var(--surf);border:1px solid var(--border);border-radius:14px;padding:14px 20px;display:flex;align-items:center;gap:10px;box-shadow:0 12px 32px rgba(0,0,0,.4);transform:translateY(80px);opacity:0;transition:all .35s cubic-bezier(.22,1,.36,1);pointer-events:none;max-width:320px}
+    .toast.show{transform:translateY(0);opacity:1}
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .fade-up{animation:fadeUp .5s ease both}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--surf2)}::-webkit-scrollbar-thumb{background:rgba(0,212,138,.3);border-radius:10px}
+  </style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="navbar-inner">
+    <a href="dashboard.html" class="logo"><span class="logo-fin">Fin</span><span class="logo-quest">Quest</span></a>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span class="tool-badge">🏠 Immobilien-Rechner</span>
+      <a href="dashboard.html" class="btn btn-ghost" style="font-size:13px;padding:8px 16px">← Dashboard</a>
+    </div>
+  </div>
+</nav>
+
+<!-- LOCK SCREEN (shown when not unlocked) -->
+<div id="lock-screen" style="display:none">
+  <div class="lock-icon">🔒</div>
+  <div class="lock-title">Rechner noch nicht freigeschaltet</div>
+  <div class="lock-desc">Schalte den Immobilien-Investment-Rechner im Dashboard für <strong style="color:var(--p)">500 FinCoins</strong> frei und analysiere Investments in Sekunden.</div>
+  <a href="dashboard.html" class="btn btn-primary" style="margin-top:8px">🏠 Zum Dashboard →</a>
+  <div class="lock-hint">Bereits freigeschaltet? Bitte einloggen.</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+  <div id="toast-icon" style="font-size:22px">✅</div>
+  <div>
+    <div id="toast-msg" style="font-size:13px;font-weight:600;line-height:1.4"></div>
+    <div id="toast-sub" style="font-size:11px;color:var(--muted);margin-top:2px"></div>
+  </div>
+</div>
+
+<!-- MAIN APP (React mount point) -->
+<div id="app-root" style="display:none">
+  <div id="react-root"></div>
+</div>
+
+<!-- React 18 + Recharts + Babel Standalone via CDN -->
+<script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js" crossorigin></script>
+<script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js" crossorigin></script>
+
+<!-- Auth integration (same as dashboard) -->
+<script src="auth.js"></script>
+<script>
+/* ═══════════════════════════════════════════════════
+   AUTH + UNLOCK CHECK
+═══════════════════════════════════════════════════ */
+let _appMounted = false;
+
+function checkUnlock() {
+  const user = (typeof FQ !== 'undefined') ? FQ.getCurrentUser() : null;
+
+  if (!user) {
+    document.getElementById('lock-screen').style.display = 'flex';
+    document.getElementById('app-root').style.display = 'none';
+    return;
+  }
+
+  const cosm = (typeof FQ !== 'undefined') ? FQ.getCosmetics() : {};
+  const unlocked = !!(cosm.unlockedTools && cosm.unlockedTools.includes('immorechner'));
+
+  if (unlocked) {
+    document.getElementById('lock-screen').style.display = 'none';
+    document.getElementById('app-root').style.display = 'block';
+    if (!_appMounted) {
+      _appMounted = true;
+      setTimeout(mountReactApp, 50);
+    }
+  } else {
+    document.getElementById('lock-screen').style.display = 'flex';
+    document.getElementById('app-root').style.display = 'none';
+  }
+}
+
+function mountReactApp() {
+  // Babel transforms the JSX block below dynamically
+  const scripts = document.querySelectorAll('script[type="text/babel"]');
+  scripts.forEach(s => {
+    try { Babel.transformScriptTags && Babel.transformScriptTags(); } catch(e) {}
+  });
+  // Trigger React render
+  if (typeof renderImmobApp === 'function') renderImmobApp();
+}
+
+// Toast helper
+let _toastTimer;
+function showToast(icon, msg, sub) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-icon').textContent = icon;
+  document.getElementById('toast-msg').textContent = msg;
+  document.getElementById('toast-sub').textContent = sub || '';
+  t.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+FQ.init();
+window._authCallback = checkUnlock;
+checkUnlock();
+</script>
+
+<!-- ═══════════ REACT CALCULATOR ═══════════ -->
+<script type="text/babel" data-presets="react">
+const { useState, useMemo, useCallback, useRef } = React;
+const {
+  PieChart, Pie, Cell, Tooltip: RCTooltip, Legend,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer, LabelList
+} = Recharts;
+
+/* ── HELPERS ── */
+const fmt = (n, dec=0) => new Intl.NumberFormat('de-DE', {minimumFractionDigits:dec, maximumFractionDigits:dec}).format(n);
+const fmtEur = (n, dec=0) => fmt(n, dec) + ' €';
+const fmtPct = (n, dec=1) => fmt(n, dec) + ' %';
+const fmtEurMo = (n) => fmt(Math.round(n)) + ' €/Mo';
+
+/* ── TOOLTIP ── */
+function Tip({ text }) {
+  return (
+    <span className="tooltip-wrap">
+      <span className="tooltip-icon">?</span>
+      <span className="tooltip-popup">{text}</span>
+    </span>
+  );
+}
+
+/* ── SLIDER + NUMBER INPUT ── */
+function InputRow({ label, value, min, max, step, unit, onChange, tip, formatFn }) {
+  const display = formatFn ? formatFn(value) : (unit === '%' ? fmtPct(value, step < 1 ? 1 : 0) : fmtEur(value));
+  return (
+    <div className="input-row">
+      <div className="input-label">
+        <span className="input-label-text">
+          {label}
+          {tip && <Tip text={tip} />}
+        </span>
+        <span className="input-val notranslate" translate="no">{display}</span>
+      </div>
+      <input
+        type="range" min={min} max={max} step={step}
+        value={value}
+        onChange={e => onChange(parseFloat(e.target.value))}
+      />
+      <input
+        type="number" className="num-input" min={min} max={max} step={step}
+        value={value}
+        onChange={e => {
+          const v = parseFloat(e.target.value);
+          if (!isNaN(v)) onChange(Math.max(min, Math.min(max, v)));
+        }}
+        style={{marginTop:'8px'}}
+      />
+    </div>
+  );
+}
+
+/* ── DEAL BADGE ── */
+function DealBanner({ rating, cashflow, nettomietrendite, eigenkapitalrendite }) {
+  const styles = {
+    green: { color: '#00D48A', bg: 'rgba(0,212,138,0.09)', border: 'rgba(0,212,138,0.35)', icon: '✅', label: 'DEAL', msg: 'Positiver Cashflow & starke Rendite – dieses Investment lohnt sich!' },
+    yellow: { color: '#FFD166', bg: 'rgba(255,209,102,0.09)', border: 'rgba(255,209,102,0.35)', icon: '⚠️', label: 'NEUTRAL', msg: 'Solider Vermögensaufbau durch Tilgung, aber kaum bis kein Cashflow.' },
+    red: { color: '#FF6B6B', bg: 'rgba(255,107,107,0.09)', border: 'rgba(255,107,107,0.35)', icon: '❌', label: 'NO DEAL', msg: 'Hohe monatliche Belastung – monatliche Zuzahlung nötig. Investment kritisch prüfen!' },
+  };
+  const s = styles[rating];
+  return (
+    <div className="deal-banner fade-up" style={{background:s.bg, border:`2px solid ${s.border}`}}>
+      <div style={{fontSize:'36px'}}>{s.icon}</div>
+      <div>
+        <div className="deal-label notranslate" style={{color:s.color}} translate="no">{s.label}</div>
+        <div className="deal-msg">{s.msg}</div>
+      </div>
+      <div className="deal-metrics" style={{marginLeft:'auto'}}>
+        <div className="deal-metric">
+          <div className="deal-metric-val notranslate" style={{color: cashflow >= 0 ? '#00D48A' : '#FF6B6B'}} translate="no">{fmtEurMo(cashflow)}</div>
+          <div className="deal-metric-key">Monatlicher Cashflow</div>
+        </div>
+        <div className="deal-metric">
+          <div className="deal-metric-val notranslate" style={{color: nettomietrendite >= 4 ? '#00D48A' : nettomietrendite >= 2.5 ? '#FFD166' : '#FF6B6B'}} translate="no">{fmtPct(nettomietrendite)}</div>
+          <div className="deal-metric-key">Nettomietrendite</div>
+        </div>
+        <div className="deal-metric">
+          <div className="deal-metric-val notranslate" style={{color: eigenkapitalrendite >= 5 ? '#00D48A' : eigenkapitalrendite >= 0 ? '#FFD166' : '#FF6B6B'}} translate="no">{fmtPct(eigenkapitalrendite)}</div>
+          <div className="deal-metric-key">EK-Rendite</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── CUSTOM CHART TOOLTIP ── */
+function CustomPieTip({ active, payload }) {
+  if (!active || !payload?.length) return null;
+  const d = payload[0];
+  return (
+    <div style={{background:'#0a0a1e', border:'1px solid rgba(0,212,138,.2)', borderRadius:'12px', padding:'10px 14px', fontFamily:'DM Sans,sans-serif', fontSize:'12px'}}>
+      <div style={{fontWeight:700, color:'#F0F4FF', marginBottom:'4px'}}>{d.name}</div>
+      <div style={{color:'#00D48A', fontFamily:'JetBrains Mono,monospace', fontWeight:700}}>{fmtEur(d.value)} /Mo</div>
+      <div style={{color:'#8892B0', fontSize:'11px', marginTop:'2px'}}>{d.payload.pct}</div>
+    </div>
+  );
+}
+
+function CustomBarTip({ active, payload, label }) {
+  if (!active || !payload?.length) return null;
+  return (
+    <div style={{background:'#0a0a1e', border:'1px solid rgba(0,212,138,.2)', borderRadius:'12px', padding:'10px 14px', fontFamily:'DM Sans,sans-serif', fontSize:'12px'}}>
+      <div style={{fontWeight:700, color:'#F0F4FF', marginBottom:'6px'}}>{label}</div>
+      {payload.map((p, i) => (
+        <div key={i} style={{color: p.color, fontFamily:'JetBrains Mono,monospace', marginBottom:'2px'}}>
+          <span style={{color:'#8892B0', fontFamily:'DM Sans,sans-serif', fontWeight:600}}>{p.name}: </span>
+          {fmtEur(p.value)}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   MAIN APP COMPONENT
+══════════════════════════════════════════════ */
+function ImmobilienRechner() {
+  /* ── INPUTS ── */
+  const [kaufpreis,        setKaufpreis]        = useState(300000);
+  const [nebenkosten,      setNebenkosten]      = useState(10);
+  const [eigenkapital,     setEigenkapital]     = useState(80000);
+  const [zinssatz,         setZinssatz]         = useState(3.5);
+  const [tilgung,          setTilgung]          = useState(2);
+  const [kaltmiete,        setKaltmiete]        = useState(1200);
+  const [nichtUmlag,       setNichtUmlag]       = useState(200);
+  const [instandhaltung,   setInstandhaltung]   = useState(100);
+
+  /* ── CALCULATIONS ── */
+  const calc = useMemo(() => {
+    const gesamtkosten        = kaufpreis * (1 + nebenkosten / 100);
+    const darlehen            = Math.max(0, gesamtkosten - eigenkapital);
+    const annRateJahr         = (zinssatz / 100) + (tilgung / 100);
+    const monatlicheAnnuitaet = darlehen * annRateJahr / 12;
+    const zinsenMonat         = darlehen * (zinssatz / 100) / 12;
+    const tilgungMonat        = Math.max(0, monatlicheAnnuitaet - zinsenMonat);
+
+    const jahresKaltmiete     = kaltmiete * 12;
+    const jahresBewirtschaft  = (nichtUmlag + instandhaltung) * 12;
+
+    const bruttomietrendite   = kaufpreis > 0 ? (jahresKaltmiete / kaufpreis) * 100 : 0;
+    const nettomietrendite    = gesamtkosten > 0 ? ((jahresKaltmiete - jahresBewirtschaft) / gesamtkosten) * 100 : 0;
+    const cashflow            = kaltmiete - monatlicheAnnuitaet - nichtUmlag - instandhaltung;
+    const eigenkapitalrendite = eigenkapital > 0 ? (cashflow * 12 / eigenkapital) * 100 : 0;
+
+    const gesamtKostenMonatlich = monatlicheAnnuitaet + nichtUmlag + instandhaltung;
+    const deckungsgrad          = gesamtKostenMonatlich > 0 ? Math.min(1, kaltmiete / gesamtKostenMonatlich) : 1;
+
+    // Deal rating
+    let rating = 'red';
+    if (cashflow >= 0 && nettomietrendite >= 4) rating = 'green';
+    else if (cashflow >= -300 && nettomietrendite >= 2.5) rating = 'yellow';
+
+    // 10-year wealth buildup
+    const yearData = [];
+    let restschuld = darlehen;
+    for (let yr = 0; yr <= 10; yr++) {
+      yearData.push({
+        label: yr === 0 ? 'Start' : `J${yr}`,
+        Restschuld: Math.round(Math.max(0, restschuld)),
+        Getilgt:    Math.round(Math.max(0, darlehen - restschuld)),
+      });
+      const jahreszinsen = Math.max(0, restschuld) * (zinssatz / 100);
+      const jahrestilgung = monatlicheAnnuitaet * 12 - jahreszinsen;
+      restschuld -= jahrestilgung;
+    }
+
+    // Pie chart data
+    const totalMonthlyKosten = zinsenMonat + tilgungMonat + instandhaltung + nichtUmlag;
+    const mkPct = (v) => '(' + (totalMonthlyKosten > 0 ? fmt(v / totalMonthlyKosten * 100, 0) : 0) + '% der Kosten)';
+    const pieData = [
+      { name: 'Zinsen',          value: Math.round(zinsenMonat),   color: '#FF6B6B', pct: mkPct(zinsenMonat) },
+      { name: 'Tilgung',         value: Math.round(tilgungMonat),  color: '#00D48A', pct: mkPct(tilgungMonat) },
+      { name: 'Instandhaltung',  value: instandhaltung,            color: '#FFD166', pct: mkPct(instandhaltung) },
+      { name: 'Verwaltung/NK',   value: nichtUmlag,                color: '#88CFFF', pct: mkPct(nichtUmlag) },
+    ].filter(d => d.value > 0);
+
+    return {
+      gesamtkosten, darlehen, monatlicheAnnuitaet, zinsenMonat, tilgungMonat,
+      bruttomietrendite, nettomietrendite, cashflow, eigenkapitalrendite,
+      gesamtKostenMonatlich, deckungsgrad, rating, yearData, pieData,
+    };
+  }, [kaufpreis, nebenkosten, eigenkapital, zinssatz, tilgung, kaltmiete, nichtUmlag, instandhaltung]);
+
+  /* ── KPI COLOR ── */
+  const kpiColor = (val, thresholds) => {
+    if (val >= thresholds[0]) return '#00D48A';
+    if (val >= thresholds[1]) return '#FFD166';
+    return '#FF6B6B';
+  };
+
+  const cashflowColor = calc.cashflow >= 0 ? '#00D48A' : calc.cashflow >= -300 ? '#FFD166' : '#FF6B6B';
+
+  /* ── RENDER ── */
+  return (
+    <div className="page">
+      {/* Deal Banner */}
+      <DealBanner
+        rating={calc.rating}
+        cashflow={calc.cashflow}
+        nettomietrendite={calc.nettomietrendite}
+        eigenkapitalrendite={calc.eigenkapitalrendite}
+      />
+
+      <div className="calc-grid">
+        {/* ── LEFT: INPUTS ── */}
+        <div>
+          {/* Kaufdaten */}
+          <div className="card fade-up" style={{animationDelay:'.05s'}}>
+            <div className="card-title">
+              🏠 Kaufdaten
+              <span className="card-title-badge notranslate" translate="no">
+                Gesamt: {fmtEur(calc.gesamtkosten)}
+              </span>
+            </div>
+            <InputRow label="Kaufpreis" value={kaufpreis} min={50000} max={2000000} step={5000}
+              onChange={setKaufpreis} unit="€"
+              tip="Der Nettokaufpreis der Immobilie ohne Nebenkosten." />
+            <InputRow label="Kaufnebenkosten" value={nebenkosten} min={0} max={20} step={0.5}
+              onChange={setNebenkosten} unit="%"
+              tip="Notar, Grunderwerbsteuer, Makler, etc. – meist 8–12 % des Kaufpreises. Aktuell: +" + fmtEur(kaufpreis * nebenkosten / 100) + "."
+              formatFn={v => fmtPct(v)} />
+          </div>
+
+          {/* Finanzierung */}
+          <div className="card fade-up" style={{animationDelay:'.1s'}}>
+            <div className="card-title">
+              💳 Finanzierung
+              <span className="card-title-badge notranslate" translate="no">
+                Darlehen: {fmtEur(calc.darlehen)}
+              </span>
+            </div>
+            <InputRow label="Eigenkapital" value={eigenkapital} min={0} max={500000} step={1000}
+              onChange={setEigenkapital} unit="€"
+              tip="Dein eingesetztes Kapital (Anzahlung). Je höher, desto geringer das Darlehen." />
+            <InputRow label="Zinssatz p.a." value={zinssatz} min={0.1} max={10} step={0.1}
+              onChange={setZinssatz} unit="%" formatFn={v => fmtPct(v)}
+              tip="Der jährliche Nominalzinssatz deines Hypothekendarlehens (Sollzins)." />
+            <InputRow label="Anfängliche Tilgung p.a." value={tilgung} min={0.5} max={10} step={0.5}
+              onChange={setTilgung} unit="%" formatFn={v => fmtPct(v)}
+              tip="Jährlicher Tilgungsanteil. 2 % = Standardwert. Höhere Tilgung = schnellere Schuldenfreiheit." />
+            <div style={{background:'var(--surf2)',borderRadius:'12px',padding:'12px 14px',marginTop:'12px'}}>
+              <div style={{display:'flex',justifyContent:'space-between',marginBottom:'6px'}}>
+                <span style={{fontSize:'12px',color:'var(--muted)'}}>Monatliche Annuität</span>
+                <span className="notranslate" style={{fontFamily:'JetBrains Mono,monospace',fontSize:'14px',fontWeight:700,color:'var(--acc)'}} translate="no">{fmtEurMo(calc.monatlicheAnnuitaet)}</span>
+              </div>
+              <div style={{display:'flex',gap:'16px'}}>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:'11px',color:'var(--muted)',marginBottom:'2px'}}>davon Zinsen</div>
+                  <div className="notranslate" style={{fontFamily:'JetBrains Mono,monospace',fontSize:'13px',fontWeight:700,color:'#FF6B6B'}} translate="no">{fmtEurMo(calc.zinsenMonat)}</div>
+                </div>
+                <div style={{flex:1}}>
+                  <div style={{fontSize:'11px',color:'var(--muted)',marginBottom:'2px'}}>davon Tilgung</div>
+                  <div className="notranslate" style={{fontFamily:'JetBrains Mono,monospace',fontSize:'13px',fontWeight:700,color:'var(--p)'}} translate="no">{fmtEurMo(calc.tilgungMonat)}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bewirtschaftung */}
+          <div className="card fade-up" style={{animationDelay:'.15s'}}>
+            <div className="card-title">🔑 Bewirtschaftung</div>
+            <InputRow label="Monatliche Kaltmiete" value={kaltmiete} min={100} max={5000} step={50}
+              onChange={setKaltmiete} unit="€"
+              tip="Die monatliche Nettokaltmiete ohne Betriebskosten. Basis für alle Renditeberechnungen." />
+            <InputRow label="Nicht umlagefähige NK" value={nichtUmlag} min={0} max={1000} step={10}
+              onChange={setNichtUmlag} unit="€"
+              tip="Kosten die du als Vermieter selbst trägst: Hausverwaltung, Kontoführung, Versicherungen (Vermieteranteil)." />
+            <InputRow label="Instandhaltungsrücklage" value={instandhaltung} min={0} max={1000} step={10}
+              onChange={setInstandhaltung} unit="€"
+              tip="Empfehlung: 1–1,5 € pro m² und Monat. Puffer für Reparaturen und Modernisierungen." />
+          </div>
+        </div>
+
+        {/* ── RIGHT: OUTPUTS ── */}
+        <div>
+          {/* BIG CASHFLOW */}
+          <div className="cashflow-card fade-up" style={{animationDelay:'.08s', borderColor: cashflowColor + '55', boxShadow: `0 0 40px ${cashflowColor}18`}}>
+            <div className="cashflow-label">
+              <span>📊</span> Monatlicher Cashflow
+              <Tip text="Mieteinnahmen minus alle monatlichen Kosten (Annuität + NK + Instandhaltung). Zeigt, ob das Investment jeden Monat Geld ein- oder ausbringt." />
+            </div>
+            <div className="cashflow-val notranslate" style={{color: cashflowColor}} translate="no">
+              {calc.cashflow >= 0 ? '+' : ''}{fmt(Math.round(calc.cashflow))}
+              <span className="cashflow-unit"> €/Mo</span>
+            </div>
+            <div className="cashflow-sub">
+              Miete: <strong className="notranslate" style={{color:'var(--p)'}} translate="no">{fmtEurMo(kaltmiete)}</strong>
+              &nbsp;·&nbsp;Annuität: <strong className="notranslate" style={{color:'var(--acc)'}} translate="no">{fmtEurMo(calc.monatlicheAnnuitaet)}</strong>
+              &nbsp;·&nbsp;Kosten: <strong className="notranslate" style={{color:'var(--muted)'}} translate="no">{fmtEurMo(nichtUmlag + instandhaltung)}</strong>
+            </div>
+          </div>
+
+          {/* KPI GRID */}
+          <div className="kpi-grid fade-up" style={{animationDelay:'.12s'}}>
+            {/* Bruttomietrendite */}
+            <div className="kpi-card">
+              <div className="kpi-label">📈 Bruttomietrendite <Tip text="Jahreskaltmiete ÷ Kaufpreis × 100. Rohrendite ohne Kosten und Finanzierung. Richtwert: ≥ 5 % = gut." /></div>
+              <div className="kpi-val notranslate" style={{color: kpiColor(calc.bruttomietrendite, [5, 3.5])}} translate="no">{fmtPct(calc.bruttomietrendite)}</div>
+              <div className="kpi-sub">Ziel: ≥ 5,0 % · Kauf-/Mietverhältnis</div>
+            </div>
+
+            {/* Nettomietrendite */}
+            <div className="kpi-card">
+              <div className="kpi-label">💰 Nettomietrendite <Tip text="(Jahreskaltmiete – jährl. Bewirtschaftungskosten) ÷ Gesamtinvestition × 100. Realistische Rendite nach allen laufenden Kosten." /></div>
+              <div className="kpi-val notranslate" style={{color: kpiColor(calc.nettomietrendite, [4, 2.5])}} translate="no">{fmtPct(calc.nettomietrendite)}</div>
+              <div className="kpi-sub">Ziel: ≥ 4,0 % · Nach Bewirtschaftung</div>
+            </div>
+
+            {/* Eigenkapitalrendite */}
+            <div className="kpi-card">
+              <div className="kpi-label">🏦 Eigenkapitalrendite <Tip text="Jährlicher Cashflow ÷ eingesetztes Eigenkapital × 100. Misst, wie effizient dein eingesetztes Kapital arbeitet (inkl. Leverage-Effekt)." /></div>
+              <div className="kpi-val notranslate" style={{color: kpiColor(calc.eigenkapitalrendite, [5, 0])}} translate="no">{fmtPct(calc.eigenkapitalrendite)}</div>
+              <div className="kpi-sub">EK eingesetzt: {fmtEur(eigenkapital)}</div>
+            </div>
+
+            {/* Vervielfältiger */}
+            <div className="kpi-card">
+              <div className="kpi-label">🔢 Vervielfältiger <Tip text="Kaufpreis ÷ Jahreskaltmiete. Zeigt in wie vielen Jahren sich der Kaufpreis durch Mieteinnahmen amortisiert. Niedriger = besser. Ziel: unter 25." /></div>
+              <div className="kpi-val notranslate" style={{color: kpiColor(kaltmiete > 0 ? -(kaufpreis / (kaltmiete * 12)) : -999, [-20, -25])}} translate="no">
+                {kaltmiete > 0 ? fmt(kaufpreis / (kaltmiete * 12), 1) + 'x' : '–'}
+              </div>
+              <div className="kpi-sub">Kaufpreis / Jahreskaltmiete · Ziel: &lt; 25</div>
+            </div>
+          </div>
+
+          {/* DECKUNGSGRAD */}
+          <div className="coverage-wrap fade-up" style={{animationDelay:'.16s'}}>
+            <div className="coverage-title">📊 Gesamtkostendeckung</div>
+            <div style={{display:'flex', justifyContent:'space-between', marginBottom:'8px', fontSize:'12px'}}>
+              <span style={{color:'var(--muted)'}}>Mieteinnahmen <strong className="notranslate" style={{color:'var(--p)'}} translate="no">{fmtEurMo(kaltmiete)}</strong></span>
+              <span style={{color:'var(--muted)'}}>Gesamtkosten <strong className="notranslate" style={{color:'var(--acc)'}} translate="no">{fmtEurMo(calc.gesamtKostenMonatlich)}</strong></span>
+            </div>
+            <div className="coverage-bar-track">
+              <div className="coverage-bar-fill" style={{
+                width: `${Math.min(100, calc.deckungsgrad * 100)}%`,
+                background: calc.deckungsgrad >= 1 ? 'var(--p)' : calc.deckungsgrad >= 0.85 ? '#FFD166' : '#FF6B6B'
+              }} />
+            </div>
+            <div className="coverage-labels">
+              <span>{fmt(calc.deckungsgrad * 100, 0)} % gedeckt</span>
+              <span style={{color: calc.cashflow >= 0 ? 'var(--p)' : 'var(--hl)'}}>
+                {calc.cashflow >= 0 ? '✓ Selbsttragend' : '⚠ Zuzahlung: ' + fmtEurMo(-calc.cashflow)}
+              </span>
+            </div>
+          </div>
+
+          {/* PIE CHART */}
+          <div className="chart-card fade-up" style={{animationDelay:'.2s'}}>
+            <div className="chart-title">🥧 Monatliche Kostenverteilung</div>
+            <div className="chart-sub">Aufteilung der monatlichen Gesamtkosten von <strong className="notranslate" translate="no">{fmtEurMo(calc.gesamtKostenMonatlich)}</strong> im Vergleich zu den Mieteinnahmen</div>
+            <ResponsiveContainer width="100%" height={220}>
+              <PieChart>
+                <Pie
+                  data={calc.pieData}
+                  cx="50%" cy="50%"
+                  innerRadius={55} outerRadius={90}
+                  paddingAngle={3}
+                  dataKey="value"
+                >
+                  {calc.pieData.map((entry, idx) => (
+                    <Cell key={idx} fill={entry.color} strokeWidth={0} />
+                  ))}
+                </Pie>
+                <RCTooltip content={<CustomPieTip />} />
+                <Legend
+                  iconType="circle" iconSize={8}
+                  formatter={(val) => <span style={{fontSize:'12px', color:'#8892B0', fontFamily:'DM Sans,sans-serif'}}>{val}</span>}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+            {/* Income reference bar */}
+            <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', background:'var(--surf2)', borderRadius:'12px', padding:'10px 16px', marginTop:'8px'}}>
+              <span style={{fontSize:'12px', color:'var(--muted)'}}>🏠 Mieteinnahmen</span>
+              <span className="notranslate" style={{fontFamily:'JetBrains Mono,monospace', fontSize:'14px', fontWeight:700, color:'var(--p)'}} translate="no">{fmtEurMo(kaltmiete)}</span>
+              <span style={{fontSize:'12px', color: calc.cashflow >= 0 ? '#00D48A' : '#FF6B6B', fontWeight:700}}>
+                {calc.cashflow >= 0 ? '▲ Überschuss' : '▼ Unterdeckung'}
+              </span>
+            </div>
+          </div>
+
+          {/* BAR CHART: 10 YEARS */}
+          <div className="chart-card fade-up" style={{animationDelay:'.24s'}}>
+            <div className="chart-title">📈 Vermögensaufbau – 10 Jahre</div>
+            <div className="chart-sub">
+              Restschuld sinkt von <strong className="notranslate" translate="no">{fmtEur(calc.darlehen)}</strong> → getilgter Anteil wächst durch laufende Tilgung
+            </div>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={calc.yearData} barSize={18} margin={{top:4, right:4, left:0, bottom:0}}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                <XAxis dataKey="label" tick={{fill:'#8892B0', fontSize:11, fontFamily:'DM Sans,sans-serif'}} axisLine={false} tickLine={false} />
+                <YAxis tickFormatter={v => fmt(v/1000)+'k'} tick={{fill:'#8892B0', fontSize:10, fontFamily:'DM Sans,sans-serif'}} axisLine={false} tickLine={false} width={42} />
+                <RCTooltip content={<CustomBarTip />} />
+                <Legend
+                  iconType="square" iconSize={10}
+                  formatter={(val) => <span style={{fontSize:'12px', color:'#8892B0', fontFamily:'DM Sans,sans-serif'}}>{val}</span>}
+                />
+                <Bar dataKey="Restschuld" stackId="a" fill="#FF6B6B" fillOpacity={0.8} radius={[0,0,4,4]} />
+                <Bar dataKey="Getilgt"    stackId="a" fill="#00D48A" fillOpacity={0.9} radius={[4,4,0,0]} />
+              </BarChart>
+            </ResponsiveContainer>
+            <div style={{display:'flex', gap:'16px', marginTop:'12px', flexWrap:'wrap'}}>
+              <div style={{flex:1, background:'rgba(255,107,107,0.08)', border:'1px solid rgba(255,107,107,0.2)', borderRadius:'12px', padding:'10px 14px'}}>
+                <div style={{fontSize:'11px', color:'#8892B0', marginBottom:'3px'}}>Restschuld nach 10 J.</div>
+                <div className="notranslate" style={{fontFamily:'JetBrains Mono,monospace', fontSize:'16px', fontWeight:700, color:'#FF6B6B'}} translate="no">
+                  {fmtEur(calc.yearData[10]?.Restschuld ?? 0)}
+                </div>
+              </div>
+              <div style={{flex:1, background:'rgba(0,212,138,0.08)', border:'1px solid rgba(0,212,138,0.2)', borderRadius:'12px', padding:'10px 14px'}}>
+                <div style={{fontSize:'11px', color:'#8892B0', marginBottom:'3px'}}>Getilgter Betrag nach 10 J.</div>
+                <div className="notranslate" style={{fontFamily:'JetBrains Mono,monospace', fontSize:'16px', fontWeight:700, color:'var(--p)'}} translate="no">
+                  {fmtEur(calc.yearData[10]?.Getilgt ?? 0)}
+                </div>
+              </div>
+              <div style={{flex:1, background:'rgba(255,209,102,0.08)', border:'1px solid rgba(255,209,102,0.2)', borderRadius:'12px', padding:'10px 14px'}}>
+                <div style={{fontSize:'11px', color:'#8892B0', marginBottom:'3px'}}>Eigenkapital (EK + Tilgung)</div>
+                <div className="notranslate" style={{fontFamily:'JetBrains Mono,monospace', fontSize:'16px', fontWeight:700, color:'var(--acc)'}} translate="no">
+                  {fmtEur(eigenkapital + (calc.yearData[10]?.Getilgt ?? 0))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* DISCLAIMER */}
+          <div style={{fontSize:'11px', color:'var(--muted)', lineHeight:'1.6', padding:'12px 16px', background:'rgba(255,255,255,0.02)', borderRadius:'12px', border:'1px solid rgba(255,255,255,0.05)', marginTop:'16px'}}>
+            ⚠️ <strong>Kein Finanzrat:</strong> Dieser Rechner dient ausschließlich Bildungszwecken. Alle Berechnungen sind vereinfacht und ohne Gewähr. Leerstand, Steueraspekte, Mietausfall und Wertsteigerungen sind nicht berücksichtigt. Bitte konsultiere einen Finanzberater.
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── MOUNT ── */
+window.renderImmobApp = function() {
+  const root = ReactDOM.createRoot(document.getElementById('react-root'));
+  root.render(React.createElement(ImmobilienRechner));
+};
+
+// If already unlocked when page loads (e.g. Babel finished late), try mounting
+if (document.getElementById('app-root').style.display !== 'none') {
+  window.renderImmobApp();
+}
+</script>
+
+<!-- Sprachumschalter -->
+<script src="lang.js"></script>
+<!-- Design-Switcher -->
+<script src="theme.js"></script>
+</body>
+</html>
