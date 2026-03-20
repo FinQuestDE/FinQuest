@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zinseszinsrechner – FinQuest</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    @import url('https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap');
+
+    :root {
+      --p: #00D48A; --s: #1A1A2E; --acc: #FFD166; --hl: #FF6B6B;
+      --surf: #16213E; --surf2: #0F3460; --txt: #F0F4FF; --muted: #8892B0;
+      --border: rgba(0,212,138,0.2); --purple: #bb8aff;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--s); color: var(--txt); min-height: 100vh; overflow-x: hidden; }
+    h1,h2,h3,.logo { font-family: 'Clash Display','DM Sans',sans-serif; }
+
+    /* ── NAVBAR ── */
+    .navbar { position: sticky; top: 0; z-index: 200; background: rgba(26,26,46,0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+    .navbar-inner { max-width: 1180px; margin: 0 auto; padding: 0 24px; display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .logo { font-size: 22px; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 6px; }
+    .logo-fin { color: var(--txt); } .logo-quest { color: var(--p); }
+    .back-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 50px; background: transparent; border: 1.5px solid rgba(255,255,255,0.15); color: var(--muted); font-size: 13px; font-weight: 600; text-decoration: none; transition: all 0.2s; cursor: pointer; font-family: 'DM Sans',sans-serif; }
+    .back-btn:hover { border-color: var(--border); color: var(--p); transform: translateX(-2px); }
+
+    /* ── PAGE ── */
+    .page { max-width: 1100px; margin: 0 auto; padding: 40px 24px 80px; }
+
+    /* ── HERO ── */
+    .hero { margin-bottom: 36px; }
+    .hero-tag { display: inline-flex; align-items: center; gap: 6px; background: rgba(0,212,138,0.08); border: 1px solid var(--border); border-radius: 50px; padding: 4px 14px; font-size: 12px; font-weight: 700; color: var(--p); margin-bottom: 14px; }
+    .hero h1 { font-size: clamp(26px,4vw,42px); font-weight: 700; margin-bottom: 8px; }
+    .hero p { font-size: 15px; color: var(--muted); line-height: 1.7; max-width: 520px; }
+
+    /* ── MAIN GRID ── */
+    .main-grid { display: grid; grid-template-columns: 380px 1fr; gap: 24px; align-items: start; }
+
+    /* ── CARD ── */
+    .card { background: var(--surf); border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; padding: 24px; }
+    .card-title { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 20px; display: flex; align-items: center; gap: 7px; }
+
+    /* ── SLIDERS ── */
+    .input-group { margin-bottom: 22px; }
+    .input-label { font-size: 13px; font-weight: 600; color: var(--txt); margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .input-val { font-family: 'JetBrains Mono',monospace; font-size: 14px; color: var(--p); font-weight: 700; background: rgba(0,212,138,0.08); border: 1px solid rgba(0,212,138,0.2); border-radius: 8px; padding: 3px 10px; min-width: 90px; text-align: center; transition: background 0.2s; }
+    input[type="range"] {
+      width: 100%; height: 5px; border-radius: 3px; background: var(--surf2);
+      outline: none; border: none; cursor: pointer; appearance: none; -webkit-appearance: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
+      background: var(--p); cursor: pointer; border: 3px solid var(--surf);
+      box-shadow: 0 0 0 2px rgba(0,212,138,0.3); transition: box-shadow 0.2s;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover { box-shadow: 0 0 0 5px rgba(0,212,138,0.2); }
+    input[type="range"]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--p); cursor: pointer; border: 3px solid var(--surf); }
+
+    /* ── FREQUENCY TOGGLE ── */
+    .freq-wrap { display: flex; gap: 6px; margin-top: 4px; }
+    .freq-btn { flex: 1; padding: 8px 6px; border-radius: 10px; border: 1.5px solid rgba(255,255,255,0.08); background: var(--surf2); color: var(--muted); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans',sans-serif; text-align: center; }
+    .freq-btn:hover { border-color: rgba(0,212,138,0.3); color: var(--txt); }
+    .freq-btn.active { background: rgba(0,212,138,0.12); border-color: var(--border); color: var(--p); }
+
+    /* ── RIGHT COLUMN ── */
+    .right-col { display: flex; flex-direction: column; gap: 20px; }
+
+    /* ── RESULT NUMBERS ── */
+    .results-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .result-item { background: var(--surf2); border-radius: 14px; padding: 16px; border: 1px solid rgba(255,255,255,0.05); text-align: center; transition: transform 0.2s; }
+    .result-item:hover { transform: translateY(-2px); }
+    .result-item.highlight { background: linear-gradient(135deg,rgba(0,212,138,0.12),rgba(0,212,138,0.04)); border-color: var(--border); }
+    .result-val { font-family: 'JetBrains Mono',monospace; font-size: 20px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+    .result-label { font-size: 11px; color: var(--muted); line-height: 1.3; }
+
+    /* ── CHART ── */
+    .chart-wrap { position: relative; height: 260px; }
+
+    /* ── BREAKDOWN ── */
+    .breakdown { display: flex; flex-direction: column; gap: 10px; }
+    .breakdown-row { display: flex; align-items: center; gap: 12px; }
+    .breakdown-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+    .breakdown-label { font-size: 13px; color: var(--muted); flex: 1; }
+    .breakdown-bar-wrap { flex: 2; height: 8px; background: var(--surf2); border-radius: 4px; overflow: hidden; }
+    .breakdown-bar { height: 100%; border-radius: 4px; transition: width 0.8s cubic-bezier(0.22,1,0.36,1); }
+    .breakdown-amount { font-family: 'JetBrains Mono',monospace; font-size: 12px; font-weight: 600; min-width: 90px; text-align: right; }
+
+    /* ── MILESTONES ── */
+    .milestones-wrap { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+    .ms-card { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 14px; transition: all 0.3s; }
+    .ms-card.locked { opacity: 0.35; filter: grayscale(0.6); border: 1px dashed rgba(255,255,255,0.1); background: transparent; }
+    .ms-card.reached { border: 1px solid; animation: ms-pop 0.4s ease; }
+    .ms-card.beyond { border: 1px dashed rgba(255,255,255,0.1); background: rgba(255,255,255,0.02); opacity: 0.5; }
+    @keyframes ms-pop { 0%{transform:scale(0.95)} 60%{transform:scale(1.03)} 100%{transform:scale(1)} }
+    .ms-icon { font-size: 22px; flex-shrink: 0; width: 36px; text-align: center; }
+    .ms-info { flex: 1; min-width: 0; }
+    .ms-title { font-size: 12px; font-weight: 700; margin-bottom: 1px; }
+    .ms-sub { font-size: 11px; color: var(--muted); }
+    .ms-year { font-family: 'JetBrains Mono',monospace; font-size: 11px; font-weight: 700; white-space: nowrap; padding: 2px 8px; border-radius: 50px; }
+    /* Milestone themes */
+    .ms-crossover.reached { background: rgba(0,212,138,0.07); border-color: rgba(0,212,138,0.3); }
+    .ms-crossover .ms-title { color: var(--p); }
+    .ms-crossover .ms-year { background: rgba(0,212,138,0.12); color: var(--p); }
+    .ms-2x.reached { background: rgba(255,209,102,0.07); border-color: rgba(255,209,102,0.3); }
+    .ms-2x .ms-title { color: var(--acc); }
+    .ms-2x .ms-year { background: rgba(255,209,102,0.12); color: var(--acc); }
+    .ms-3x.reached { background: rgba(255,107,107,0.07); border-color: rgba(255,107,107,0.3); }
+    .ms-3x .ms-title { color: var(--hl); }
+    .ms-3x .ms-year { background: rgba(255,107,107,0.12); color: var(--hl); }
+    .ms-5x.reached { background: rgba(187,138,255,0.07); border-color: rgba(187,138,255,0.3); }
+    .ms-5x .ms-title { color: #bb8aff; }
+    .ms-5x .ms-year { background: rgba(187,138,255,0.12); color: #bb8aff; }
+    .ms-10x.reached { background: rgba(136,207,255,0.07); border-color: rgba(136,207,255,0.3); }
+    .ms-10x .ms-title { color: #88CFFF; }
+    .ms-10x .ms-year { background: rgba(136,207,255,0.12); color: #88CFFF; }
+
+    /* ── YEARLY TABLE ── */
+    .table-wrap { overflow-x: auto; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    thead th { background: var(--surf2); padding: 10px 14px; font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    thead th:first-child { text-align: left; }
+    tbody tr { border-bottom: 1px solid rgba(255,255,255,0.04); transition: background 0.15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,0.03); }
+    tbody tr.double-row { background: rgba(255,209,102,0.06); }
+    tbody tr.double-row td { color: var(--acc); font-weight: 600; }
+    td { padding: 9px 14px; color: var(--txt); text-align: right; font-family: 'JetBrains Mono',monospace; font-size: 11px; }
+    td:first-child { text-align: left; font-family: 'DM Sans',sans-serif; font-size: 12px; font-weight: 600; color: var(--muted); }
+    td.pos { color: var(--p); }
+    .double-badge { display: inline-flex; align-items: center; gap: 4px; background: rgba(255,209,102,0.15); border: 1px solid rgba(255,209,102,0.3); border-radius: 50px; padding: 1px 8px; font-size: 10px; font-weight: 700; color: var(--acc); margin-left: 6px; }
+
+    /* ── RESPONSIVE ── */
+    @media(max-width: 900px) {
+      .main-grid { grid-template-columns: 1fr; }
+      .results-grid { grid-template-columns: 1fr 1fr 1fr; }
+    }
+    @media(max-width: 600px) {
+      .results-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    /* ── SLIDER + NUMBER INPUT ── */
+    .slider-number-row { display: flex; align-items: center; gap: 12px; }
+    .slider-number-row input[type="range"] { flex: 1; min-width: 0; }
+    .num-input-wrap { display: flex; align-items: center; background: var(--surf2); border: 1.5px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 0 10px 0 0; overflow: hidden; flex-shrink: 0; width: 110px; transition: border-color 0.2s; }
+    .num-input-wrap:focus-within { border-color: var(--p); box-shadow: 0 0 0 3px rgba(0,212,138,0.12); }
+    .num-input { width: 70px; background: transparent; border: none; outline: none; font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; color: var(--p); padding: 7px 4px 7px 10px; -moz-appearance: textfield; }
+    .num-input::-webkit-inner-spin-button, .num-input::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    .num-unit { font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+
+    /* ── SCENARIO UI ── */
+    .scenario-card { background: var(--surf); border: 1px solid rgba(255,255,255,0.07); border-radius: 20px; padding: 20px 24px; margin-top: 20px; }
+    .scenario-title { font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 16px; display: flex; align-items: center; gap: 7px; }
+    .scenario-save-row { display: flex; gap: 8px; margin-bottom: 12px; }
+    .scenario-name-input { flex: 1; background: var(--surf2); border: 1.5px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 9px 14px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--txt); outline: none; transition: border-color 0.2s; }
+    .scenario-name-input:focus { border-color: var(--p); box-shadow: 0 0 0 3px rgba(0,212,138,0.12); }
+    .scenario-name-input::placeholder { color: var(--muted); }
+    .scenario-btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; border: none; transition: all 0.2s; white-space: nowrap; }
+    .scenario-btn-save { background: var(--p); color: #0a0a14; }
+    .scenario-btn-save:hover { box-shadow: 0 4px 16px rgba(0,212,138,0.4); transform: translateY(-1px); }
+    .scenario-btn-save:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+    .scenario-sep { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; }
+    .scenario-select { width: 100%; background: var(--surf2); border: 1.5px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 9px 14px; font-family: 'DM Sans', sans-serif; font-size: 13px; color: var(--txt); outline: none; cursor: pointer; transition: border-color 0.2s; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%238892B0' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+    .scenario-select:focus { border-color: var(--p); }
+    .scenario-select option { background: #16213E; }
+    .scenario-load-row { display: flex; gap: 8px; margin-top: 8px; }
+    .scenario-btn-load { background: rgba(0,212,138,0.1); color: var(--p); border: 1.5px solid rgba(0,212,138,0.3); }
+    .scenario-btn-load:hover { background: rgba(0,212,138,0.2); }
+    .scenario-btn-load:disabled { opacity: 0.4; cursor: not-allowed; }
+    .scenario-btn-del { background: rgba(255,107,107,0.08); color: var(--hl); border: 1.5px solid rgba(255,107,107,0.25); }
+    .scenario-btn-del:hover { background: rgba(255,107,107,0.16); }
+    .scenario-btn-del:disabled { opacity: 0.4; cursor: not-allowed; }
+    .scenario-msg { font-size: 12px; min-height: 18px; margin-top: 8px; transition: opacity 0.3s; }
+    .scenario-login-hint { font-size: 12px; color: var(--muted); background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07); border-radius: 10px; padding: 10px 14px; text-align: center; }
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="navbar-inner">
+    <a href="finquest.html" class="logo"><span class="logo-fin">Fin</span><span class="logo-quest">Quest</span></a>
+    <a href="dashboard.html" class="back-btn">← Zum Dashboard</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-tag">🧮 Finanz-Tool</div>
+    <h1>📈 Zinseszinsrechner</h1>
+    <p>Berechne wie dein Kapital durch den Zinseszinseffekt über die Jahre wächst – mit monatlichen Einzahlungen.</p>
+  </div>
+
+  <div class="main-grid">
+
+    <!-- LEFT: INPUTS -->
+    <div>
+      <div class="card">
+        <div class="card-title">⚙️ Parameter einstellen</div>
+
+        <!-- Startkapital -->
+        <div class="input-group">
+          <div class="input-label">Startkapital</div>
+          <div class="slider-number-row">
+            <input type="range" id="sl-start" min="0" max="100000" step="500" value="5000">
+            <div class="num-input-wrap">
+              <input type="number" id="num-start" class="num-input" min="0" max="500000" step="500" value="5000">
+              <span class="num-unit">€</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Monatliche Sparrate -->
+        <div class="input-group">
+          <div class="input-label">Monatliche Sparrate</div>
+          <div class="slider-number-row">
+            <input type="range" id="sl-monthly" min="0" max="5000" step="25" value="200">
+            <div class="num-input-wrap">
+              <input type="number" id="num-monthly" class="num-input" min="0" max="50000" step="25" value="200">
+              <span class="num-unit">€</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Zinssatz -->
+        <div class="input-group">
+          <div class="input-label">Jährlicher Zinssatz</div>
+          <div class="slider-number-row">
+            <input type="range" id="sl-rate" min="0" max="20" step="0.1" value="7">
+            <div class="num-input-wrap">
+              <input type="number" id="num-rate" class="num-input" min="0" max="50" step="0.1" value="7">
+              <span class="num-unit">%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Laufzeit -->
+        <div class="input-group">
+          <div class="input-label">Laufzeit</div>
+          <div class="slider-number-row">
+            <input type="range" id="sl-years" min="1" max="50" step="1" value="25">
+            <div class="num-input-wrap">
+              <input type="number" id="num-years" class="num-input" min="1" max="100" step="1" value="25">
+              <span class="num-unit">Jahre</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Verzinsungsfrequenz -->
+        <div class="input-group" style="margin-bottom:0">
+          <div class="input-label" style="margin-bottom:10px">Verzinsungsfrequenz</div>
+          <div class="freq-wrap">
+            <button class="freq-btn" data-freq="12" onclick="setFreq(this)">Monatlich</button>
+            <button class="freq-btn" data-freq="4" onclick="setFreq(this)">Quartals­weise</button>
+            <button class="freq-btn active" data-freq="1" onclick="setFreq(this)">Jährlich</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MILESTONES -->
+      <div class="milestones-wrap" id="milestones-wrap">
+        <div class="ms-card ms-crossover locked" id="ms-crossover">
+          <div class="ms-icon">⚖️</div>
+          <div class="ms-info">
+            <div class="ms-title">Zinsgewinn übersteigt Einzahlungen</div>
+            <div class="ms-sub" id="ms-crossover-sub">Der Zinseszins verdient mehr als du einzahlst</div>
+          </div>
+          <div class="ms-year" id="ms-crossover-year">–</div>
+        </div>
+        <div class="ms-card ms-2x locked" id="ms-2x">
+          <div class="ms-icon">2️⃣</div>
+          <div class="ms-info">
+            <div class="ms-title">Kapital = 2× Eingezahlt</div>
+            <div class="ms-sub" id="ms-2x-sub">Gesamtwert doppelt so hoch wie alle Einzahlungen</div>
+          </div>
+          <div class="ms-year" id="ms-2x-year">–</div>
+        </div>
+        <div class="ms-card ms-3x locked" id="ms-3x">
+          <div class="ms-icon">3️⃣</div>
+          <div class="ms-info">
+            <div class="ms-title">Kapital = 3× Eingezahlt</div>
+            <div class="ms-sub" id="ms-3x-sub">Dreifaches deiner gesamten Einzahlungen</div>
+          </div>
+          <div class="ms-year" id="ms-3x-year">–</div>
+        </div>
+        <div class="ms-card ms-5x locked" id="ms-5x">
+          <div class="ms-icon">5️⃣</div>
+          <div class="ms-info">
+            <div class="ms-title">Kapital = 5× Eingezahlt</div>
+            <div class="ms-sub" id="ms-5x-sub">Fünffaches deiner gesamten Einzahlungen</div>
+          </div>
+          <div class="ms-year" id="ms-5x-year">–</div>
+        </div>
+        <div class="ms-card ms-10x locked" id="ms-10x">
+          <div class="ms-icon">🔟</div>
+          <div class="ms-info">
+            <div class="ms-title">Kapital = 10× Eingezahlt</div>
+            <div class="ms-sub" id="ms-10x-sub">Zehnfaches – der Zinseszins dominiert vollständig</div>
+          </div>
+          <div class="ms-year" id="ms-10x-year">–</div>
+        </div>
+      </div>
+      <!-- SCENARIO SAVE/LOAD -->
+      <div class="scenario-card" id="scenario-card">
+        <div class="scenario-title">💾 Szenario speichern & laden</div>
+        <div id="scenario-auth-gate">
+          <div class="scenario-login-hint">🔒 Bitte <a href="login.html" style="color:var(--p);font-weight:700">einloggen</a>, um Szenarien zu speichern.</div>
+        </div>
+        <div id="scenario-ui" style="display:none">
+
+          <!-- Aktives Szenario-Banner (sichtbar wenn ein Szenario geladen ist) -->
+          <div id="sc-active-banner" style="display:none;align-items:center;justify-content:space-between;gap:8px;background:rgba(0,212,138,0.08);border:1px solid rgba(0,212,138,0.25);border-radius:10px;padding:9px 14px;margin-bottom:10px">
+            <div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:1px">Geladenes Szenario</div>
+              <div style="font-size:13px;font-weight:700;color:var(--p)" id="sc-active-name">–</div>
+            </div>
+            <button onclick="scenarioClearActive()" style="background:none;border:none;color:var(--muted);font-size:18px;cursor:pointer;line-height:1;padding:0 4px" title="Verknüpfung aufheben">✕</button>
+          </div>
+
+          <!-- Save-Zeile -->
+          <div class="scenario-save-row">
+            <input type="text" class="scenario-name-input" id="sc-name" placeholder="Szenario-Name (z. B. Konservativ)" maxlength="40">
+            <button class="scenario-btn scenario-btn-save" id="sc-save-btn" onclick="scenarioSave()">💾 Speichern</button>
+          </div>
+          <!-- Überschreiben-Button (nur sichtbar wenn Szenario geladen) -->
+          <button id="sc-overwrite-btn" onclick="scenarioOverwrite()" style="display:none;width:100%;margin-top:6px;padding:9px 0;border-radius:10px;background:rgba(255,209,102,0.1);color:var(--acc);border:1.5px solid rgba(255,209,102,0.3);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s"
+            onmouseover="this.style.background='rgba(255,209,102,0.2)'" onmouseout="this.style.background='rgba(255,209,102,0.1)'">
+            🔄 Aktuelles Szenario überschreiben
+          </button>
+
+          <!-- Load -->
+          <div class="scenario-sep" style="margin-top:14px">Gespeicherte Szenarien</div>
+          <select class="scenario-select" id="sc-select">
+            <option value="">– Szenario wählen –</option>
+          </select>
+          <div class="scenario-load-row">
+            <button class="scenario-btn scenario-btn-load" id="sc-load-btn" onclick="scenarioLoad()" disabled>📂 Laden</button>
+            <button class="scenario-btn scenario-btn-del" id="sc-del-btn" onclick="scenarioDelete()" disabled>🗑️ Löschen</button>
+          </div>
+          <div class="scenario-msg" id="sc-msg"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: RESULTS & CHART -->
+    <div class="right-col">
+
+      <!-- RESULT NUMBERS -->
+      <div class="card" style="padding:20px">
+        <div class="results-grid">
+          <div class="result-item highlight">
+            <div class="result-val" style="color:var(--p)" id="res-total">–</div>
+            <div class="result-label">Endkapital</div>
+          </div>
+          <div class="result-item">
+            <div class="result-val" style="color:var(--muted)" id="res-invested">–</div>
+            <div class="result-label">Eingezahlt</div>
+          </div>
+          <div class="result-item">
+            <div class="result-val" style="color:var(--acc)" id="res-interest">–</div>
+            <div class="result-label">Zinseszins-Gewinn</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHART -->
+      <div class="card">
+        <div class="card-title">📊 Kapitalentwicklung</div>
+        <div class="chart-wrap">
+          <canvas id="mainChart"></canvas>
+        </div>
+      </div>
+
+      <!-- BREAKDOWN -->
+      <div class="card">
+        <div class="card-title">💡 Aufschlüsselung</div>
+        <div class="breakdown">
+          <div class="breakdown-row">
+            <div class="breakdown-dot" style="background:rgba(136,146,176,0.6)"></div>
+            <div class="breakdown-label">Eingezahltes Kapital</div>
+            <div class="breakdown-bar-wrap"><div class="breakdown-bar" id="bar-invested" style="background:rgba(136,146,176,0.5);width:0%"></div></div>
+            <div class="breakdown-amount" style="color:var(--muted)" id="lbl-invested">–</div>
+          </div>
+          <div class="breakdown-row">
+            <div class="breakdown-dot" style="background:var(--acc)"></div>
+            <div class="breakdown-label">Zinseszins-Gewinn</div>
+            <div class="breakdown-bar-wrap"><div class="breakdown-bar" id="bar-interest" style="background:linear-gradient(90deg,var(--acc),#ffb700);width:0%"></div></div>
+            <div class="breakdown-amount" style="color:var(--acc)" id="lbl-interest">–</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- YEARLY TABLE -->
+      <div class="card">
+        <div class="card-title">📋 Jahresübersicht</div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Jahr</th>
+                <th>Gesamtwert</th>
+                <th>Eingezahlt</th>
+                <th>Zinsgewinn</th>
+                <th>Zinsgewinn %</th>
+              </tr>
+            </thead>
+            <tbody id="year-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="auth.js"></script>
+<script src="lang.js"></script>
+<script type="module" src="firebase-init.js"></script>
+<script>
+/* ── CHART SETUP ── */
+const ctx = document.getElementById('mainChart').getContext('2d');
+
+// Gradient fills
+function makeGrad(ctx, color1, color2) {
+  const g = ctx.createLinearGradient(0, 0, 0, 260);
+  g.addColorStop(0, color1);
+  g.addColorStop(1, color2);
+  return g;
+}
+
+let chart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: [],
+    datasets: [
+      {
+        label: 'Eingezahltes Kapital',
+        data: [],
+        fill: true,
+        backgroundColor: 'rgba(136,146,176,0.18)',
+        borderColor: 'rgba(136,146,176,0.5)',
+        borderWidth: 2,
+        pointRadius: 0,
+        tension: 0.4,
+        order: 2,
+      },
+      {
+        label: 'Gesamtwert',
+        data: [],
+        fill: '-1',
+        backgroundColor: 'rgba(0,212,138,0.12)',
+        borderColor: 'var(--p)',
+        borderWidth: 2.5,
+        pointRadius: 0,
+        tension: 0.4,
+        order: 1,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#16213E',
+        borderColor: 'rgba(0,212,138,0.3)',
+        borderWidth: 1,
+        padding: 12,
+        titleColor: '#8892B0',
+        bodyColor: '#F0F4FF',
+        callbacks: {
+          title: ctx => 'Jahr ' + ctx[0].label,
+          label: ctx => {
+            const labels = ['Eingezahlt', 'Gesamtwert'];
+            return ' ' + labels[ctx.datasetIndex] + ': ' + fmt(ctx.raw) + ' €';
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: 'rgba(255,255,255,0.04)' },
+        ticks: { color: '#8892B0', font: { size: 11, family: 'JetBrains Mono' } }
+      },
+      y: {
+        grid: { color: 'rgba(255,255,255,0.04)' },
+        ticks: {
+          color: '#8892B0',
+          font: { size: 11, family: 'JetBrains Mono' },
+          callback: v => v >= 1000000 ? (v/1000000).toFixed(1)+'M €' : v >= 1000 ? (v/1000).toFixed(0)+'K €' : v + ' €'
+        }
+      }
+    }
+  }
+});
+
+/* ── STATE ── */
+let freq = 1; // compounding periods per year
+
+function setFreq(btn) {
+  document.querySelectorAll('.freq-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  freq = parseInt(btn.dataset.freq);
+  update();
+}
+
+/* ── FORMATTING ── */
+function fmt(n) {
+  return Math.round(n).toLocaleString('de');
+}
+
+/* ── COMPOUND CALC ── */
+function calcYearly(principal, monthlyRate, annualRate, years, n) {
+  const r = annualRate / 100;
+  const periodicRate = r / n;
+  const paymentPerPeriod = monthlyRate * (12 / n); // payment per compounding period
+
+  const data = [];
+  let capital = principal;
+  let invested = principal;
+  const initialCapital = principal;
+
+  // Year 0
+  data.push({ year: 0, total: capital, invested: capital, interest: 0 });
+
+  for (let y = 1; y <= years; y++) {
+    for (let p = 0; p < n; p++) {
+      capital = capital * (1 + periodicRate) + paymentPerPeriod;
+      invested += paymentPerPeriod;
+    }
+    data.push({
+      year: y,
+      total: capital,
+      invested: invested,
+      interest: capital - invested
+    });
+  }
+  return data;
+}
+
+/* ── UPDATE ── */
+function update() {
+  const principal  = parseFloat(document.getElementById('num-start').value)   || 0;
+  const monthly    = parseFloat(document.getElementById('num-monthly').value)  || 0;
+  const rate       = parseFloat(document.getElementById('num-rate').value)     || 0;
+  const years      = parseInt(document.getElementById('num-years').value)      || 1;
+
+  // Calc
+  const data = calcYearly(principal, monthly, rate, years, freq);
+
+  const finalTotal    = data[data.length-1].total;
+  const finalInvested = data[data.length-1].invested;
+  const finalInterest = data[data.length-1].interest;
+
+  // Result numbers
+  document.getElementById('res-total').textContent    = fmt(finalTotal) + ' €';
+  document.getElementById('res-invested').textContent = fmt(finalInvested) + ' €';
+  document.getElementById('res-interest').textContent  = '+' + fmt(finalInterest) + ' €';
+
+  // Breakdown bars
+  const maxVal = finalTotal;
+  const investPct = maxVal > 0 ? (finalInvested / maxVal * 100) : 0;
+  const interestPct = maxVal > 0 ? (finalInterest / maxVal * 100) : 0;
+  document.getElementById('bar-invested').style.width  = investPct + '%';
+  document.getElementById('bar-interest').style.width  = interestPct + '%';
+  document.getElementById('lbl-invested').textContent  = fmt(finalInvested) + ' €';
+  document.getElementById('lbl-interest').textContent  = '+' + fmt(finalInterest) + ' €';
+
+  // Chart update
+  const labels  = data.map(d => d.year);
+  const totals  = data.map(d => Math.round(d.total));
+  const invData = data.map(d => Math.round(d.invested));
+
+  chart.data.labels = labels;
+  chart.data.datasets[0].data = invData;
+  chart.data.datasets[1].data = totals;
+  chart.update('none');
+
+  // ── MEILENSTEINE ──
+  // Alle basieren auf dem tatsächlich eingezahlten Kapital (invested), nicht auf dem Startkapital
+
+  // Suche Jahr für einen bestimmten Multiplikator: total >= factor × invested
+  function findMultipleYear(data, factor) {
+    for (let i = 1; i < data.length; i++) {
+      if (data[i].invested > 0 && data[i].total >= factor * data[i].invested) return i;
+    }
+    return null; // nicht innerhalb der Laufzeit erreicht
+  }
+
+  // Crossover: Zinsgewinn >= Eingezahlt (total >= 2× invested ist das gleiche, aber hier: interest >= invested)
+  function findCrossoverYear(data) {
+    for (let i = 1; i < data.length; i++) {
+      if (data[i].invested > 0 && data[i].interest >= data[i].invested) return i;
+    }
+    return null;
+  }
+
+  const milestones = [
+    { id: 'crossover', find: () => findCrossoverYear(data),       label: y => 'Jahr ' + y, beyond: d => d.interest >= d.invested },
+    { id: '2x',        find: () => findMultipleYear(data, 2),     label: y => 'Jahr ' + y, beyond: d => d.total >= 2 * d.invested },
+    { id: '3x',        find: () => findMultipleYear(data, 3),     label: y => 'Jahr ' + y, beyond: d => d.total >= 3 * d.invested },
+    { id: '5x',        find: () => findMultipleYear(data, 5),     label: y => 'Jahr ' + y, beyond: d => d.total >= 5 * d.invested },
+    { id: '10x',       find: () => findMultipleYear(data, 10),    label: y => 'Jahr ' + y, beyond: d => d.total >= 10 * d.invested },
+  ];
+
+  // Alle Meilenstein-Jahre berechnen (für Tabelle)
+  const msYears = {};
+  milestones.forEach(ms => {
+    const yr = ms.find();
+    msYears[ms.id] = yr;
+    const card     = document.getElementById('ms-' + ms.id);
+    const yearEl   = document.getElementById('ms-' + ms.id + '-year');
+    if (!card || !yearEl) return;
+
+    if (yr !== null && yr <= years) {
+      card.className = card.className.replace(' locked','').replace(' beyond','');
+      card.classList.add('reached');
+      yearEl.textContent = 'Jahr ' + yr;
+
+      // Sub-Text mit konkretem Betrag
+      const subEl = document.getElementById('ms-' + ms.id + '-sub');
+      if (subEl) {
+        const d = data[yr];
+        if (ms.id === 'crossover') {
+          subEl.textContent = 'Ab Jahr ' + yr + ': Zinsgewinn ' + fmt(d.interest) + ' € > Eingezahlt ' + fmt(d.invested) + ' €';
+        } else {
+          const factor = ms.id === '2x' ? 2 : ms.id === '3x' ? 3 : ms.id === '5x' ? 5 : 10;
+          subEl.textContent = 'Gesamtwert ' + fmt(d.total) + ' € bei ' + fmt(d.invested) + ' € eingezahlt';
+        }
+      }
+    } else if (yr !== null && yr > years) {
+      // Erreichbar aber außerhalb der Laufzeit
+      card.className = card.className.replace(' reached','').replace(' locked','');
+      card.classList.add('beyond');
+      yearEl.textContent = 'Jahr ' + yr + ' ↗';
+    } else {
+      // Nicht erreichbar
+      card.className = card.className.replace(' reached','').replace(' beyond','');
+      card.classList.add('locked');
+      yearEl.textContent = '–';
+    }
+  });
+
+  // Yearly table – alle Meilensteine markieren
+  const tbody = document.getElementById('year-table');
+  tbody.innerHTML = '';
+  data.forEach((d, i) => {
+    if (i === 0) return;
+    const y = d.year;
+    const msHits = [];
+    if (msYears.crossover === y) msHits.push({ label: '⚖️', color: 'var(--p)' });
+    if (msYears['2x']    === y) msHits.push({ label: '2×',  color: 'var(--acc)' });
+    if (msYears['3x']    === y) msHits.push({ label: '3×',  color: 'var(--hl)' });
+    if (msYears['5x']    === y) msHits.push({ label: '5×',  color: '#bb8aff' });
+    if (msYears['10x']   === y) msHits.push({ label: '10×', color: '#88CFFF' });
+
+    const isMilestone = msHits.length > 0;
+    const interestPct = d.invested > 0 ? ((d.interest / d.invested) * 100).toFixed(0) : '0';
+    const tr = document.createElement('tr');
+    if (isMilestone) tr.style.cssText = 'background:rgba(255,255,255,0.03);border-left:2px solid ' + msHits[0].color;
+
+    const badges = msHits.map(h =>
+      `<span style="display:inline-flex;align-items:center;background:rgba(255,255,255,0.08);border-radius:50px;padding:1px 7px;font-size:10px;font-weight:700;color:${h.color};margin-left:4px;border:1px solid ${h.color}40">${h.label}</span>`
+    ).join('');
+
+    tr.innerHTML = `
+      <td>Jahr ${y}${badges}</td>
+      <td class="pos">${fmt(d.total)} €</td>
+      <td>${fmt(d.invested)} €</td>
+      <td style="color:var(--acc)">${d.interest > 0 ? '+' : ''}${fmt(d.interest)} €</td>
+      <td style="color:${d.interest > 0 ? 'var(--p)' : 'var(--muted)'}">${d.interest > 0 ? '+' : ''}${interestPct} %</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+/* ── SLIDER ↔ NUMBER INPUT SYNC ── */
+const sliderNumPairs = [
+  { slider: 'sl-start',   num: 'num-start',   parse: parseInt,   clamp: [0, 500000] },
+  { slider: 'sl-monthly', num: 'num-monthly',  parse: parseInt,   clamp: [0, 50000]  },
+  { slider: 'sl-rate',    num: 'num-rate',     parse: parseFloat, clamp: [0, 50]     },
+  { slider: 'sl-years',   num: 'num-years',    parse: parseInt,   clamp: [1, 100]    },
+];
+
+sliderNumPairs.forEach(({ slider, num, parse, clamp }) => {
+  const sl  = document.getElementById(slider);
+  const inp = document.getElementById(num);
+  if (!sl || !inp) return;
+
+  sl.addEventListener('input', () => {
+    inp.value = sl.value;
+    update();
+  });
+
+  inp.addEventListener('input', () => {
+    let v = parse(inp.value);
+    if (isNaN(v)) return;
+    v = Math.max(clamp[0], Math.min(clamp[1], v));
+    // Clamp slider to its own range without restricting the number input
+    sl.value = Math.min(parseFloat(sl.max), Math.max(parseFloat(sl.min), v));
+    update();
+  });
+
+  inp.addEventListener('blur', () => {
+    let v = parse(inp.value);
+    if (isNaN(v)) { inp.value = sl.value; return; }
+    v = Math.max(clamp[0], Math.min(clamp[1], v));
+    inp.value = v;
+    sl.value  = Math.min(parseFloat(sl.max), Math.max(parseFloat(sl.min), v));
+    update();
+  });
+});
+
+// Initial render
+update();
+
+/* ══════════════════════════════════════════════════════
+   FIREBASE SCENARIO: SAVE / OVERWRITE / LOAD / DELETE
+   Collection: users/{uid}/savedCalculations
+══════════════════════════════════════════════════════ */
+
+// Hält die docId des aktuell geladenen Szenarios (null = keines)
+let _activeScenarioId   = null;
+let _activeScenarioName = null;
+
+function scMsg(text, ok = true) {
+  const el = document.getElementById('sc-msg');
+  if (!el) return;
+  el.textContent = text;
+  el.style.color = ok ? 'var(--p)' : 'var(--hl)';
+  if (text) setTimeout(() => { if (el.textContent === text) el.textContent = ''; }, 3500);
+}
+
+/* Zeigt / versteckt den Banner und den Überschreiben-Button */
+function scSetActive(id, name) {
+  _activeScenarioId   = id;
+  _activeScenarioName = name;
+  const banner    = document.getElementById('sc-active-banner');
+  const nameEl    = document.getElementById('sc-active-name');
+  const overwrite = document.getElementById('sc-overwrite-btn');
+  if (id) {
+    if (banner)    { banner.style.display = 'flex'; }
+    if (nameEl)    { nameEl.textContent   = name; }
+    if (overwrite) { overwrite.style.display = 'block'; overwrite.textContent = '🔄 „' + name + '" überschreiben'; }
+  } else {
+    if (banner)    { banner.style.display    = 'none'; }
+    if (overwrite) { overwrite.style.display = 'none'; }
+  }
+}
+
+function scenarioClearActive() {
+  scSetActive(null, null);
+  // Dropdown-Auswahl zurücksetzen
+  const sel = document.getElementById('sc-select');
+  if (sel) sel.value = '';
+  updateLoadDeleteBtns();
+}
+
+function getInputValues() {
+  return {
+    start:   parseFloat(document.getElementById('num-start').value)   || 0,
+    monthly: parseFloat(document.getElementById('num-monthly').value) || 0,
+    rate:    parseFloat(document.getElementById('num-rate').value)     || 0,
+    years:   parseInt(document.getElementById('num-years').value)     || 1,
+    freq:    freq,
+  };
+}
+
+function applyInputValues(vals) {
+  const map = [
+    { slider: 'sl-start',   num: 'num-start',   key: 'start'   },
+    { slider: 'sl-monthly', num: 'num-monthly',  key: 'monthly' },
+    { slider: 'sl-rate',    num: 'num-rate',     key: 'rate'    },
+    { slider: 'sl-years',   num: 'num-years',    key: 'years'   },
+  ];
+  map.forEach(({ slider, num, key }) => {
+    const v   = vals[key];
+    const sl  = document.getElementById(slider);
+    const inp = document.getElementById(num);
+    if (sl)  sl.value  = Math.min(parseFloat(sl.max), Math.max(parseFloat(sl.min), v));
+    if (inp) inp.value = v;
+  });
+  if (vals.freq !== undefined) {
+    freq = vals.freq;
+    document.querySelectorAll('.freq-btn').forEach(b => {
+      b.classList.toggle('active', parseInt(b.dataset.freq) === freq);
+    });
+  }
+  update();
+}
+
+async function getFBRefs() {
+  if (!window.FirebaseDB || !window.FirebaseAuth) return null;
+  const user = window.FirebaseAuth.auth.currentUser;
+  if (!user) return null;
+  return { user, ...window.FirebaseDB };
+}
+
+async function scenarioRefresh() {
+  const fb = await getFBRefs();
+  if (!fb) return;
+  try {
+    const { db, collection, getDocs, query, where } = fb;
+    const col  = collection(db, 'users', fb.user.uid, 'savedCalculations');
+    const q    = query(col, where('tool', '==', 'zinseszins'));
+    const snap = await getDocs(q);
+    const sel  = document.getElementById('sc-select');
+    if (!sel) return;
+    const prev = sel.value; // ausgewählten Wert merken
+    sel.innerHTML = '<option value="">– Szenario wählen –</option>';
+    snap.forEach(d => {
+      const opt    = document.createElement('option');
+      opt.value    = d.id;
+      const ts     = d.data().savedAt?.toDate?.() ?? new Date(d.data().savedAt || 0);
+      const dtStr  = ts.toLocaleDateString('de-DE', { day:'2-digit', month:'2-digit', year:'2-digit' });
+      opt.textContent = `${d.data().name}  (${dtStr})`;
+      sel.appendChild(opt);
+    });
+    // Vorherige Auswahl wiederherstellen falls noch vorhanden
+    if (prev && sel.querySelector(`option[value="${prev}"]`)) sel.value = prev;
+    updateLoadDeleteBtns();
+  } catch(e) { console.warn('Scenario refresh error:', e); }
+}
+
+function updateLoadDeleteBtns() {
+  const sel    = document.getElementById('sc-select');
+  const hasVal = sel && sel.value !== '';
+  const lb     = document.getElementById('sc-load-btn');
+  const db     = document.getElementById('sc-del-btn');
+  if (lb) lb.disabled = !hasVal;
+  if (db) db.disabled = !hasVal;
+}
+
+document.getElementById('sc-select')?.addEventListener('change', updateLoadDeleteBtns);
+
+/* ── NEU SPEICHERN ── */
+async function scenarioSave() {
+  const fb = await getFBRefs();
+  if (!fb) { scMsg('Bitte einloggen.', false); return; }
+  const name = (document.getElementById('sc-name')?.value || '').trim();
+  if (!name) { scMsg('Bitte einen Szenario-Namen eingeben.', false); return; }
+
+  const btn = document.getElementById('sc-save-btn');
+  if (btn) btn.disabled = true;
+  scMsg('Wird gespeichert…');
+  try {
+    const { db, collection } = fb;
+    const { addDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const col = collection(db, 'users', fb.user.uid, 'savedCalculations');
+    const ref = await addDoc(col, {
+      tool: 'zinseszins', name, values: getInputValues(), savedAt: serverTimestamp(),
+    });
+    scMsg('✅ Szenario „' + name + '" gespeichert!');
+    document.getElementById('sc-name').value = '';
+    // Neu gespeichertes Szenario als aktives setzen
+    scSetActive(ref.id, name);
+    await scenarioRefresh();
+    // Dropdown auf neues Szenario stellen
+    const sel = document.getElementById('sc-select');
+    if (sel) sel.value = ref.id;
+    updateLoadDeleteBtns();
+  } catch(e) {
+    scMsg('Fehler: ' + e.message, false);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+/* ── ÜBERSCHREIBEN (setDoc auf bestehende docId) ── */
+async function scenarioOverwrite() {
+  if (!_activeScenarioId) return;
+  const fb = await getFBRefs();
+  if (!fb) { scMsg('Bitte einloggen.', false); return; }
+
+  const btn = document.getElementById('sc-overwrite-btn');
+  if (btn) btn.disabled = true;
+  scMsg('Wird überschrieben…');
+  try {
+    const { db, doc } = fb;
+    const { setDoc, serverTimestamp } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    const docRef = doc(db, 'users', fb.user.uid, 'savedCalculations', _activeScenarioId);
+    await setDoc(docRef, {
+      tool: 'zinseszins', name: _activeScenarioName,
+      values: getInputValues(), savedAt: serverTimestamp(),
+    });
+    scMsg('✅ „' + _activeScenarioName + '" wurde überschrieben!');
+    await scenarioRefresh();
+    const sel = document.getElementById('sc-select');
+    if (sel) sel.value = _activeScenarioId;
+    updateLoadDeleteBtns();
+  } catch(e) {
+    scMsg('Fehler: ' + e.message, false);
+  } finally {
+    if (btn) btn.disabled = false;
+  }
+}
+
+/* ── LADEN ── */
+async function scenarioLoad() {
+  const sel = document.getElementById('sc-select');
+  const id  = sel?.value;
+  if (!id) return;
+  const fb = await getFBRefs();
+  if (!fb) return;
+  try {
+    const { db, doc, getDoc } = fb;
+    const snap = await getDoc(doc(db, 'users', fb.user.uid, 'savedCalculations', id));
+    if (!snap.exists()) { scMsg('Szenario nicht gefunden.', false); return; }
+    const data = snap.data();
+    applyInputValues(data.values);
+    scSetActive(id, data.name);
+    scMsg('✅ Szenario „' + data.name + '" geladen!');
+  } catch(e) {
+    scMsg('Fehler: ' + e.message, false);
+  }
+}
+
+/* ── LÖSCHEN ── */
+async function scenarioDelete() {
+  const sel = document.getElementById('sc-select');
+  const id  = sel?.value;
+  if (!id) return;
+  if (!confirm('Szenario wirklich löschen?')) return;
+  const fb = await getFBRefs();
+  if (!fb) return;
+  try {
+    const { deleteDoc, doc } = await import('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js');
+    await deleteDoc(doc(fb.db, 'users', fb.user.uid, 'savedCalculations', id));
+    // Falls das aktive Szenario gelöscht wurde → Banner ausblenden
+    if (id === _activeScenarioId) scenarioClearActive();
+    scMsg('Szenario gelöscht.');
+    await scenarioRefresh();
+  } catch(e) {
+    scMsg('Fehler: ' + e.message, false);
+  }
+}
+
+/* ── AUTH GATE ── */
+function initScenarioAuth() {
+  const authGate = document.getElementById('scenario-auth-gate');
+  const scenUI   = document.getElementById('scenario-ui');
+  if (!window.FirebaseAuth) { window.addEventListener('firebaseLoaded', initScenarioAuth); return; }
+  window.FirebaseAuth.onAuthStateChanged(window.FirebaseAuth.auth, user => {
+    if (user) {
+      if (authGate) authGate.style.display = 'none';
+      if (scenUI)   scenUI.style.display   = 'block';
+      scenarioRefresh();
+    } else {
+      if (authGate) authGate.style.display = 'block';
+      if (scenUI)   scenUI.style.display   = 'none';
+    }
+  });
+}
+initScenarioAuth();
+</script>
+<script src="theme.js"></script>
+</body>
+</html>
