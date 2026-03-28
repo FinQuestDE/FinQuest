@@ -1,0 +1,1484 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<script type="module" src="firebase-init.js"></script>
+<meta charset="UTF-8">
+<meta name="no-components">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Zinseszins – FinQuest</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+@import url('https://api.fontshare.com/v2/css?f[]=clash-display@600,700&display=swap');
+
+    :root {
+      --p: #00D48A; --s: #1A1A2E; --acc: #FFD166; --hl: #FF6B6B;
+      --su: #16213E; --su2: #0F3460; --tx: #F0F4FF; --mu: #8892B0;
+      --bo: rgba(0,212,138,.2);
+      /* Lange Aliasse → werden von theme.js überschrieben */
+      --kurs-color: #FFD166;
+      --color-primary: #00D48A; --color-secondary: #1A1A2E;
+      --color-accent: #FFD166; --color-highlight: #FF6B6B;
+      --color-surface: #16213E; --color-surface-2: #0F3460;
+      --color-text-main: #F0F4FF; --color-text-muted: #8892B0;
+      --color-border: rgba(0,212,138,.2); --color-footer: #0D0D1A;
+      /* Kurs-spezifische Tokens */
+      --article-text: #c8d0e8;
+      --story-bg: linear-gradient(135deg, rgba(255,255,255,.04) 0%, rgba(255,255,255,.01) 100%);
+      --story-border: rgba(255,255,255,.1);
+      --story-avatar-bg: rgba(255,255,255,.06);
+      --story-avatar-border: rgba(255,255,255,.12);
+      --map-border: rgba(255,255,255,.1);
+      --map-shadow: rgba(0,0,0,.7);
+      --node-bg: rgba(10,14,28,.82);
+      --node-border: rgba(255,255,255,.15);
+      --overlay-bg: rgba(0,0,0,.75);
+      --modal-bg: rgba(0,0,0,.85);
+      --lesson-border: rgba(255,255,255,.07);
+      --btn-ghost-bg: rgba(255,255,255,.06);
+      --btn-ghost-border: rgba(240,244,255,.25);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--s); color: var(--color-text-main); }
+    h1,h2,h3 { font-family: 'Clash Display','DM Sans',sans-serif; }    .btn { display: inline-flex; align-items: center; padding: 8px 18px; border-radius: 50px;
+      font-family: 'DM Sans',sans-serif; font-weight: 600; font-size: 13px; cursor: pointer;
+      border: none; text-decoration: none; transition: transform .18s, box-shadow .18s; }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-ghost { background: var(--btn-ghost-bg); color: var(--color-text-main); }
+    .btn-primary { background: var(--p); color: #0a0a14; }
+    .btn-primary:hover { box-shadow: 0 6px 20px rgba(0,212,138,.4); }
+    .btn-outline { background: transparent; color: var(--color-text-main); border: 1.5px solid var(--btn-ghost-border); }
+
+    .hero { background: linear-gradient(135deg, var(--color-surface) 0%, var(--color-surface-2) 100%);
+      border-bottom: 1px solid var(--color-border); padding: 40px 24px 36px; }
+    .hero-inner { max-width: 800px; margin: 0 auto; }
+    .back-link { display: inline-flex; align-items: center; gap: 6px; font-size: 13px;
+      color: var(--color-text-muted); text-decoration: none; margin-bottom: 20px; transition: color .2s; }
+    .back-link:hover { color: var(--color-primary); }
+    .course-tag { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 50px;
+      font-size: 11px; font-weight: 700; margin-bottom: 12px; }
+    .hero h1 { font-size: clamp(26px, 4vw, 38px); font-weight: 700; margin-bottom: 8px; }
+    .hero p { font-size: 15px; color: var(--color-text-muted); margin-bottom: 20px; }
+    .course-meta { display: flex; flex-wrap: wrap; gap: 16px; }
+    .meta-item { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--color-text-muted); }
+
+    .prog-wrap { max-width: 800px; margin: 24px auto; padding: 0 24px; }
+    .prog-header { display: flex; justify-content: space-between; margin-bottom: 8px;
+      font-size: 13px; color: var(--color-text-muted); }
+    .prog-track { height: 8px; background: var(--color-surface-2); border-radius: 99px; overflow: hidden; }
+    .prog-fill { height: 100%; background: var(--p); border-radius: 99px; transition: width .5s ease; width: 0%; }
+
+    .complete-banner { display: none; max-width: 800px; margin: 0 auto 16px; padding: 0 24px; }
+    .complete-banner.show { display: block; }
+    .complete-inner { background: rgba(0,212,138,.08); border: 1px solid rgba(0,212,138,.3);
+      border-radius: 18px; padding: 28px; text-align: center; }
+    .complete-inner h2 { margin-bottom: 8px; }
+    .complete-inner p { color: var(--color-text-muted); font-size: 14px; margin-bottom: 18px; }
+    .complete-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+    .lesson-list { max-width: 800px; margin: 0 auto; padding: 12px 24px 80px; }
+    .lesson-item { display: flex; align-items: center; gap: 14px; background: var(--color-surface);
+      border: 1px solid var(--lesson-border); border-radius: 14px; padding: 16px 18px;
+      margin-bottom: 10px; cursor: pointer; transition: transform .18s, border-color .18s, box-shadow .18s; }
+    .lesson-item:hover { transform: translateY(-2px); border-color: var(--color-border); box-shadow: 0 8px 24px var(--shadow-sm); }
+    .lesson-item.active { border-color: var(--color-primary); box-shadow: 0 0 0 2px rgba(0,212,138,.15); }
+    .lesson-item.completed { opacity: .7; }
+    .lesson-item.completed:hover { opacity: 1; }
+    .lesson-icon { font-size: 24px; width: 40px; text-align: center; flex-shrink: 0; }
+    .lesson-content { flex: 1; }
+    .lesson-title { font-weight: 600; font-size: 15px; margin-bottom: 3px; }
+    .lesson-desc { font-size: 13px; color: var(--color-text-muted); }
+    .lesson-xp { font-family: 'JetBrains Mono',monospace; font-size: 12px; color: var(--color-accent);
+      font-weight: 600; white-space: nowrap; }
+    .lesson-status { font-size: 18px; width: 28px; text-align: center; flex-shrink: 0; }
+
+    .modal-overlay { display: none; position: fixed; inset: 0; background: var(--overlay-bg);
+      z-index: 999; align-items: center; justify-content: center; padding: 16px; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 20px;
+      width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto;
+      animation: slideUp .25s ease; }
+    @keyframes slideUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+    .modal-header { padding: 24px 24px 16px; border-bottom: 1px solid var(--modal-sep); }
+    .modal-tag { font-size: 11px; font-weight: 700; color: var(--color-primary); text-transform: uppercase;
+      letter-spacing: .08em; margin-bottom: 8px; }
+    .modal-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .modal-subtitle { font-size: 14px; color: var(--color-text-muted); }
+    .modal-body { padding: 20px 24px; }
+    .theory-box { background: var(--color-surface-2); border-radius: 12px; padding: 16px 18px;
+      font-size: 14px; line-height: 1.75; color: var(--article-text); margin-bottom: 20px; }
+    .theory-box strong { color: var(--color-text-main); }
+    .quiz-label { font-size: 11px; font-weight: 700; color: var(--color-text-muted); text-transform: uppercase;
+      letter-spacing: .08em; margin-bottom: 10px; }
+    .quiz-question { font-size: 15px; font-weight: 600; margin-bottom: 14px; line-height: 1.45; }
+    .quiz-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+    .quiz-option { display: flex; align-items: center; gap: 10px; background: var(--color-surface-2);
+      border: 1.5px solid var(--input-border); border-radius: 10px; padding: 12px 14px;
+      cursor: pointer; text-align: left; font-family: 'DM Sans',sans-serif; font-size: 14px;
+      color: var(--color-text-main); transition: border-color .18s, background .18s; }
+    .quiz-option:hover:not(:disabled) { border-color: var(--color-primary); background: rgba(0,212,138,.06); }
+    .quiz-option.correct { border-color: var(--color-primary); background: rgba(0,212,138,.12); }
+    .quiz-option.wrong { border-color: var(--color-highlight); background: rgba(255,107,107,.1); }
+    .quiz-option:disabled { cursor: default; }
+    .option-letter { font-weight: 700; font-size: 12px; width: 24px; height: 24px;
+      border-radius: 50%; background: var(--xp-avatar-bg); display: flex;
+      align-items: center; justify-content: center; flex-shrink: 0; }
+    .feedback-box { display: none; border-radius: 10px; padding: 12px 14px; font-size: 14px;
+      line-height: 1.6; margin-top: 4px; }
+    .feedback-box.correct { background: rgba(0,212,138,.1); border: 1px solid rgba(0,212,138,.3); }
+    .feedback-box.wrong { background: rgba(255,107,107,.08); border: 1px solid rgba(255,107,107,.25); }
+    .modal-footer { padding: 16px 24px; border-top: 1px solid var(--modal-sep);
+      display: flex; align-items: center; justify-content: space-between; }
+    .xp-badge { font-family: 'JetBrains Mono',monospace; font-size: 13px; font-weight: 700;
+      color: var(--color-accent); background: rgba(255,209,102,.1); border: 1px solid rgba(255,209,102,.25);
+      border-radius: 50px; padding: 6px 14px; }
+    #btn-continue { display: none; }
+
+    .toast { position: fixed; bottom: 28px; right: 24px; background: var(--color-surface);
+      border: 1px solid var(--color-border); border-radius: 14px; padding: 12px 20px;
+      display: flex; align-items: center; gap: 10px; font-family: 'JetBrains Mono',monospace;
+      font-size: 15px; font-weight: 700; color: var(--color-primary); z-index: 9999;
+      transform: translateY(80px); opacity: 0; transition: transform .4s ease, opacity .4s ease;
+      pointer-events: none; }
+    .toast.show { transform: translateY(0); opacity: 1; }
+
+    /* ── GAMIFICATION EXTRAS ── */
+    .lesson-item { position: relative; overflow: hidden; }
+    .lesson-item::after { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg,transparent,rgba(0,212,138,.06),transparent); transition:left .5s; }
+    .lesson-item:hover::after { left:100%; }
+    .lesson-item.completed .lesson-icon { filter: drop-shadow(0 0 6px rgba(0,212,138,.6)); }
+
+    /* Streak badge */
+    .streak-banner { background:linear-gradient(135deg,rgba(255,107,107,.12),rgba(255,107,107,.04)); border:1px solid rgba(255,107,107,.25); border-radius:16px; padding:14px 20px; margin:0 auto 20px; max-width:800px; display:flex; align-items:center; gap:12px; }
+    .streak-fire { font-size:28px; }
+    .streak-text { font-size:13px; color:var(--mu); }
+    .streak-text strong { color:var(--tx); font-size:15px; display:block; }
+
+    /* XP explosion on correct answer */
+    @keyframes xpPop { 0%{transform:scale(0) translateY(0);opacity:1} 80%{transform:scale(1.2) translateY(-30px);opacity:1} 100%{transform:scale(1) translateY(-50px);opacity:0} }
+    .xp-pop { position:fixed; font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; color:#00D48A; pointer-events:none; z-index:9999; animation:xpPop .8s ease forwards; }
+
+    /* Progress milestone badge */
+    .milestone-badge { display:inline-flex; align-items:center; gap:6px; background:rgba(255,209,102,.1); border:1px solid rgba(255,209,102,.3); border-radius:50px; padding:4px 12px; font-size:11px; font-weight:700; color:var(--acc); margin:0 0 12px; }
+
+    /* Course section dividers */
+    .section-label { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.12em; color:var(--mu); padding:8px 20px; background:var(--progress-bg-1); border-top:1px solid var(--progress-bg-2); border-bottom:1px solid var(--progress-bg-2); margin:4px 0; }
+
+    /* Quiz option animations */
+    .quiz-option { transition:transform .15s, background .2s, border-color .2s; }
+    .quiz-option:hover:not(:disabled) { transform:translateX(4px); }
+    .quiz-option.correct-anim { animation: correctPulse .4s ease; }
+    @keyframes correctPulse { 0%{transform:scale(1)} 50%{transform:scale(1.03)} 100%{transform:scale(1)} }
+
+    /* Lesson counter chip */
+    .lesson-counter-chip { display:inline-flex; align-items:center; gap:5px; background:rgba(0,212,138,.08); border:1px solid var(--bo); border-radius:50px; padding:3px 10px; font-size:11px; font-weight:600; color:var(--p); margin-bottom:16px; }
+
+
+    /* ══════════════════════════════════════════════════
+       STORY BOX
+    ══════════════════════════════════════════════════ */
+    .story-box {
+      max-width: 800px; margin: 0 auto 8px; padding: 0 24px;
+    }
+    .story-inner {
+      background: var(--story-bg);
+      border: 1px solid var(--story-border);
+      border-radius: 20px;
+      padding: 20px 22px;
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+    .story-inner::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, var(--story-color-a, rgba(0,212,138,.06)), transparent 60%);
+      pointer-events: none;
+    }
+    .story-avatar {
+      font-size: 48px;
+      width: 72px; height: 72px;
+      border-radius: 50%;
+      background: var(--story-avatar-bg);
+      border: 2px solid var(--story-avatar-border);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      animation: avatarFloat 3s ease-in-out infinite;
+    }
+    @keyframes avatarFloat {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(-5px); }
+    }
+    .story-text {
+      flex: 1;
+    }
+    .story-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .12em; color: var(--color-text-muted); margin-bottom: 5px;
+    }
+    .story-body {
+      font-size: 14px; line-height: 1.65; color: var(--article-text);
+    }
+    .story-body strong { color: var(--color-text-main); }
+
+
+    /* ══════════════════════════════════════════════════
+       MARIO MAP  –  reichhaltige interaktive Level-Karte
+    ══════════════════════════════════════════════════ */
+    .mario-map-wrap {
+      max-width: 560px; margin: 0 auto; padding: 0 16px 80px;
+    }
+    .mario-map {
+      position: relative; width: 100%;
+      border-radius: 20px; overflow: hidden;
+      padding-top: 463.46%;
+      border: 2px solid rgba(255,255,255,.1);
+      box-shadow: 0 32px 80px rgba(0,0,0,.7), inset 0 1px 0 rgba(255,255,255,.06);
+    }
+    .mario-map::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(255,255,255,.03) 0%, transparent 55%);
+      pointer-events: none; z-index: 1;
+    }
+    .map-svg {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%; z-index: 0;
+    }
+    /* ── NODES ── */
+    .mnode {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      width: 66px; height: 66px;
+      border-radius: 50%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      cursor: pointer; z-index: 10;
+      transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .2s;
+      border: 3px solid rgba(255,255,255,.15);
+      background: rgba(10,14,28,.82);
+      backdrop-filter: blur(6px);
+    }
+    .mnode:hover { transform: translate(-50%,-50%) scale(1.18) !important; z-index: 20; }
+
+    .mnode.state-done {
+      background: var(--nc, #00D48A);
+      border-color: rgba(255,255,255,.45);
+      box-shadow: 0 0 0 5px rgba(var(--nr,0,212,138),.2),
+                  0 0 28px rgba(var(--nr,0,212,138),.55),
+                  0 6px 18px rgba(0,0,0,.5);
+    }
+    .mnode.state-done .mnode-num { color: rgba(0,0,0,.55); }
+
+    .mnode.state-active {
+      background: rgba(8,12,26,.95);
+      border: 3px solid var(--nc, #00D48A);
+      animation: mPulse 1.7s ease-in-out infinite; /* kursfarbe bleibt */
+    }
+    @keyframes mPulse {
+      0%   { box-shadow: 0 0 0 0   rgba(var(--nr,0,212,138),.8), 0 6px 20px rgba(0,0,0,.5); }
+      65%  { box-shadow: 0 0 0 18px rgba(var(--nr,0,212,138),0), 0 6px 20px rgba(0,0,0,.5); }
+      100% { box-shadow: 0 0 0 0   rgba(var(--nr,0,212,138),0), 0 6px 20px rgba(0,0,0,.5); }
+    }
+    .mnode.state-active::before {
+      content: "▼";
+      position: absolute; top: -22px; left: 50%;
+      transform: translateX(-50%);
+      font-size: 13px; color: var(--nc, #00D48A);
+      animation: arrowBounce .9s ease-in-out infinite;
+      text-shadow: 0 0 8px rgba(var(--nr,0,212,138),.8);
+    }
+    @keyframes arrowBounce {
+      0%,100% { top: -22px; opacity: 1; }
+      50%      { top: -30px; opacity: .8; }
+    }
+    .mnode.state-locked {
+      background: rgba(6,8,18,.7);
+      border-color: rgba(255,255,255,.06);
+      cursor: not-allowed; opacity: .42;
+    }
+    .mnode.state-locked:hover { transform: translate(-50%,-50%) scale(1) !important; }
+
+    .mnode-icon { font-size: 22px; line-height: 1; pointer-events: none; }
+    .mnode-num  { font-family: "JetBrains Mono",monospace; font-size: 9px; font-weight: 700;
+                  color: rgba(255,255,255,.5); margin-top: 1px; pointer-events: none; }
+
+    .mnode-check {
+      position: absolute; top: -5px; right: -5px;
+      width: 21px; height: 21px; border-radius: 50%;
+      background: white; color: var(--nc, #00D48A);
+      font-size: 12px; font-weight: 900;
+      display: flex; align-items: center; justify-content: center;
+      border: 2.5px solid var(--nc, #00D48A);
+      box-shadow: 0 3px 10px var(--node-shadow-sm); pointer-events: none;
+    }
+
+    /* Tooltip */
+    .mnode[data-tip]:hover::after {
+      content: attr(data-tip);
+      position: absolute; bottom: calc(100% + 12px); left: 50%;
+      transform: translateX(-50%);
+      background: var(--tooltip-bg); border: 1px solid var(--tooltip-border);
+      border-radius: 10px; padding: 7px 11px; font-size: 11px; line-height: 1.5;
+      white-space: normal; max-width: 155px; text-align: center;
+      color: var(--color-text-main); pointer-events: none; z-index: 30;
+      box-shadow: 0 8px 24px var(--shadow-dark);
+    }
+    .mnode[data-tip]:hover::before {
+      content: ""; position: absolute; bottom: calc(100% + 7px); left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent; border-top-color: var(--tooltip-border);
+      pointer-events: none; z-index: 30;
+    }
+    @media(max-width:600px){
+      .mario-map-wrap{ padding:0 8px 60px; }
+      .mario-map { overflow: visible; border-radius: 12px; }
+      .mnode{ width:52px; height:52px; }
+      .mnode-icon{ font-size:16px; }
+      .mnode-num { font-size:9px; }
+      .mnode:hover { transform: translate(-50%,-50%) scale(1.1) !important; }
+    }
+
+        /* ══════════════════════════════════════════════════
+       LOOT BOX / SCHATZTRUHEN
+    ══════════════════════════════════════════════════ */
+    .loot-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: var(--modal-bg);
+      z-index: 1100;
+      align-items: center; justify-content: center;
+      flex-direction: column;
+      backdrop-filter: blur(8px);
+    }
+    .loot-overlay.open { display: flex; }
+
+    .loot-title {
+      font-family: 'Clash Display','DM Sans',sans-serif;
+      font-size: clamp(22px,4vw,34px);
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+    .loot-sub {
+      font-size: 15px;
+      color: var(--color-text-muted);
+      margin-bottom: 36px;
+      text-align: center;
+    }
+
+    .loot-chests {
+      display: flex;
+      gap: 28px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 32px;
+    }
+
+    .chest {
+      display: flex; flex-direction: column; align-items: center;
+      cursor: pointer;
+      transition: transform .2s;
+    }
+    .chest:hover .chest-body { transform: rotate(-4deg) scale(1.06); }
+    .chest.chosen  { pointer-events: none; }
+    .chest.unchosen { opacity: .5; pointer-events: none; }
+
+    .chest-body {
+      width: 100px; height: 90px;
+      background: linear-gradient(135deg, #2a1800, #4a2e00);
+      border: 3px solid #8B5E00;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 50px;
+      transition: transform .35s cubic-bezier(.34,1.56,.64,1);
+      position: relative;
+      box-shadow: 0 8px 28px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,220,80,.15);
+    }
+    .chest-body::before {
+      content: '';
+      position: absolute; top: 40%; left: 0; right: 0;
+      height: 3px;
+      background: #8B5E00;
+    }
+    .chest-body::after {
+      content: '';
+      position: absolute; top: 34%; left: 50%; transform: translateX(-50%);
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #FFD166 40%, #8B5E00 100%);
+      border: 2px solid #4a2e00;
+    }
+
+    /* Chest open animation */
+    @keyframes chestOpen {
+      0%   { transform: rotate(0deg) scale(1); }
+      20%  { transform: rotate(-8deg) scale(1.08); }
+      40%  { transform: rotate(8deg)  scale(1.12); }
+      60%  { transform: rotate(-4deg) scale(1.15); }
+      80%  { transform: rotate(2deg)  scale(1.1); }
+      100% { transform: rotate(0deg) scale(1); }
+    }
+    .chest.opening .chest-body { animation: chestOpen .5s ease; }
+    .chest.open-winner .chest-body { background: linear-gradient(135deg,#1a3300,#2e5500); border-color: var(--color-primary); box-shadow: 0 0 32px rgba(0,212,138,.6), 0 8px 28px rgba(0,0,0,.5); }
+    .chest.open-looser .chest-body { background: var(--chest-body-bg); border-color: var(--chest-border); }
+
+    .chest-label {
+      margin-top: 10px;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--color-text-muted);
+      text-align: center;
+    }
+    .chest-label.win-label { color: var(--color-accent); font-size: 14px; }
+    .chest-label.miss-label { color: var(--chest-miss); }
+
+    /* XP burst */
+    @keyframes xpBurst { 0%{transform:scale(0) translateY(0);opacity:1} 80%{transform:scale(1.3) translateY(-40px);opacity:1} 100%{transform:scale(1) translateY(-70px);opacity:0} }
+    .xp-burst {
+      position: fixed;
+      font-family: 'JetBrains Mono',monospace;
+      font-size: 28px; font-weight: 700;
+      color: var(--color-accent);
+      pointer-events: none;
+      z-index: 9999;
+      animation: xpBurst 1.2s ease forwards;
+      text-shadow: 0 0 20px rgba(255,209,102,.8);
+    }
+
+    /* Confetti */
+    .confetti-piece {
+      position: fixed; top: -20px;
+      width: 10px; height: 10px;
+      border-radius: 2px;
+      pointer-events: none;
+      z-index: 2000;
+      animation: confettiFall linear forwards;
+    }
+    @keyframes confettiFall {
+      0%   { transform: translateY(-20px) rotate(0deg);   opacity: 1; }
+      100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
+
+    .loot-result {
+      text-align: center;
+      animation: fadeInUp .5s ease;
+    }
+    @keyframes fadeInUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+    .loot-result h2 { font-size: clamp(20px,4vw,30px); font-weight: 700; margin-bottom: 6px; }
+    .loot-result p  { color: var(--color-text-muted); font-size: 14px; margin-bottom: 20px; }
+
+    .loot-close-btn {
+      background: var(--p); color: #0a0a14;
+      border: none; border-radius: 50px;
+      padding: 13px 32px; font-size: 15px; font-weight: 700;
+      cursor: pointer; font-family: 'DM Sans',sans-serif;
+      transition: transform .18s, box-shadow .18s;
+    }
+    .loot-close-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,212,138,.4); }
+
+    @media(max-width:600px) {
+      .map-row:nth-child(odd)  { padding-left: 20px; }
+      .map-row:nth-child(even) { padding-right: 20px; }
+      .map-node { width: 60px; height: 60px; }
+      .node-icon { font-size: 18px; }
+      .loot-chests { gap: 16px; }
+      .chest-body { width: 80px; height: 72px; font-size: 38px; }
+      .story-avatar { width: 56px; height: 56px; font-size: 36px; }
+    }
+
+
+    html[data-theme="clean"] {
+      --article-text: #3D3452;
+      --story-bg: linear-gradient(135deg, rgba(124,58,237,.04) 0%, rgba(124,58,237,.01) 100%);
+      --story-border: rgba(124,58,237,.12);
+      --story-avatar-bg: rgba(124,58,237,.08);
+      --story-avatar-border: rgba(124,58,237,.15);
+      --map-border: rgba(124,58,237,.15);
+      --map-shadow: rgba(0,0,0,.15);
+      --node-bg: rgba(255,255,255,.95);
+      --node-border: rgba(124,58,237,.2);
+      --overlay-bg: rgba(26,21,35,.5);
+      --modal-bg: rgba(26,21,35,.85);
+      --lesson-border: rgba(124,58,237,.1);
+      --btn-ghost-bg: rgba(124,58,237,.06);
+      --btn-ghost-border: rgba(124,58,237,.2);
+      /* Weitere Clean-Tokens */
+      --shadow-sm: rgba(0,0,0,.06);
+      --modal-sep: rgba(124,58,237,.1);
+      --input-border: rgba(124,58,237,.15);
+      --progress-bg-1: rgba(124,58,237,.04);
+      --progress-bg-2: rgba(124,58,237,.06);
+      --map-inset: rgba(124,58,237,.06);
+      --map-glow: rgba(124,58,237,.03);
+      --node-done-border: rgba(124,58,237,.4);
+      --node-shadow-dark: rgba(0,0,0,.1);
+      --node-num-done: rgba(26,21,35,.6);
+      --node-num-locked: rgba(26,21,35,.4);
+      --node-shadow-sm: rgba(0,0,0,.08);
+      --tooltip-border: rgba(124,58,237,.15);
+      --chest-border: rgba(124,58,237,.12);
+      --chest-miss: rgba(26,21,35,.4);
+      --chest-body-bg: #F0EDE8;
+    }
+      html[data-theme="clean"] {
+      --node-locked-border: rgba(124,58,237,.08);
+      --tooltip-bg: rgba(255,255,255,.97);
+      --node-locked-bg: rgba(240,235,255,.85);
+      --xp-avatar-bg: rgba(124,58,237,.1);
+      --shadow-dark: rgba(0,0,0,.12);
+    }
+  
+    @media(max-width:480px){
+      .mnode[data-tip]:hover::after,
+      .mnode[data-tip]:hover::before { display: none; }
+      .mnode { width:48px; height:48px; }
+      .mnode-icon { font-size:15px; }
+      .mnode-num { font-size:8px; }
+    }
+  
+    /* ── TOOLTIP erste Node nach unten ── */
+    #li0[data-tip]:hover::after {
+      bottom: auto; top: calc(100% + 12px);
+    }
+    #li0[data-tip]:hover::before {
+      bottom: auto; top: calc(100% + 7px);
+      border-top-color: transparent;
+      border-bottom-color: var(--tooltip-border);
+    }
+    /* ── pathDone theme-aware ── */
+    .map-svg #pathDone { color: var(--kurs-color) !important; } /* kursfarbe immer, nicht theme */
+    /* ── dashed trail theme-aware ── */
+    .map-svg .svg-dashed { stroke: rgba(255,255,255,.3) !important; }
+    /* ── SVG Hintergrund im Clean-Theme ── */
+
+  </style>
+</head>
+<body>
+<section class="hero">
+  <div class="hero-inner">
+    <a href="dashboard.html" class="back-link">← Zurück zum Dashboard</a>
+    <div class="course-tag" style="background:rgba(0,212,138,.1);color:#00D48A;border:1px solid rgba(0,212,138,.25);">📊 Einsteiger</div>
+    <h1>📈 Zinseszins</h1>
+    <p>Die mächtigste Kraft im Universum – für dein Geld</p>
+    <div class="course-meta">
+      <div class="meta-item">📚 20 Lektionen</div>
+      <div class="meta-item">⚡ 1000 XP möglich</div>
+      <div class="meta-item">⏱️ ca. 19 Minuten</div>
+    </div>
+  </div>
+</section>
+
+<div class="prog-wrap">
+  <div class="prog-header">
+    <span id="progLabel">0 von 19 Lektionen</span>
+    <span id="progXP">0 / 950 XP</span>
+  </div>
+  <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+</div>
+
+<div class="story-box">
+  <div class="story-inner" style="--story-color-a: rgba(255,209,102,.08);">
+    <div class="story-avatar">📊</div>
+    <div class="story-text">
+      <div class="story-label">📖 Deine Geschichte</div>
+      <div class="story-body">Das ist <strong>Ben</strong>. Ben ist 22 und hat 100€ übrig pro Monat. Sein Opa sagt: "Fang jetzt an, und du wirst staunen." Ben glaubt das nicht. Zeig ihm das 8. Weltwunder – und warum jeder Monat den Unterschied macht!</div>
+    </div>
+  </div>
+</div>
+<div class="complete-banner" id="completeBanner">
+  <div class="complete-inner">
+    <div style="font-size:48px;margin-bottom:10px;">🏆</div>
+    <h2>Kurs abgeschlossen!</h2>
+    <p>Alle 20 Lektionen von <strong>Zinseszins</strong> abgeschlossen – 1000 XP verdient!</p>
+    <div class="complete-btns">
+      <a href="dashboard.html" class="btn btn-primary">Zum Dashboard →</a>
+      <button class="btn btn-ghost" onclick="resetCourse()">🔄 Wiederholen</button>
+    </div>
+  </div>
+</div>
+
+<div class="mario-map-wrap" id="levelMap">
+  <div class="mario-map">
+    <svg class="map-svg" viewBox="0 0 520 2410" preserveAspectRatio="xMidYMin meet" xmlns="http://www.w3.org/2000/svg">
+      
+  <defs>
+    <linearGradient id="zinssky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a1000"/>
+      <stop offset="60%" stop-color="#2a1e00"/>
+      <stop offset="100%" stop-color="#1a1400"/>
+    </linearGradient>
+    <radialGradient id="goldGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFD166" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#FFD166" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="520" height="2360" fill="url(#zinssky)"/>
+
+  <!-- Goldener Glanz Hintergrund -->
+  <ellipse cx="260" cy="600" rx="220" ry="180" fill="url(#goldGlow)"/>
+  <ellipse cx="260" cy="1600" rx="200" ry="160" fill="url(#goldGlow)"/>
+
+  <!-- Sterne in Gold-Tönen -->
+  <circle cx="30" cy="35" r="1.5" fill="#FFD166" opacity=".6"/><circle cx="90" cy="18" r="1.2" fill="#FFD166" opacity=".5"/>
+  <circle cx="160" cy="48" r="1" fill="white" opacity=".7"/><circle cx="230" cy="20" r="1.5" fill="#FFD166" opacity=".6"/>
+  <circle cx="310" cy="42" r="1.2" fill="white" opacity=".5"/><circle cx="400" cy="16" r="1" fill="#FFD166" opacity=".7"/>
+  <circle cx="470" cy="38" r="1.5" fill="white" opacity=".6"/>
+
+  <!-- EXPONENTIELLES WACHSTUM - riesige Chart-Kurve als Hintergrund -->
+  <path d="M 30 2200 Q 100 2100 160 1900 Q 220 1700 260 1400 Q 300 1100 340 800 Q 360 650 380 500 Q 400 380 420 280 Q 440 200 460 140" fill="none" stroke="#FFD166" stroke-width="3" opacity=".12"/>
+  <path d="M 30 2200 Q 100 2100 160 1900 Q 220 1700 260 1400 Q 300 1100 340 800 Q 360 650 380 500 Q 400 380 420 280 Q 440 200 460 140" fill="none" stroke="#FFD166" stroke-width="12" opacity=".04"/>
+
+  <!-- Münzturm links (wächst mit) -->
+  <!-- Basis: viele Münzen gestapelt -->
+  <ellipse cx="65" cy="850" rx="28" ry="8" fill="#9a7000" opacity=".8"/>
+  <ellipse cx="65" cy="844" rx="26" ry="7" fill="#c8a000" opacity=".7"/>
+  <ellipse cx="65" cy="838" rx="25" ry="7" fill="#c8a000" opacity=".7"/>
+  <ellipse cx="65" cy="832" rx="24" ry="7" fill="#FFD166" opacity=".6"/>
+  <ellipse cx="65" cy="826" rx="23" ry="7" fill="#FFD166" opacity=".6"/>
+  <ellipse cx="65" cy="820" rx="22" ry="6" fill="#FFD166" opacity=".65"/>
+  <ellipse cx="65" cy="814" rx="21" ry="6" fill="#FFD166" opacity=".65"/>
+  <ellipse cx="65" cy="808" rx="20" ry="6" fill="#FFD166" opacity=".7"/>
+  <text x="65" y="870" text-anchor="middle" fill="#FFD166" font-size="7">💰 Jahr 1: 1.000€</text>
+
+  <!-- Münzturm Mitte (mittleres Wachstum) -->
+  <ellipse cx="260" cy="1100" rx="32" ry="9" fill="#9a7000" opacity=".8"/>
+  <ellipse cx="260" cy="1093" rx="30" ry="8" fill="#c8a000" opacity=".7"/>
+  <ellipse cx="260" cy="1086" rx="29" ry="8" fill="#FFD166" opacity=".65"/>
+  <ellipse cx="260" cy="1079" rx="28" ry="8" fill="#FFD166" opacity=".65"/>
+  <ellipse cx="260" cy="1072" rx="27" ry="8" fill="#FFD166" opacity=".65"/>
+  <ellipse cx="260" cy="1065" rx="26" ry="7" fill="#FFD166" opacity=".7"/>
+  <ellipse cx="260" cy="1058" rx="25" ry="7" fill="#FFD166" opacity=".7"/>
+  <ellipse cx="260" cy="1051" rx="24" ry="7" fill="#FFD166" opacity=".75"/>
+  <ellipse cx="260" cy="1044" rx="23" ry="7" fill="#FFD166" opacity=".75"/>
+  <ellipse cx="260" cy="1037" rx="22" ry="6" fill="#FFD166" opacity=".8"/>
+  <ellipse cx="260" cy="1030" rx="21" ry="6" fill="#FFD166" opacity=".8"/>
+  <text x="260" y="1120" text-anchor="middle" fill="#FFD166" font-size="7">💰 Jahr 10: 1.967€</text>
+
+  <!-- Münzturm rechts (explosives Wachstum) -->
+  <ellipse cx="450" cy="1500" rx="38" ry="11" fill="#9a7000" opacity=".8"/>
+  <ellipse cx="450" cy="1492" rx="36" ry="10" fill="#c8a000" opacity=".7"/>
+  <ellipse cx="450" cy="1484" rx="34" ry="10" fill="#FFD166" opacity=".65"/>
+  <ellipse cx="450" cy="1476" rx="32" ry="9" fill="#FFD166" opacity=".65"/>
+  <ellipse cx="450" cy="1468" rx="30" ry="9" fill="#FFD166" opacity=".7"/>
+  <ellipse cx="450" cy="1460" rx="28" ry="9" fill="#FFD166" opacity=".7"/>
+  <ellipse cx="450" cy="1452" rx="26" ry="8" fill="#FFD166" opacity=".75"/>
+  <ellipse cx="450" cy="1444" rx="24" ry="8" fill="#FFD166" opacity=".75"/>
+  <ellipse cx="450" cy="1436" rx="22" ry="7" fill="#FFD166" opacity=".8"/>
+  <ellipse cx="450" cy="1428" rx="20" ry="7" fill="#FFD166" opacity=".8"/>
+  <ellipse cx="450" cy="1420" rx="18" ry="7" fill="#FFD166" opacity=".85"/>
+  <ellipse cx="450" cy="1412" rx="16" ry="6" fill="#FFD166" opacity=".9"/>
+  <text x="450" y="1522" text-anchor="middle" fill="#FFD166" font-size="7">💰 Jahr 30: 7.612€</text>
+
+  <!-- Formel-Tafel -->
+  <rect x="10" y="300" width="150" height="70" fill="#1a1000" rx="4" stroke="#ffd16630" stroke-width="1.5"/>
+  <text x="85" y="318" text-anchor="middle" fill="#FFD166" font-size="7" font-weight="700">📐 ZINSESZINS-FORMEL</text>
+  <text x="85" y="334" text-anchor="middle" fill="white" font-size="9" font-weight="700" font-style="italic">K × (1 + p)ⁿ</text>
+  <text x="85" y="350" text-anchor="middle" fill="#8892B0" font-size="6">K = Kapital, p = Zinssatz</text>
+  <text x="85" y="362" text-anchor="middle" fill="#8892B0" font-size="6">n = Jahre</text>
+
+  <!-- Uhr / Zeit-Symbol (Zeit ist entscheidend) -->
+  <circle cx="440" cy="380" r="40" fill="#1a1000" stroke="#ffd16630" stroke-width="2"/>
+  <circle cx="440" cy="380" r="34" fill="none" stroke="#3a2a00" stroke-width="1"/>
+  <text x="440" y="345" text-anchor="middle" fill="#8892B0" font-size="7">12</text>
+  <text x="476" y="384" text-anchor="middle" fill="#8892B0" font-size="7">3</text>
+  <text x="440" y="420" text-anchor="middle" fill="#8892B0" font-size="7">6</text>
+  <text x="404" y="384" text-anchor="middle" fill="#8892B0" font-size="7">9</text>
+  <line x1="440" y1="380" x2="440" y2="352" stroke="#FFD166" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="440" y1="380" x2="460" y2="393" stroke="#8892B0" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="440" cy="380" r="4" fill="#FFD166"/>
+  <text x="440" y="432" text-anchor="middle" fill="#FFD166" font-size="7" font-weight="700">⏳ ZEIT = MACHT</text>
+
+  <!-- Sparschwein-Bank -->
+  <text x="80" y="1430" text-anchor="middle" font-size="34">🐷</text>
+  <rect x="48" y="1432" width="64" height="12" fill="#1a1000" rx="2"/>
+  <text x="80" y="1441" text-anchor="middle" fill="#FFD166" font-size="6">100€/Monat</text>
+
+  <!-- Schatzkammer unten -->
+  <rect x="150" y="1900" width="220" height="120" fill="#140e00" rx="4" stroke="#ffd16630" stroke-width="1.5"/>
+  <text x="260" y="1918" text-anchor="middle" fill="#FFD166" font-size="8" font-weight="700">🏦 SCHATZKAMMER</text>
+  <!-- Goldbarren im Regal -->
+  <rect x="165" y="1928" width="28" height="14" fill="#9a7000" rx="2"/><text x="179" y="1938" text-anchor="middle" fill="#3a2800" font-size="5" font-weight="700">GOLD</text>
+  <rect x="199" y="1928" width="28" height="14" fill="#9a7000" rx="2"/><text x="213" y="1938" text-anchor="middle" fill="#3a2800" font-size="5" font-weight="700">GOLD</text>
+  <rect x="233" y="1928" width="28" height="14" fill="#c8a000" rx="2"/><text x="247" y="1938" text-anchor="middle" fill="#3a2800" font-size="5" font-weight="700">GOLD</text>
+  <rect x="267" y="1928" width="28" height="14" fill="#c8a000" rx="2"/><text x="281" y="1938" text-anchor="middle" fill="#3a2800" font-size="5" font-weight="700">GOLD</text>
+  <rect x="301" y="1928" width="28" height="14" fill="#9a7000" rx="2"/><text x="315" y="1938" text-anchor="middle" fill="#3a2800" font-size="5" font-weight="700">GOLD</text>
+  <rect x="165" y="1948" width="60" height="3" fill="#3a2800" opacity=".5"/>
+  <rect x="165" y="1956" width="28" height="14" fill="#c8a000" rx="2"/><rect x="199" y="1956" width="28" height="14" fill="#9a7000" rx="2"/>
+  <rect x="233" y="1956" width="28" height="14" fill="#c8a000" rx="2"/><rect x="267" y="1956" width="28" height="14" fill="#c8a000" rx="2"/>
+  <text x="260" y="1988" text-anchor="middle" fill="#FFD166" font-size="9" font-weight="700">1.000.000 € 🎉</text>
+  <text x="260" y="2002" text-anchor="middle" fill="#8892B0" font-size="7">Zinseszins über 40 Jahre</text>
+
+  <!-- Ziel: Millionärs-Villa -->
+  <rect x="155" y="2140" width="210" height="140" fill="#140e00" rx="4" stroke="#FFD166" stroke-width="2.5"/>
+  <polygon points="148,2140 260,2065 372,2140" fill="#1e1600"/>
+  <text x="260" y="2108" text-anchor="middle" font-size="24">🏆</text>
+  <rect x="238" y="2228" width="44" height="52" fill="#0a0800" rx="2"/>
+  <rect x="172" y="2158" width="26" height="22" fill="#ffd16635" rx="2"/>
+  <rect x="322" y="2158" width="26" height="22" fill="#ffd16635" rx="2"/>
+  <text x="260" y="2058" text-anchor="middle" fill="#FFD166" font-size="10" font-weight="700">MILLIONÄR 💰</text>
+  
+      
+  <!-- === ZUSÄTZLICHE DEKO – gleichmäßig verteilt === -->
+
+  <!-- Gold-Partikel verteilt -->
+  <circle cx="12"  cy="180" r="1.5" fill="#FFD166" opacity=".4"/>
+  <circle cx="506" cy="240" r="1.2" fill="#FFD166" opacity=".35"/>
+  <circle cx="8"   cy="600" r="1.5" fill="#FFD166" opacity=".45"/>
+  <circle cx="512" cy="680" r="1.2" fill="#FFD166" opacity=".4"/>
+  <circle cx="10"  cy="1000" r="1.5" fill="#FFD166" opacity=".4"/>
+  <circle cx="510" cy="1100" r="1.2" fill="white" opacity=".35"/>
+  <circle cx="12"  cy="1600" r="1.5" fill="#FFD166" opacity=".45"/>
+  <circle cx="508" cy="1700" r="1.2" fill="#FFD166" opacity=".35"/>
+  <circle cx="10"  cy="2040" r="1.5" fill="#FFD166" opacity=".4"/>
+  <circle cx="506" cy="2090" r="1.2" fill="white" opacity=".35"/>
+
+  <!-- Zone y≈570 – Wachstumskurve groß (Hintergrund) rechts -->
+  <rect x="370" y="540" width="130" height="100" fill="#1a1000" rx="4" stroke="#ffd16620" stroke-width="1"/>
+  <text x="435" y="555" text-anchor="middle" fill="#FFD166" font-size="7.5" font-weight="700">ZINSESZINS</text>
+  <polyline points="380,620 395,615 410,606 425,595 440,578 455,562 470,548 485,536 495,528" fill="none" stroke="#FFD166" stroke-width="2" stroke-linecap="round"/>
+  <polyline points="380,620 395,615 410,606 425,595 440,578 455,562 470,548 485,536 495,528" fill="url(#goldGlow)" opacity=".12"/>
+  <text x="430" y="632" text-anchor="middle" fill="#8892B0" font-size="6.5" opacity=".55">Jahre →</text>
+
+  <!-- Zone y≈750 – Goldmünze-Türme wachsend links -->
+  <circle cx="30" cy="778" r="14" fill="#9a7000" stroke="#c8a000" stroke-width="1.5"/>
+  <circle cx="30" cy="764" r="14" fill="#c8a000" stroke="#ffd166" stroke-width="1.5"/>
+  <circle cx="30" cy="750" r="14" fill="#c8a000" stroke="#ffd166" stroke-width="1.5"/>
+  <text x="30" y="754" text-anchor="middle" fill="#3a2800" font-size="7" font-weight="700">€</text>
+  <text x="30" y="800" text-anchor="middle" fill="#FFD166" font-size="7" opacity=".6">Jahr 5</text>
+
+  <!-- Zone y≈1000 – Zinsen-Tabelle rechts -->
+  <rect x="370" y="980" width="130" height="90" fill="#1a1000" rx="4" stroke="#ffd16620" stroke-width="1"/>
+  <text x="435" y="994" text-anchor="middle" fill="#FFD166" font-size="7.5" font-weight="700">ZINSEN p.a.</text>
+  <rect x="380" y="1000" width="110" height="2" fill="#ffd16620"/>
+  <text x="385" y="1014" fill="#8892B0" font-size="7">1.000 € × 7%</text>
+  <text x="480" y="1014" text-anchor="end" fill="#00D48A" font-size="7" font-weight="700">= +70 €</text>
+  <text x="385" y="1028" fill="#8892B0" font-size="7">nach 10 Jahren</text>
+  <text x="480" y="1028" text-anchor="end" fill="#FFD166" font-size="7" font-weight="700">1.967 €</text>
+  <text x="385" y="1042" fill="#8892B0" font-size="7">nach 20 Jahren</text>
+  <text x="480" y="1042" text-anchor="end" fill="#FFD166" font-size="7" font-weight="700">3.870 €</text>
+  <text x="385" y="1056" fill="#8892B0" font-size="7">nach 30 Jahren</text>
+  <text x="480" y="1056" text-anchor="end" fill="#FFD166" font-size="7" font-weight="700">7.612 €</text>
+
+  <!-- Zone y≈1230 – Goldbarren-Regal links -->
+  <rect x="0" y="1200" width="90" height="70" fill="#1a1000" rx="2" stroke="#ffd16620" stroke-width="1"/>
+  <rect x="6"  y="1224" width="24" height="12" fill="#9a7000" rx="1"/><text x="18" y="1233" text-anchor="middle" fill="#3a2800" font-size="5" font-weight="700">GOLD</text>
+  <rect x="34" y="1224" width="24" height="12" fill="#c8a000" rx="1"/><text x="46" y="1233" text-anchor="middle" fill="#3a2800" font-size="5" font-weight="700">GOLD</text>
+  <rect x="62" y="1224" width="24" height="12" fill="#9a7000" rx="1"/><text x="74" y="1233" text-anchor="middle" fill="#3a2800" font-size="5" font-weight="700">GOLD</text>
+  <rect x="6"  y="1242" width="24" height="12" fill="#c8a000" rx="1"/><rect x="34" y="1242" width="24" height="12" fill="#9a7000" rx="1"/>
+  <rect x="62" y="1242" width="24" height="12" fill="#c8a000" rx="1"/>
+  <text x="45" y="1264" text-anchor="middle" fill="#FFD166" font-size="7" opacity=".55">RESERVEN</text>
+
+  <!-- Zone y≈1680 – Wachstums-Baum rechts -->
+  <circle cx="490" cy="1640" r="28" fill="#1a1000" stroke="#ffd16625" stroke-width="1.5"/>
+  <circle cx="490" cy="1620" r="22" fill="#1e1400" stroke="#ffd16620" stroke-width="1"/>
+  <circle cx="490" cy="1605" r="16" fill="#221800" stroke="#ffd16618" stroke-width="1"/>
+  <rect x="487" y="1668" width="6" height="20" fill="#3a2800"/>
+  <text x="490" y="1615" text-anchor="middle" font-size="14" opacity=".6">🌳</text>
+  <text x="490" y="1700" text-anchor="middle" fill="#FFD166" font-size="7" opacity=".55">ZINSESZINS</text>
+  <text x="490" y="1712" text-anchor="middle" fill="#8892B0" font-size="6.5" opacity=".5">wächst exponentiell</text>
+
+  <!-- Path glow -->
+      <path d="M 80 60 Q 125 60 170 170 Q 220 170 270 280 Q 320 280 370 390 Q 405 390 440 500 Q 440 500 440 610 Q 405 610 370 720 Q 320 720 270 830 Q 220 830 170 940 Q 125 940 80 1050 Q 80 1050 80 1160 Q 125 1160 170 1270 Q 220 1270 270 1380 Q 320 1380 370 1490 Q 405 1490 440 1600 Q 440 1600 440 1710 Q 405 1710 370 1820 Q 320 1820 270 1930 Q 220 1930 170 2040 Q 125 2040 80 2150" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" class="svg-trail"/>
+      <!-- Path dashes -->
+      <path d="M 80 60 Q 125 60 170 170 Q 220 170 270 280 Q 320 280 370 390 Q 405 390 440 500 Q 440 500 440 610 Q 405 610 370 720 Q 320 720 270 830 Q 220 830 170 940 Q 125 940 80 1050 Q 80 1050 80 1160 Q 125 1160 170 1270 Q 220 1270 270 1380 Q 320 1380 370 1490 Q 405 1490 440 1600 Q 440 1600 440 1710 Q 405 1710 370 1820 Q 320 1820 270 1930 Q 220 1930 170 2040 Q 125 2040 80 2150" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="14 10" class="svg-dashed"/>
+      <!-- Done overlay -->
+      <path id="pathDone" d="M 80 60 Q 125 60 170 170 Q 220 170 270 280 Q 320 280 370 390 Q 405 390 440 500 Q 440 500 440 610 Q 405 610 370 720 Q 320 720 270 830 Q 220 830 170 940 Q 125 940 80 1050 Q 80 1050 80 1160 Q 125 1160 170 1270 Q 220 1270 270 1380 Q 320 1380 370 1490 Q 405 1490 440 1600 Q 440 1600 440 1710 Q 405 1710 370 1820 Q 320 1820 270 1930 Q 220 1930 170 2040 Q 125 2040 80 2150" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="3392" stroke-dashoffset="3392" opacity=".75"/>
+      <rect x="368" y="554" width="144" height="20" rx="10" fill="rgba(0,0,0,.55)" stroke="#FFD166" stroke-width="1.2" opacity=".85"/>
+<text x="440" y="569" text-anchor="middle" fill="#FFD166" font-size="9.5" font-weight="700" letter-spacing="0.5">⚡ Aufbau</text><rect x="8" y="1104" width="144" height="20" rx="10" fill="rgba(0,0,0,.55)" stroke="#FF6B6B" stroke-width="1.2" opacity=".85"/>
+<text x="80" y="1119" text-anchor="middle" fill="#FF6B6B" font-size="9.5" font-weight="700" letter-spacing="0.5">🚀 Fortgeschritten</text><rect x="368" y="1654" width="144" height="20" rx="10" fill="rgba(0,0,0,.55)" stroke="#A78BFA" stroke-width="1.2" opacity=".85"/>
+<text x="440" y="1669" text-anchor="middle" fill="#A78BFA" font-size="9.5" font-weight="700" letter-spacing="0.5">🏆 Meisterlevel</text>
+    </svg>
+    <div class="mnode" id="li0" onclick="openLesson(0)" style="left:15.38%;top:2.49%;--nc:#FFD166;--nr:255,209,102;" data-tip="Lekt. 1: Was ist Zinseszins?"><span class="mnode-icon">💡</span><span class="mnode-num">1</span></div>
+<div class="mnode" id="li1" onclick="openLesson(1)" style="left:32.69%;top:7.05%;--nc:#FFD166;--nr:255,209,102;" data-tip="Lekt. 2: Die Zinseszins-Formel"><span class="mnode-icon">🧮</span><span class="mnode-num">2</span></div>
+<div class="mnode" id="li2" onclick="openLesson(2)" style="left:51.92%;top:11.62%;--nc:#FFD166;--nr:255,209,102;" data-tip="Lekt. 3: Zeit ist dein wichtigstes Asset"><span class="mnode-icon">⏳</span><span class="mnode-num">3</span></div>
+<div class="mnode" id="li3" onclick="openLesson(3)" style="left:71.15%;top:16.18%;--nc:#FFD166;--nr:255,209,102;" data-tip="Lekt. 4: Die 72er-Regel"><span class="mnode-icon">📏</span><span class="mnode-num">4</span></div>
+<div class="mnode" id="li4" onclick="openLesson(4)" style="left:84.62%;top:20.75%;--nc:#FFD166;--nr:255,209,102;" data-tip="Lekt. 5: Zinseszins bei Sparplänen"><span class="mnode-icon">🔄</span><span class="mnode-num">5</span></div>
+<div class="mnode" id="li5" onclick="openLesson(5)" style="left:84.62%;top:25.31%;--nc:#FFD166;--nr:255,209,102;" data-tip="Lekt. 6: Negativer Zinseszins – die Schuldenfalle"><span class="mnode-icon">💸</span><span class="mnode-num">6</span></div>
+<div class="mnode" id="li6" onclick="openLesson(6)" style="left:71.15%;top:29.88%;--nc:#FFD166;--nr:255,209,102;" data-tip="Lekt. 7: Zinseszins vs. Inflation"><span class="mnode-icon">🔥</span><span class="mnode-num">7</span></div>
+<div class="mnode" id="li7" onclick="openLesson(7)" style="left:51.92%;top:34.44%;--nc:#FFD166;--nr:255,209,102;" data-tip="Lekt. 8: Zinseszins für sich arbeiten lassen"><span class="mnode-icon">🚀</span><span class="mnode-num">8</span></div>
+<div class="mnode" id="li8" onclick="openLesson(8)" style="left:32.69%;top:39.0%;--nc:#FFD166;--nr:255,209,102;" data-tip="Lekt. 9: Die 72er-Regel im Detail"><span class="mnode-icon">🧮</span><span class="mnode-num">9</span></div>
+<div class="mnode" id="li9" onclick="openLesson(9)" style="left:15.38%;top:43.57%;--nc:#FFD166;--nr:255,209,102;" data-tip="Lekt. 10: Zinseszins täglich vs. jährlich"><span class="mnode-icon">🌊</span><span class="mnode-num">10</span></div>
+<div class="mnode" id="li10" onclick="openLesson(10)" style="left:15.38%;top:48.13%;--nc:#FFD166;--nr:255,209,102;" data-tip="Lekt. 11: Warum 10 Jahre früher starten so viel ausmacht"><span class="mnode-icon">⏳</span><span class="mnode-num">11</span></div>
+<div class="mnode" id="li11" onclick="openLesson(11)" style="left:32.69%;top:52.7%;--nc:#FFD166;--nr:255,209,102;" data-tip="Lekt. 12: Negativzins und Strafzinsen"><span class="mnode-icon">💸</span><span class="mnode-num">12</span></div>
+<div class="mnode" id="li12" onclick="openLesson(12)" style="left:51.92%;top:57.26%;--nc:#FFD166;--nr:255,209,102;" data-tip="Lekt. 13: Zinseszins bei Schulden – die dunkle Seite"><span class="mnode-icon">🏦</span><span class="mnode-num">13</span></div>
+<div class="mnode" id="li13" onclick="openLesson(13)" style="left:71.15%;top:61.83%;--nc:#FFD166;--nr:255,209,102;" data-tip="Lekt. 14: Zinseszins-Rechner nutzen"><span class="mnode-icon">📱</span><span class="mnode-num">14</span></div>
+<div class="mnode" id="li14" onclick="openLesson(14)" style="left:84.62%;top:66.39%;--nc:#FFD166;--nr:255,209,102;" data-tip="Lekt. 15: Zinseszins global – historische Renditen"><span class="mnode-icon">🌍</span><span class="mnode-num">15</span></div>
+<div class="mnode" id="li15" onclick="openLesson(15)" style="left:84.62%;top:70.95%;--nc:#FFD166;--nr:255,209,102;" data-tip="Lekt. 16: Zinseszins-Meister – dein Wissenscheck"><span class="mnode-icon">🎓</span><span class="mnode-num">16</span></div>
+<div class="mnode" id="li16" onclick="openLesson(16)" style="left:71.15%;top:75.52%;--nc:#FFD166;--nr:255,209,102;" data-tip="Lekt. 17: Dein Zinseszins-Aktionsplan"><span class="mnode-icon">🚀</span><span class="mnode-num">17</span></div>
+<div class="mnode" id="li17" onclick="openLesson(17)" style="left:51.92%;top:80.08%;--nc:#FFD166;--nr:255,209,102;" data-tip="Lekt. 18: Millionär durch Zinseszins – eine Rechnung"><span class="mnode-icon">🏆</span><span class="mnode-num">18</span></div>
+<div class="mnode" id="li18" onclick="openLesson(18)" style="left:32.69%;top:84.65%;--nc:#FFD166;--nr:255,209,102;" data-tip="Lekt. 19: Zinseszins in der Praxis – häufige Fehler"><span class="mnode-icon">💡</span><span class="mnode-num">19</span></div>
+<div class="mnode" id="li19" onclick="openLesson(19)" style="left:15.38%;top:89.21%;--nc:#FFD166;--nr:255,209,102;" data-tip="Lekt. 20: Monte-Carlo-Simulation für dein Portfolio"><span class="mnode-icon">🎲</span><span class="mnode-num">20</span></div>
+
+  </div>
+</div>
+
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-tag" id="mTag"></div>
+      <div class="modal-title" id="mTitle"></div>
+      <div class="modal-subtitle" id="mSub"></div>
+    </div>
+    <div class="modal-body">
+      <div class="theory-box" id="mTheory"></div>
+      <div class="quiz-label">Wissenscheck 🧠</div>
+      <div class="quiz-question" id="mQuestion"></div>
+      <div class="quiz-options" id="mOptions"></div>
+      <div class="feedback-box" id="mFeedback"></div>
+    </div>
+    <div class="modal-footer">
+      <div class="xp-badge" id="mXP">⚡ +50 XP</div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-ghost" onclick="closeModal()">✕ Schließen</button>
+        <button class="btn btn-primary" id="btn-continue" onclick="nextLesson()">Weiter →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span>⚡</span><span id="toastMsg"></span></div>
+
+
+<script src="components.js"></script>
+<script src="auth.js"></script>
+<script>
+const COURSE_ID  = 'kurs-zinseszins';
+const XP_EACH    = 50;
+
+const LESSONS = [
+
+  {
+    icon:`💡`, title:`Was ist Zinseszins?`, subtitle:`Zinsen auf Zinsen – das Prinzip hinter jedem Vermögen.`,
+    theory:`**Einfache Zinsen** bedeuten: Du bekommst jedes Jahr Zinsen nur auf dein ursprüngliches Kapital.\n\nBeispiel: 1.000€ bei 5% → jedes Jahr +50€ → nach 10 Jahren: 1.500€.\n\n**Zinseszins** bedeutet: Du bekommst Zinsen auch auf die bereits erhaltenen Zinsen.\n\nBeispiel: 1.000€ bei 5% Zinseszins → nach 10 Jahren: 1.629€. Nach 30 Jahren: 4.322€ statt nur 2.500€!\n\nDer Unterschied mag am Anfang klein wirken – über Zeit wird er gigantisch.`,
+    question:`Was unterscheidet Zinseszins von einfachen Zinsen?`,
+    options:[`Zinsen werden auch auf bereits erhaltene Zinsen berechnet`, `Der Zinssatz ist höher`, `Die Laufzeit ist kürzer`, `Man braucht mehr Startkapital`],
+    correct:0,
+    explanation:`Richtig! Beim Zinseszins wachsen Zinsen auf Zinsen – das ist der entscheidende Unterschied zur einfachen Verzinsung.`
+  },
+  {
+    icon:`🧮`, title:`Die Zinseszins-Formel`, subtitle:`K × (1 + p)ⁿ – so berechnest du dein zukünftiges Kapital.`,
+    theory:`Die Zinseszins-Formel lautet:\n\n**K_n = K_0 × (1 + p)ⁿ**\n\nDabei ist:\n- **K_0** = Startkapital\n- **p** = Zinssatz pro Periode (z.B. 0,07 für 7%)\n- **n** = Anzahl der Perioden (Jahre)\n- **K_n** = Endkapital\n\nBeispiel: 5.000€ bei 7% für 20 Jahre:\n5.000 × (1,07)²⁰ = 5.000 × 3,87 = **19.348€**\n\nDu hast dein Kapital fast vervierfacht – ohne einen Cent mehr einzuzahlen!`,
+    question:`Was ist "n" in der Zinseszins-Formel K_n = K_0 × (1 + p)ⁿ?`,
+    options:[`Der Zinssatz`, `Das Startkapital`, `Die Anzahl der Perioden (Jahre)`, `Das Endkapital`],
+    correct:2,
+    explanation:`Korrekt! "n" steht für die Anzahl der Perioden – meistens Jahre. Je größer n, desto mächtiger der Zinseszinseffekt.`
+  },
+  {
+    icon:`⏳`, title:`Zeit ist dein wichtigstes Asset`, subtitle:`10 Jahre früher starten macht einen riesigen Unterschied.`,
+    theory:`Vergleich zweier Anleger bei 7% p.a.:\n\n**Anna** startet mit 25 Jahren, investiert 10 Jahre lang 200€/Monat (24.000€ eingezahlt) und lässt dann das Kapital bis 65 wachsen.\n\n**Bernd** startet mit 35 Jahren, investiert 30 Jahre lang 200€/Monat (72.000€ eingezahlt) bis 65.\n\nErgebnis mit 65:\n- **Anna**: ~**394.000€** (3× mehr eingezahlt als Bernd trotz kürzerer Einzahlung!)\n- **Bernd**: ~**227.000€**\n\nAnna hat weniger eingezahlt, aber mehr raus bekommen – weil **Zeit** der entscheidende Faktor ist.`,
+    question:`Warum schneidet Anna trotz weniger eingezahltem Geld besser ab als Bernd?`,
+    options:[`Sie hat einen höheren Zinssatz`, `Sie investiert in riskantere Anlagen`, `Sie fängt früher an und nutzt mehr Zeit`, `Sie zahlt keine Steuern`],
+    correct:2,
+    explanation:`Genau! Der frühere Start gibt dem Zinseszins mehr Zeit zu wirken – das schlägt sogar mehr eingezahltes Kapital.`
+  },
+  {
+    icon:`📏`, title:`Die 72er-Regel`, subtitle:`Mit einer simplen Rechnung weißt du wann sich dein Geld verdoppelt.`,
+    theory:`Die **72er-Regel** ist eine Faustregel für schnelle Überschlagsrechnungen:\n\n**Verdopplungszeit (Jahre) = 72 ÷ Zinssatz (%)**\n\nBeispiele:\n- Bei **2% Zinsen** (Sparbuch): 72 ÷ 2 = **36 Jahre** bis zur Verdoppelung\n- Bei **7% Zinsen** (ETF): 72 ÷ 7 ≈ **10,3 Jahre** bis zur Verdoppelung\n- Bei **12% Zinsen**: 72 ÷ 12 = **6 Jahre**\n\nDie Regel funktioniert auch umgekehrt: Wenn du weißt, in wie vielen Jahren sich dein Geld verdoppeln soll, weißt du welchen Zinssatz du brauchst.`,
+    question:`Wie lange dauert es bei 6% Zinsen, bis sich ein Kapital verdoppelt (72er-Regel)?`,
+    options:[`6 Jahre`, `18 Jahre`, `12 Jahre`, `24 Jahre`],
+    correct:2,
+    explanation:`Richtig! 72 ÷ 6 = 12 Jahre. Die 72er-Regel ist eine schnelle und überraschend genaue Faustregel.`
+  },
+  {
+    icon:`🔄`, title:`Zinseszins bei Sparplänen`, subtitle:`Monatlich 100€ können zu echtem Reichtum werden.`,
+    theory:`Beim **Sparplan** wird regelmäßig ein fester Betrag investiert. Jeder Beitrag wächst unterschiedlich lange mit dem Zinseszins.\n\nBeispiel: 100€/Monat bei 7% p.a. über 30 Jahre:\n- Eingezahlt: 36.000€\n- Endwert: ca. **121.000€**\n- Davon Zinseszins-Gewinn: **85.000€**!\n\nDie Formel für Sparpläne: **K = R × ((1+p)ⁿ - 1) / p**\n\nWichtig: Der **Steuerstundungseffekt** bei thesaurierenden ETFs – Steuern werden erst beim Verkauf fällig, das Kapital wächst länger unversteuert.`,
+    question:`Wie viel Endkapital ergibt ein Sparplan von 100€/Monat bei 7% über 30 Jahre (ca.)?`,
+    options:[`36.000€`, `72.000€`, `200.000€`, `121.000€`],
+    correct:3,
+    explanation:`Korrekt! 100€/Monat × 360 Monate = 36.000€ eingezahlt, aber durch den Zinseszins wächst es auf ca. 121.000€.`
+  },
+  {
+    icon:`💸`, title:`Negativer Zinseszins – die Schuldenfalle`, subtitle:`Zinseszins wirkt auch gegen dich – bei Krediten und Dispokonto.`,
+    theory:`Der Zinseszins ist eine zweischneidige Waffe. Bei **Schulden** arbeitet er gegen dich:\n\n**Dispokredit** mit 12% p.a.: Wer 1.000€ im Dispo lässt und nichts zahlt, schuldet nach 5 Jahren: **1.000 × (1,12)⁵ = 1.762€**.\n\n**Kreditkartenschulden** in den USA: oft 20–25% Zinsen. Das verdoppelt die Schulden in ~3,5 Jahren!\n\nStrategie: Schulden mit hohen Zinsen haben immer höchste Priorität. Jeder Euro Schuldenabbau bringt garantiert den Schuldzinssatz als "Rendite".`,
+    question:`Welche Strategie beim Schuldenabbau ist mathematisch optimal?`,
+    options:[`Zuerst die Schuld mit dem höchsten Zinssatz tilgen`, `Zuerst die kleinste Schuld tilgen`, `Alle gleichzeitig tilgen`, `Nur Mindestzahlungen leisten`],
+    correct:0,
+    explanation:`Richtig! Zuerst die teuerste Schuld zu tilgen spart die meisten Zinsen – das ist die "Avalanche-Methode".`
+  },
+  {
+    icon:`🔥`, title:`Zinseszins vs. Inflation`, subtitle:`Auf dem Sparbuch verlierst du trotz Zinsen – warum?`,
+    theory:`Die **reale Rendite** ist das, was nach Abzug der Inflation übrig bleibt:\n\n**Reale Rendite = Nominale Rendite − Inflation**\n\nBeispiel:\n- Sparbuch: 1% Zinsen − 3% Inflation = **−2% real** → Kaufkraftverlust!\n- Tagesgeld: 3,5% − 3% = **+0,5% real** → kaum Gewinn\n- MSCI World ETF: 7% − 3% = **+4% real** → echter Vermögensaufbau\n\nFazit: Wer sein Geld auf dem Sparbuch lässt, verliert durch Inflation real an Kaufkraft – selbst wenn die Zahl auf dem Konto steigt.`,
+    question:`Was bedeutet "reale Rendite"?`,
+    options:[`Die Rendite vor Steuern`, `Die garantierte Mindestrendite`, `Die Rendite nach Bankgebühren`, `Die Rendite minus Inflation`],
+    correct:3,
+    explanation:`Korrekt! Die reale Rendite = nominale Rendite minus Inflation. Nur sie zeigt, ob du wirklich reicher wirst.`
+  },
+  {
+    icon:`🚀`, title:`Zinseszins für sich arbeiten lassen`, subtitle:`Wie du den Effekt maximal nutzt – heute noch.`,
+    theory:`So maximierst du den Zinseszinseffekt:\n\n**1. Früh starten**: Jedes Jahr zählt. Wer mit 20 statt 30 anfängt, hat einen massiven Vorteil.\n\n**2. Thesaurierend investieren**: ETFs, die Dividenden automatisch reinvestieren, wachsen schneller als ausschüttende.\n\n**3. Kosten minimieren**: 1% Gebühren p.a. klingt wenig – kostet aber über 30 Jahre ~25% des Endkapitals!\n\n**4. Nicht verkaufen**: Wer bei Kursrückgängen aussteigt, unterbricht den Zinseszins zum schlechtesten Zeitpunkt.\n\n**5. Regelmäßig investieren**: Sparplan > Einmalanlage für Durchschnittsanleger.`,
+    question:`Warum sind thesaurierende ETFs für den Zinseszinseffekt besser?`,
+    options:[`Sie haben höhere Zinssätze`, `Dividenden werden automatisch reinvestiert und wachsen weiter`, `Sie sind steuerfrei`, `Sie haben niedrigere Schwankungen`],
+    correct:1,
+    explanation:`Genau! Bei thesaurierenden ETFs werden Dividenden sofort reinvestiert – das Kapital, auf das der Zinseszins wirkt, ist damit immer maximal.`
+  },
+  {
+    icon:`🧮`, title:`Die 72er-Regel im Detail`, subtitle:`Wie lange bis sich dein Geld verdoppelt?`,
+    theory:`**Regel 72**: Teile 72 durch deinen Zinssatz → Verdoppelungszeit in Jahren.
+
+Beispiele:
+- 2% Zinsen → 36 Jahre
+- 6% Zinsen → 12 Jahre
+- 9% Zinsen → 8 Jahre
+- 12% Zinsen → 6 Jahre
+
+Umgekehrt: Inflation von 3% halbiert dein Geld in 24 Jahren!
+
+Die Regel ist eine Annäherung – aber erstaunlich präzise.`,
+    question:`Wie lange dauert es bei 6% Rendite bis sich dein Geld verdoppelt?`,
+    options:[`6 Jahre`, `12 Jahre`, `18 Jahre`, `24 Jahre`],
+    correct:1,
+    explanation:`72 ÷ 6 = 12 Jahre. Die 72er-Regel ist eine schnelle Faustregel für die Verdoppelungszeit.`
+  },
+  {
+    icon:`🌊`, title:`Zinseszins täglich vs. jährlich`, subtitle:`Wie oft wird gezinst – und warum es wichtig ist.`,
+    theory:`Zinsen können unterschiedlich oft berechnet werden:
+
+📅 **Jährlich**: 1.000€ × 1,05 = 1.050€ nach 1 Jahr
+📅 **Monatlich**: Mehr Zinseszins durch häufigere Aufzinsung
+📅 **Täglich**: Am häufigsten, maximaler Effekt
+
+Unterschied über 30 Jahre bei 5%:
+- Jährlich: 4.321€
+- Täglich: 4.481€
+
+Sparplan-ETFs reinvestieren praktisch **kontinuierlich**.`,
+    question:`Bei welcher Zinszahlungsfrequenz ist der Zinseszinseffekt am stärksten?`,
+    options:[`Jährlich`, `Halbjährlich`, `Monatlich`, `Täglich`],
+    correct:3,
+    explanation:`Je häufiger Zinsen aufgezinst werden, desto stärker der Effekt – täglich schlägt monatlich schlägt jährlich.`
+  },
+  {
+    icon:`⏳`, title:`Warum 10 Jahre früher starten so viel ausmacht`, subtitle:`Die dramatische Kraft der Zeit.`,
+    theory:`**Zwei Anleger**, beide 7% p.a.:
+
+👦 **Anna** startet mit 20, investiert bis 30 (10 Jahre, 12.000€), dann nie wieder.
+
+👨 **Ben** startet mit 30, investiert bis 65 (35 Jahre, 42.000€).
+
+Mit 65 hat **Anna mehr** – trotz weniger Einzahlungen!
+
+Annas 10 frühe Jahre > Bens 35 spätere Jahre. Das ist die Macht des Zinseszinses kombiniert mit Zeit.`,
+    question:`Warum ist es so wichtig früh mit dem Investieren zu beginnen?`,
+    options:[`Frühe Jahre haben mehr Zeit für Zinseszins zu wirken`, `Weil Kurse früher höher waren`, `Weil die Steuern früher niedriger sind`, `Weil man früher mehr Geld hat`],
+    correct:0,
+    explanation:`Frühe Jahre im Markt lassen den Zinseszins maximal wirken. Jedes Jahr Verzögerung kostet überproportional viel.`
+  },
+  {
+    icon:`💸`, title:`Negativzins und Strafzinsen`, subtitle:`Wenn du für dein Erspartes bezahlst.`,
+    theory:`Nach der Finanzkrise 2008 senkten Zentralbanken die Zinsen auf **0% und darunter**.
+
+Banken gaben Negativzinsen weiter: Kunden zahlten **0,5% p.a.** Strafzinsen auf hohe Einlagen.
+
+Folge: Geld wanderte aus Sparkonten in Immobilien, ETFs, Aktien → Preisblasen entstanden.
+
+Seit 2022: EZB erhöhte Zinsen wieder. Tagesgeld zahlt wieder 2–4%.`,
+    question:`Was sind Negativzinsen?`,
+    options:[`Besonders hohe Zinsen`, `Zinsen auf Schulden`, `Steuern auf Zinserträge`, `Zinsen unter 0% – man zahlt für das Anlegen von Geld`],
+    correct:3,
+    explanation:`Negativzinsen bedeuten: Statt Zinsen zu bekommen, zahlt man für das Hinterlegen von Geld – eine ungewöhnliche Situation.`
+  },
+  {
+    icon:`🏦`, title:`Zinseszins bei Schulden – die dunkle Seite`, subtitle:`Kreditkarten und Dispozinsen fressen dich auf.`,
+    theory:`Zinseszins wirkt auch gegen dich!
+
+💳 **Kreditkarte**: 15–20% p.a. → 1.000€ Schulden werden zu 6.727€ nach 10 Jahren!
+🏦 **Dispo**: 10–14% p.a. → Ebenfalls dramatisch
+
+Schulden IMMER von den teuersten zuerst tilgen (**Avalanche-Methode**).
+
+Oder anders: Du brauchst keine 7% ETF-Rendite wenn du gleichzeitig 15% Dispozinsen zahlst.`,
+    question:`Welche Schulden sollte man als erstes tilgen?`,
+    options:[`Die ältesten Schulden`, `Die mit den höchsten Zinsen`, `Die kleinsten Schulden`, `Alle gleichzeitig`],
+    correct:1,
+    explanation:`Avalanche-Methode: Zuerst teuerste Schulden (höchste Zinsen) tilgen – spart am meisten Geld.`
+  },
+  {
+    icon:`📱`, title:`Zinseszins-Rechner nutzen`, subtitle:`Konkrete Zahlen für deine Situation.`,
+    theory:`**Online-Zinseszinsrechner** helfen dir deine eigene Situation zu berechnen.
+
+Die wichtigsten Variablen:
+💰 **Startkapital** (Einmalinvestition)
+📅 **Monatliche Rate** (Sparplan)
+📈 **Rendite** p.a. (z.B. 7% für globalen ETF)
+⏳ **Laufzeit** in Jahren
+
+Zwei Empfehlungen:
+- compound.interest.com
+- zinsen-berechnen.de
+
+Tipp: Berechne was passiert wenn du 5 Jahre früher anfängst!`,
+    question:`Welcher Faktor hat den GRÖSSTEN Einfluss auf das Endvermögen laut Zinseszins-Formel?`,
+    options:[`Die Höhe des Startkapitals`, `Der Zinssatz`, `Die Laufzeit`, `Die monatliche Sparrate`],
+    correct:2,
+    explanation:`Die Laufzeit (Exponent in der Formel) hat den größten Hebel – deshalb ist früh starten so entscheidend.`
+  },
+  {
+    icon:`🌍`, title:`Zinseszins global – historische Renditen`, subtitle:`Was hat der Markt wirklich geliefert?`,
+    theory:`**Historische durchschnittliche Renditen** (real, nach Inflation):
+
+🌍 **MSCI World**: ~5–7% p.a. langfristig
+🇺🇸 **S&P 500**: ~7% p.a. real seit 1926
+🇩🇪 **DAX**: ~5–6% p.a. real
+🏠 **Immobilien**: ~2–4% p.a. real (ohne Mietrendite)
+🏦 **Staatsanleihen**: ~1–2% p.a. real
+
+⚠️ Vergangenheit garantiert keine Zukunft – aber lange Zeitreihen geben Orientierung.`,
+    question:`Wie hoch war die historische reale Rendite des S&P 500 langfristig etwa?`,
+    options:[`~2% p.a.`, `~4% p.a.`, `~12% p.a.`, `~7% p.a.`],
+    correct:3,
+    explanation:`~7% p.a. real (nach Inflation) für den S&P 500 seit ~1926 ist ein häufig zitierter Richtwert.`
+  },
+  {
+    icon:`🎓`, title:`Zinseszins-Meister – dein Wissenscheck`, subtitle:`Alles zusammengebracht.`,
+    theory:`Du hast gelernt:
+
+✅ Die Formel K × (1+p)ⁿ
+✅ Die 72er-Regel
+✅ Warum früh starten entscheidend ist
+✅ Tägliche vs. jährliche Verzinsung
+✅ Zinseszins bei Schulden (die dunkle Seite)
+✅ Historische Marktrenditen
+
+**Die wichtigste Erkenntnis**: Zinseszins braucht nur zwei Zutaten – **Rendite** und **Zeit**. Beides in deiner Hand.`,
+    question:`Was sind die zwei wichtigsten Zutaten für maximalen Zinseszins?`,
+    options:[`Hoher Lohn und ein Finanzberater`, `Ein Sparbuch und Geduld`, `Rendite und Zeit`, `Aktien und Gold`],
+    correct:2,
+    explanation:`Rendite + Zeit = Zinseszinswunder. Keine Magie, reine Mathematik.`
+  },
+  {
+    icon:`🚀`, title:`Dein Zinseszins-Aktionsplan`, subtitle:`Was du in den nächsten 24 Stunden tun kannst.`,
+    theory:`**Schritt 1 – Heute**:
+Gehe auf einen Zinseszinsrechner. Gib deine realen Zahlen ein.
+
+**Schritt 2 – Diese Woche**:
+Eröffne ein Depot bei einem Neobroker (Trade Republic, Scalable).
+
+**Schritt 3 – Automatisieren**:
+Richte einen monatlichen Sparplan ab 25–50€ ein.
+
+**Schritt 4 – Vergessen**:
+Nicht täglich schauen. Nicht bei Krisen verkaufen. Einfach laufen lassen.
+
+⏱️ **Jeder Monat kostet dich Zinseszins. Die Uhr läuft.**`,
+    question:`Was ist der einfachste Weg den Zinseszinseffekt sofort zu nutzen?`,
+    options:[`Einen automatischen ETF-Sparplan einrichten`, `Ein Sparkonto eröffnen`, `Eine Immobilie kaufen`, `Gold kaufen`],
+    correct:0,
+    explanation:`Automatischer ETF-Sparplan = Zinseszins auf Autopilot. Einmal einrichten, jahrelang profitieren.`
+  },
+  {
+    icon:`🏆`, title:`Millionär durch Zinseszins – eine Rechnung`, subtitle:`Wie realistisch ist eine Million Euro?`,
+    theory:`**Wie werde ich Millionär?**
+
+Bei **7% p.a.** und monatlich **500€**:
+- Nach 20 Jahren: ~260.000€
+- Nach 30 Jahren: ~567.000€
+- Nach 40 Jahren: **~1.310.000€** 🎉
+
+Bei nur **200€/Monat** ab 25:
+- Mit 65 (40 Jahre): ~524.000€
+
+Ein **Millionär** mit 500€/Monat benötigt ~35 Jahre bei 7%.
+
+Klingt lang – ist es aber nicht wenn man früh anfängt.`,
+    question:`Was ist bei der Millionär-Rechnung der wichtigste Hebel?`,
+    options:[`Die Laufzeit (früh anfangen)`, `Die monatliche Sparrate`, `Der genaue ETF`, `Die Steueroptimierung`],
+    correct:0,
+    explanation:`Die Laufzeit ist der stärkste Hebel. Früh anfangen mit wenig schlägt spät anfangen mit viel.`
+  },
+  {
+    icon:`💡`, title:`Zinseszins in der Praxis – häufige Fehler`, subtitle:`Was die meisten falsch machen.`,
+    theory:`**Top-5-Fehler beim Zinseszins:**
+
+1. **Zu spät anfangen** – jedes Jahr kostet exponentiell
+2. **Zu oft umschichten** – Kosten und Steuern fressen Rendite
+3. **In Krisen verkaufen** – bricht den Zinseszins-Effekt
+4. **Zu hohe Kosten** – 1% TER-Unterschied = Tausende Euro über Jahrzehnte
+5. **Inflation vergessen** – 100€ heute ≠ 100€ in 30 Jahren
+
+**Lösung**: Niedrigkosten-ETF, Sparplan, nie anfassen, Inflation einrechnen.`,
+    question:`Welcher Fehler kostet langfristig am meisten Rendite?`,
+    options:[`Zu selten rebalancen`, `In Krisen verkaufen und den Zinseszins-Zyklus unterbrechen`, `Zu viele ETFs haben`, `Den Sparplan einmal pausieren`],
+    correct:1,
+    explanation:`In Krisen verkaufen ist der teuerste Fehler – man realisiert Verluste und verpasst die Erholung, die den Zinseszins wiederherstellt.`
+  }
+,
+  {
+    icon:`🎲`, title:`Monte-Carlo-Simulation für dein Portfolio`, subtitle:`Warum Durchschnittswerte lügen können.`,
+    theory:`**Monte-Carlo-Simulation** berechnet tausende mögliche Szenarien für dein Portfolio:
+
+Statt "7% p.a. immer" simuliert man:
+- 2005: +30%
+- 2008: -40%
+- 2009: +25%
+- 2022: -18%
+
+Ergebnis: Bei 500 Simulationen kommen 95% nach 30 Jahren mit positiven Ergebnissen heraus.
+
+**Wichtige Erkenntnis**: Reihenfolge der Renditen (Sequenz) ist entscheidend, nicht nur der Durchschnitt.
+
+Kostenlose Tools: portfoliovisualizer.com`,
+    question:`Was zeigt eine Monte-Carlo-Simulation für Investments?`,
+    options:[`Die garantierte Rendite`, `Die Bandbreite möglicher Ergebnisse über viele Szenarien`, `Den optimalen Kaufzeitpunkt`, `Den perfekten ETF`],
+    correct:1,
+    explanation:`Monte-Carlo-Simulationen zeigen durch tausende Szenarien wie wahrscheinlich verschiedene Ergebnisse sind – ehrlicher als ein Durchschnittswert.`
+  }
+];
+
+let current = -1;
+let answered = false;
+
+(function() {
+  var user = FQ.getCurrentUser();
+  if (!user) { window.location.href = 'login.html'; return; }
+  var _xpEl = document.getElementById('xpNav');
+  if (_xpEl) _xpEl.textContent = '⚡ ' + (user.totalXP || 0) + ' XP';
+  if (typeof fqUpdateNavbar === 'function') fqUpdateNavbar();
+  FQ.init && FQ.init();
+})();
+
+function getCompleted() {
+  const user = FQ.getCurrentUser();
+  if (!user) return [];
+  return (user.progress && user.progress[COURSE_ID]) || [];
+}
+
+function markComplete(idx) {
+  const user = FQ.getCurrentUser();
+  if (!user) return;
+  const completed = getCompleted();
+  if (completed.includes(idx)) return;
+  const newArr = [...completed, idx];
+  FQ.saveProgress(COURSE_ID, newArr, XP_EACH);
+  const fresh = FQ.getCurrentUser();
+  const _xpEl = document.getElementById('xpNav'); if (_xpEl) _xpEl.textContent = '⚡ ' + (user.totalXP || 0) + ' XP';
+}
+
+
+// ── Render Level Map ──────────────────────────────────────────
+function renderMap() {
+  const completed = getCompleted();
+  const count = completed.length;
+  const total = LESSONS.length;
+  document.getElementById('progLabel').textContent = count + ' von ' + total + ' Lektionen';
+  document.getElementById('progXP').textContent = (count * XP_EACH) + ' / ' + (total * XP_EACH) + ' XP';
+  document.getElementById('progFill').style.width = (count / total * 100) + '%';
+  for (let i = 0; i < total; i++) {
+    const node = document.getElementById('li' + i);
+    if (!node) continue;
+    node.querySelectorAll('.mnode-check').forEach(e => e.remove());
+    node.classList.remove('state-done','state-active','state-locked');
+    if (completed.includes(i)) {
+      node.className = 'mnode state-done';
+      const ck = document.createElement('div'); ck.className = 'mnode-check'; ck.textContent = '✓';
+      node.appendChild(ck);
+    } else if (i === count) {
+      node.className = 'mnode state-active';
+      setTimeout(() => node.scrollIntoView({ behavior:'smooth', block:'center' }), 350);
+    } else {
+      node.className = 'mnode state-locked';
+    }
+  }
+  const pd = document.getElementById('pathDone');
+  if (pd) {
+    const pathLen = 2715; // tatsächliche SVG-Pfadlänge
+    // Pfad leuchtet bis zur aktiven (nächsten freizuschaltenden) Lektion
+    const activeNode = Math.min(count, total - 1);
+    const done = Math.round(pathLen * activeNode / (total - 1));
+    pd.style.transition = 'stroke-dashoffset 1s ease';
+    pd.setAttribute('stroke-dasharray', 3392);
+    pd.setAttribute('stroke-dashoffset', 3392 - done);
+  }
+  if (count === total) {
+    document.getElementById('completeBanner').classList.add('show');
+    showLoot();
+  }
+}
+
+
+function openLesson(idx) {
+  const completed = getCompleted();
+  if (idx > 0 && !completed.includes(idx) && !completed.includes(idx - 1) && completed.length < idx) {
+    showToast('🔒 Schließe zuerst die vorherige Lektion ab!', '#FF6B6B');
+    return;
+  }
+  current = idx;
+  answered = false;
+
+  const l = LESSONS[idx];
+  const _tr = (typeof tr === 'function') ? tr : (x => x);
+  document.getElementById('mTag').textContent = 'Lektion ' + (idx + 1) + ' / ' + LESSONS.length;
+  document.getElementById('mTitle').textContent = _tr(l.title);
+  document.getElementById('mSub').textContent = _tr(l.subtitle);
+  document.getElementById('mTheory').innerHTML =
+    _tr(l.theory).replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+  document.getElementById('mQuestion').textContent = _tr(l.question);
+  document.getElementById('mXP').textContent = '⚡ +' + XP_EACH + ' XP';
+
+  const opts = document.getElementById('mOptions');
+  opts.innerHTML = '';
+  ['A','B','C','D'].forEach(function(letter, i) {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-option';
+    btn.innerHTML = '<span class="option-letter">' + letter + '</span>' + _tr(l.options[i]);
+    btn.dataset.idx = i;
+    btn.addEventListener('click', function() { checkAnswer(parseInt(this.dataset.idx), this); });
+    opts.appendChild(btn);
+  });
+
+  const fb = document.getElementById('mFeedback');
+  fb.style.display = 'none';
+  fb.className = 'feedback-box';
+  document.getElementById('btn-continue').style.display = 'none';
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function checkAnswer(chosen, btn) {
+  if (answered) return;
+  answered = true;
+
+  const l = LESSONS[current];
+  const _tr2 = (typeof tr === 'function') ? tr : (x => x);
+  document.querySelectorAll('.quiz-option').forEach(function(b) { b.disabled = true; });
+  document.querySelectorAll('.quiz-option')[l.correct].classList.add('correct');
+
+  const fb = document.getElementById('mFeedback');
+  if (chosen === l.correct) {
+    btn.classList.add('correct');
+    fb.className = 'feedback-box correct';
+    fb.innerHTML = '✅ ' + _tr2(l.explanation);
+    markComplete(current);
+    showToast('+' + XP_EACH + ' XP verdient! ⚡', '#00D48A');
+    renderMap();
+  } else {
+    btn.classList.add('wrong');
+    fb.className = 'feedback-box wrong';
+    fb.innerHTML = '❌ Falsch. 💡 ' + _tr2(l.explanation);
+  }
+  fb.style.display = 'block';
+  document.getElementById('btn-continue').style.display = 'inline-flex';
+}
+
+function nextLesson() {
+  closeModal();
+  if (current + 1 < LESSONS.length) {
+    setTimeout(function() { openLesson(current + 1); }, 280);
+  }
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+// outsideClick handled via addEventListener below
+function outsideClick(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+}
+
+function resetCourse() {
+  const user = FQ.getCurrentUser();
+  if (!user) return;
+  FQ.saveProgress(COURSE_ID, [], XP_EACH);
+  document.getElementById('completeBanner').classList.remove('show');
+  
+  // Re-fetch user to get updated XP
+  const freshUser = FQ.getCurrentUser();
+  if (freshUser) {
+    const _xpEl = document.getElementById('xpNav'); if (_xpEl) _xpEl.textContent = '⚡ ' + (user.totalXP || 0) + ' XP';
+  }
+  renderMap();
+}
+
+function showToast(msg, color) {
+  const t = document.getElementById('toast');
+  const m = document.getElementById('toastMsg');
+  m.textContent = msg;
+  t.style.color = color || '#00D48A';
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 3000);
+}
+
+renderMap();
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+
+// ── XP Pop Animation ─────────────────────────────────────────
+function showXpPop(x, y) {
+  const el = document.createElement('div');
+  el.className = 'xp-pop';
+  el.textContent = '+50 XP ⚡';
+  el.style.left = x + 'px';
+  el.style.top  = y + 'px';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 900);
+}
+
+// ── Milestone check ───────────────────────────────────────────
+function checkMilestone(count, total) {
+  const milestones = [
+    { at: Math.floor(total*0.25), msg: '25% geschafft! 🔥' },
+    { at: Math.floor(total*0.5),  msg: 'Halbzeit! Du bist auf dem richtigen Weg! ⚡' },
+    { at: Math.floor(total*0.75), msg: '75%! Fast am Ziel! 🚀' },
+  ];
+  const hit = milestones.find(m => m.at === count);
+  if (hit) showToast('🎯 ' + hit.msg, '#FFD166');
+}
+
+// ── Override checkAnswer to add gamification ──────────────────
+const _origCheckAnswer = window.checkAnswer;
+
+// ── LOOT BOX LOGIC ───────────────────────────────────────────
+let _lootDone = false;
+let _chestValues = [];
+
+function showLoot() {
+  if (_lootDone) return;
+  _lootDone = true;
+  // Generate 3 random values, guarantee one is the "winner" range
+  const prizes = [
+    Math.floor(Math.random() * 151) + 50,   // 50–200
+    Math.floor(Math.random() * 201) + 100,  // 100–300
+    Math.floor(Math.random() * 301) + 200,  // 200–500
+  ];
+  // Shuffle
+  _chestValues = prizes.sort(() => Math.random() - 0.5);
+  document.getElementById('lootOverlay').classList.add('open');
+}
+
+function openChest(idx) {
+  if (document.getElementById('chest'+idx).classList.contains('chosen')) return;
+
+  const winXP = _chestValues[idx];
+
+  // Animate chosen chest
+  const chosen = document.getElementById('chest'+idx);
+  chosen.classList.add('chest','opening');
+  setTimeout(() => {
+    chosen.classList.remove('opening');
+    chosen.classList.add('open-winner','chosen');
+    chosen.querySelector('.chest-body').textContent = '🎁';
+    document.getElementById('cl'+idx).textContent = '+' + winXP + ' XP!';
+    document.getElementById('cl'+idx).className = 'chest-label win-label';
+  }, 520);
+
+  // Reveal other chests after short delay
+  setTimeout(() => {
+    [0,1,2].forEach(i => {
+      if (i === idx) return;
+      const c = document.getElementById('chest'+i);
+      c.classList.add('open-looser','unchosen');
+      c.querySelector('.chest-body').textContent = '💨';
+      document.getElementById('cl'+i).textContent = _chestValues[i] + ' XP';
+      document.getElementById('cl'+i).className = 'chest-label miss-label';
+    });
+    // Award XP
+    awardBonusXP(winXP);
+    // Confetti
+    launchConfetti();
+    // XP burst
+    for (let b = 0; b < 5; b++) {
+      setTimeout(() => {
+        const el = document.createElement('div');
+        el.className = 'xp-burst';
+        el.textContent = '+' + winXP + ' XP ⚡';
+        el.style.left = (20 + Math.random() * 60) + 'vw';
+        el.style.top  = (30 + Math.random() * 30) + 'vh';
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 1300);
+      }, b * 180);
+    }
+    // Show result
+    document.getElementById('lootResultTitle').textContent = '🎉 Glückwunsch! +' + winXP + ' Bonus-XP!';
+    document.getElementById('lootResultSub').textContent = 'Du hast die Truhe mit dem größten Schatz gewählt. Die anderen hätten ' + _chestValues.filter((_,i)=>i!==idx).join(' und ') + ' XP gebracht.';
+    setTimeout(() => { document.getElementById('lootResult').style.display = 'block'; }, 800);
+  }, 700);
+}
+
+function awardBonusXP(amount) {
+  try {
+    if (typeof FQ !== 'undefined' && FQ.addXP) {
+      FQ.addXP(amount);
+    } else {
+      // Fallback: direct localStorage write
+      const email = localStorage.getItem('fq_current_user');
+      if (email) {
+        const users = JSON.parse(localStorage.getItem('fq_users') || '{}');
+        if (users[email]) {
+          users[email].totalXP = (users[email].totalXP || 0) + amount;
+          localStorage.setItem('fq_users', JSON.stringify(users));
+        }
+      }
+    }
+    // Update nav XP display
+    const xpEl = document.getElementById('xpNav');
+    if (xpEl) {
+      const user = typeof FQ !== 'undefined' ? FQ.getCurrentUser() : null;
+      if (user) xpEl.textContent = '⚡ ' + (user.totalXP || 0) + ' XP';
+    }
+  } catch(e) { console.warn('awardBonusXP error:', e); }
+}
+
+function launchConfetti() {
+  const colors = ['#00D48A','#FFD166','#FF6B6B','#A78BFA','#38BDF8','#ffffff'];
+  for (let i = 0; i < 80; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.left     = Math.random() * 100 + 'vw';
+      el.style.background = colors[Math.floor(Math.random() * colors.length)];
+      el.style.width    = (6 + Math.random() * 8) + 'px';
+      el.style.height   = (6 + Math.random() * 12) + 'px';
+      el.style.borderRadius = Math.random() > .5 ? '50%' : '2px';
+      const dur = 1.5 + Math.random() * 2;
+      el.style.animationDuration = dur + 's';
+      el.style.animationDelay   = (Math.random() * .5) + 's';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), (dur + 0.6) * 1000);
+    }, i * 20);
+  }
+}
+
+function closeLoot() {
+  document.getElementById('lootOverlay').classList.remove('open');
+  window.location.href = 'dashboard.html';
+}
+
+</script>
+
+<!-- LOOT BOX OVERLAY -->
+<div class="loot-overlay" id="lootOverlay">
+  <div class="loot-title">🏆 Kurs abgeschlossen!</div>
+  <div class="loot-sub">Wähle eine Schatztruhe – dein Bonusbelohnung wartet!</div>
+  <div class="loot-chests" id="lootChests">
+    <div class="chest" id="chest0" onclick="openChest(0)">
+      <div class="chest-body">🪙</div>
+      <div class="chest-label" id="cl0">Wähle mich!</div>
+    </div>
+    <div class="chest" id="chest1" onclick="openChest(1)">
+      <div class="chest-body">🪙</div>
+      <div class="chest-label" id="cl1">Wähle mich!</div>
+    </div>
+    <div class="chest" id="chest2" onclick="openChest(2)">
+      <div class="chest-body">🪙</div>
+      <div class="chest-label" id="cl2">Wähle mich!</div>
+    </div>
+  </div>
+  <div class="loot-result" id="lootResult" style="display:none">
+    <h2 id="lootResultTitle"></h2>
+    <p id="lootResultSub"></p>
+    <button class="loot-close-btn" onclick="closeLoot()">Weiter zum Dashboard →</button>
+  </div>
+</div>
+
+<script src="lang.js"></script>
+<script src="theme.js"></script>
+</body>
+</html>
